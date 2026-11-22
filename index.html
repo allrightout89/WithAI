@@ -97,10 +97,9 @@ textarea{min-height:76px;resize:vertical}.field label{display:block;font-size:12
  <div class="auth-card">
   <div class="auth-brand">WithAi <small>PT MANAGEMENT CLOUD</small></div>
   <h1 id="authTitle">회원 로그인</h1>
-  <p class="sub" id="authDesc">회원 이름과 휴대폰 번호 뒷자리 4자리로 로그인하세요.</p>
+  <p class="sub" id="authDesc">휴대폰 번호 뒷자리 4자리로 로그인하세요.</p>
   <div id="memberLoginFields">
-   <div class="field"><label>회원 이름</label><input id="memberLoginName" autocomplete="name" placeholder="이름 입력"></div>
-   <div class="field" style="margin-top:10px"><label>휴대폰 번호 뒷자리 4자리</label><input id="memberLoginLast4" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" placeholder="예: 1234"></div>
+   <div class="field"><label>휴대폰 번호 뒷자리 4자리</label><input id="memberLoginLast4" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" placeholder="예: 1234"></div>
   </div>
   <div id="memberSignupFields" class="hidden">
    <div class="field"><label>이름 *</label><input id="signupName" autocomplete="name" placeholder="이름 입력"></div>
@@ -440,7 +439,7 @@ function setAuthMode(mode){
  authMode=mode;
  const admin=mode==='admin', signup=mode==='signup';
  $('authTitle').textContent=admin?'관리자 로그인':signup?'회원가입 신청':'회원 로그인';
- $('authDesc').textContent=admin?'관리자 계정으로 로그인하세요.':signup?'이름과 휴대폰 번호를 입력하면 가입 신청이 접수됩니다.':'회원 이름과 휴대폰 번호 뒷자리 4자리를 함께 입력해 로그인하세요.';
+ $('authDesc').textContent=admin?'관리자 계정으로 로그인하세요.':signup?'이름과 휴대폰 번호를 입력하면 가입 신청이 접수됩니다.':'휴대폰 번호 뒷자리 4자리로 로그인하세요.';
  $('memberLoginFields').classList.toggle('hidden',admin||signup);
  $('memberSignupFields').classList.toggle('hidden',!signup);
  $('adminLoginFields').classList.toggle('hidden',!admin);
@@ -793,12 +792,10 @@ $('loginBtn').onclick=async()=>{
    $('signupName').value='';$('signupPhone').value='';
    setAuthMode('member');authMsg(data.message||'가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.');
   }else{
-   const name=$('memberLoginName').value.trim();
    const last4=$('memberLoginLast4').value.replace(/\D/g,'');
-   if(!name)throw new Error('회원 이름을 입력해 주세요.');
    if(!/^\d{4}$/.test(last4))throw new Error('휴대폰 번호 뒷자리 숫자 4자리를 입력하세요.');
    authMsg('회원 정보를 확인하고 있습니다...');
-   const {data,error}=await supabaseClient.rpc('withai_member_enter_by_name_last4',{p_name:name,p_last4:last4});
+   const {data,error}=await supabaseClient.rpc('withai_member_enter_by_last4',{p_last4:last4});
    if(error)throw error;
    if(!data||data.ok!==true)throw new Error(data?.message||'회원 정보를 확인하지 못했습니다.');
    memberPortalToken=data.token||null;
@@ -807,7 +804,7 @@ $('loginBtn').onclick=async()=>{
  }catch(e){authMsg((authMode==='signup'?'가입 신청 실패: ':authMode==='admin'?'관리자 로그인 실패: ':'회원 로그인 실패: ')+(e?.message||String(e)));}
  finally{$('loginBtn').disabled=false;}
 };
-$('memberLogoutBtn').onclick=()=>{memberPortalToken=null;memberPortalPayload=null;showGate();$('memberLoginName').value='';$('memberLoginLast4').value='';authMsg('로그아웃했습니다.');};
+$('memberLogoutBtn').onclick=()=>{memberPortalToken=null;memberPortalPayload=null;showGate();$('memberLoginLast4').value='';authMsg('로그아웃했습니다.');};
 $('logoutBtn').onclick=async()=>{await ensureSupabaseClient();await supabaseClient.auth.signOut();currentUser=null;currentProfile=null;window.withAiCloudEnabled=false;if(cloudChannel){await supabaseClient.removeChannel(cloudChannel);cloudChannel=null;}showGate();authMsg('관리자 로그아웃했습니다.');setAuthMode('member');};
 async function checkSession(){const {data:{session}}=await supabaseClient.auth.getSession();if(!session){showGate();return}currentUser=session.user;const {data:profile,error}=await supabaseClient.from('profiles').select('id,email,display_name,role,approval_status').eq('id',currentUser.id).maybeSingle();if(error)throw error;if(!profile){authMsg('관리자 프로필을 찾을 수 없습니다.');return}currentProfile=profile;if(profile.role==='admin'){showApp();window.withAiCloudEnabled=true;$('approvalPanel').classList.remove('hidden');await loadSnapshot();setupRealtimeSync();await loadPending();return}await supabaseClient.auth.signOut();currentUser=null;currentProfile=null;showGate();authMsg('관리자 계정만 관리자 화면에 로그인할 수 있습니다.');}
 async function loadSnapshot(options={}){
