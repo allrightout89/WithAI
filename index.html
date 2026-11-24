@@ -330,6 +330,7 @@ textarea{min-height:76px;resize:vertical}.field label{display:block;font-size:12
 <section id="trainerAdmin" class="hidden">
 <h1>트레이너 배정 / 전체 레슨</h1>
 <div class="sub">Supabase 회원에게 담당 트레이너를 지정하고, 전체 레슨 기록을 확인합니다. 이 화면은 관리자만 접근합니다.</div>
+<div class="panel"><h2>기존 앱 회원과 Supabase 회원 연결</h2><p class="tiny">이름과 연락처를 확인해 같은 회원끼리 연결하세요. 연결 후 초기 상담 일지가 트레이너·회원 화면과 공유됩니다.</p><div id="adminMemberMappings">불러오는 중...</div></div>
 <div class="panel"><h2>회원별 담당 트레이너 지정</h2><p class="tiny">Supabase members 테이블에 등록된 회원만 표시됩니다. 트레이너 계정은 profiles의 role이 trainer인 계정입니다.</p><div id="adminTrainerAssignments">불러오는 중...</div></div>
 <div class="panel" style="margin-top:14px"><h2>전체 레슨 기록</h2><div id="adminAllTrainingSessions">불러오는 중...</div></div>
 </section>
@@ -391,7 +392,7 @@ function showMember(id){let m=member(id);if(!m)return;let ss=db.sessions.filter(
 <div class="field full"><label>8. 초기 레슨 방향 및 단계별 계획</label><textarea id="consultPlan" placeholder="우선순위, 초기 강도·빈도, 먼저 익힐 움직임, 재평가 항목과 시점">${esc(c.plan||'')}</textarea></div>
 <div class="field full"><label>9. 트레이너 종합 의견 및 다음 확인 사항</label><textarea id="consultMemo" placeholder="상담 요약, 추가 확인, 의료진 확인 또는 운동 보류 필요 여부, 다음 계획">${esc(c.memo||'')}</textarea></div>
 <div class="field"><label>다음 재평가 예정일</label><input id="consultReviewDate" type="date" value="${esc(c.reviewDate||'')}"></div></div><div class="btnrow"><button class="btn primary" onclick="saveMemberConsultation('${id}')">상담 일지 저장 및 회원에게 공유</button><button class="btn" onclick="showMember('${id}')">취소 / 다시 불러오기</button></div><h3 style="margin-top:20px">레슨 이력 (${ss.length}회)</h3>${ss.map(x=>'<p class="tiny">'+esc(x.date)+' · '+esc(x.part)+' · '+esc(x.no)+'회</p>').join('')||'<div class="empty">레슨 기록이 없습니다.</div>'}<h3>회원 개인 운동 기록 (${own.length}건)</h3>${own.map(x=>'<p class="tiny">'+esc(x.date)+' · '+esc(x.name)+' · '+esc(x.reps||'-')+'</p>').join('')||'<div class="empty">기록이 없습니다.</div>'}`;d.scrollIntoView({behavior:'smooth',block:'start'})}
-function saveMemberConsultation(id){const m=member(id);if(!m)return;const v=k=>document.getElementById('consult'+k)?.value.trim()||'';const c={date:v('Date'),coach:v('Coach'),goal:v('Goal'),experience:v('Experience'),health:v('Health'),changes:v('Changes'),availability:v('Availability'),assessment:v('Assessment'),preferences:v('Preferences'),plan:v('Plan'),memo:v('Memo'),reviewDate:v('ReviewDate'),updatedAt:new Date().toISOString()};if(!Object.values(c).some(x=>String(x||'').trim())){msg('상담 내용을 입력해 주세요.');return}m.consultation=c;persist();showMember(id);msg('상담 일지를 저장하고 회원에게 공유했습니다.')}
+async function saveMemberConsultation(id){const m=member(id);if(!m)return;const v=k=>document.getElementById('consult'+k)?.value.trim()||'';const c={date:v('Date'),coach:v('Coach'),goal:v('Goal'),experience:v('Experience'),health:v('Health'),changes:v('Changes'),availability:v('Availability'),assessment:v('Assessment'),preferences:v('Preferences'),plan:v('Plan'),memo:v('Memo'),reviewDate:v('ReviewDate'),updatedAt:new Date().toISOString()};if(!Object.values(c).some(x=>String(x||'').trim())){msg('상담 내용을 입력해 주세요.');return}m.consultation=c;persist();try{const link=await supabaseClient.from('withai_member_app_links').select('member_id').eq('app_member_id',id).maybeSingle();if(link.data?.member_id){const saved=await supabaseClient.from('withai_consultations').upsert({member_id:link.data.member_id,consultation:c,updated_by:currentUser.id},{onConflict:'member_id'});if(saved.error)throw saved.error;} }catch(e){msg('앱 상담 일지는 저장했지만 트레이너 공유 동기화에 실패했습니다: '+e.message);showMember(id);return;}showMember(id);msg('상담 일지를 저장하고 회원·담당 트레이너와 공유했습니다.')}
 function editMember(id){let m=member(id);if(!m)return;document.getElementById('editingMemberId').value=id;document.getElementById('fName').value=m.name;document.getElementById('fPhone').value=m.phone;document.getElementById('fGoal').value=m.goal;document.getElementById('fCoach').value=m.coach;document.getElementById('fPackage').value=m.package;document.getElementById('fWeeklyGoal').value=String(m.weeklyGoalDays||3);document.getElementById('fStatus').value=m.status;document.getElementById('fSex').value=m.sex||'female';document.getElementById('fAge').value=m.age||'';document.getElementById('fHeight').value=m.height||'';document.getElementById('fWeight').value=m.weight||'';document.getElementById('fActivity').value=String(m.activityFactor||1.375);document.getElementById('fCalorieTarget').value=m.calorieTarget||'';document.getElementById('fProteinTarget').value=m.proteinTarget||'';document.getElementById('fMemo').value=m.memo;document.getElementById('memberFormTitle').textContent='회원 정보 수정';window.scrollTo({top:0,behavior:'smooth'})}
 function startForMember(id){go('session');document.getElementById('sMember').value=id}
 function deleteMember(id){
@@ -855,8 +856,17 @@ async function openTrainerMember(id){
  if(error){msg('회원 조회 실패: '+error.message);return;}
  trainerSelectedMember=memberData;$('trainerWorkPanel').style.display='block';$('trainerMemberTitle').textContent=memberData.name+' 회원 레슨 기록';
  const {data:consult}=await supabaseClient.from('withai_consultations').select('consultation,updated_at').eq('member_id',id).maybeSingle();
- $('trainerConsultView').innerHTML='<h3>초기 상담 일지</h3>'+(consult?.consultation?'<pre style="white-space:pre-wrap">'+esc(JSON.stringify(consult.consultation,null,2))+'</pre>':'<p>등록된 상담 일지가 없습니다.</p>');
+ const c=consult?.consultation||{};$('trainerConsultView').innerHTML='<h3>초기 상담 일지</h3><div class="formgrid"><div class="field"><label>상담일</label><input id="trConsultDate" type="date" value="'+esc(c.date||localDateString(new Date()))+'"></div><div class="field"><label>담당 트레이너</label><input id="trConsultCoach" value="'+esc(c.coach||currentProfile?.display_name||'')+'"></div>'+[['Goal','운동 목적 및 목표'],['Experience','운동 경험 및 과거 이력'],['Health','질환·수술·부상·통증 및 제한 사항'],['Changes','최근 3개월간 신체 변화'],['Availability','생활 패턴 및 운동 가능 시간'],['Assessment','자세·움직임 평가 및 기초 측정'],['Preferences','회원의 걱정·선호·동기 요인'],['Plan','초기 레슨 방향 및 단계별 계획'],['Memo','트레이너 종합 의견 및 다음 확인 사항'],['ReviewDate','다음 재평가 예정일']].map(([k,label])=>'<div class="field full"><label>'+label+'</label><textarea id="trConsult'+k+'">'+esc(c[k.toLowerCase()]||'')+'</textarea></div>').join('')+'</div><button class="btn primary" onclick="saveTrainerConsultation()">상담 일지 저장 및 회원 공유</button>';
  await loadTrainerSessions(id);
+}
+async function saveTrainerConsultation(){
+ if(!trainerSelectedMember)return;
+ const v=k=>$('trConsult'+k)?.value.trim()||'';
+ const consultation={date:$('trConsultDate').value,coach:$('trConsultCoach').value.trim(),goal:v('Goal'),experience:v('Experience'),health:v('Health'),changes:v('Changes'),availability:v('Availability'),assessment:v('Assessment'),preferences:v('Preferences'),plan:v('Plan'),memo:v('Memo'),reviewDate:v('ReviewDate'),updatedAt:new Date().toISOString()};
+ if(!Object.values(consultation).some(x=>String(x||'').trim())){msg('상담 내용을 입력해 주세요.');return;}
+ const {error}=await supabaseClient.from('withai_consultations').upsert({member_id:trainerSelectedMember.id,consultation,updated_by:currentUser.id},{onConflict:'member_id'});
+ if(error){msg('상담 일지 저장 실패: '+error.message);return;}
+ $('trainerConsultView').querySelector('button')?.scrollIntoView({block:'nearest'});msg('상담 일지를 저장하고 회원에게 공유했습니다.');
 }
 async function loadTrainerSessions(id){
  const {data,error}=await supabaseClient.from('training_sessions').select('id,session_date,session_number,training_part,goal,exercises,rpe,condition,coaching_note,video_url').eq('member_id',id).order('session_date',{ascending:false});
@@ -921,19 +931,27 @@ $('saveCloudNowBtn').onclick=async()=>{
  if(error)cloudMsg('저장 실패: '+error.message);else{lastSnapshotUpdatedAt=new Date().toISOString();hasSnapshot=true;cloudMsg('현재 데이터의 클라우드 저장 완료 · '+new Date().toLocaleString('ko-KR'));}
 };
 async function loadAdminTrainerAdmin(){
- const assignmentHost=$('adminTrainerAssignments'),sessionHost=$('adminAllTrainingSessions');
+ const mappingHost=$('adminMemberMappings'),assignmentHost=$('adminTrainerAssignments'),sessionHost=$('adminAllTrainingSessions');
  if(!assignmentHost||!sessionHost)return;
+ if(mappingHost)mappingHost.textContent='기존 앱 회원과 Supabase 회원 목록을 불러오는 중...';
  assignmentHost.textContent='회원과 트레이너 목록을 불러오는 중...';sessionHost.textContent='레슨 기록을 불러오는 중...';
- const [membersRes,trainersRes,sessionsRes]=await Promise.all([
+ const [membersRes,trainersRes,sessionsRes,linksRes]=await Promise.all([
   supabaseClient.from('members').select('id,name,phone,goal,trainer_user_id').order('name'),
   supabaseClient.from('profiles').select('id,display_name,email').eq('role','trainer').order('display_name'),
-  supabaseClient.from('training_sessions').select('id,member_id,session_date,session_number,training_part,goal,coaching_note,created_by').order('session_date',{ascending:false}).limit(200)
+  supabaseClient.from('training_sessions').select('id,member_id,session_date,session_number,training_part,goal,coaching_note,created_by').order('session_date',{ascending:false}).limit(200),
+  supabaseClient.from('withai_member_app_links').select('app_member_id,member_id')
  ]);
- if(membersRes.error){assignmentHost.textContent='회원 조회 실패: '+membersRes.error.message;}
- else if(trainersRes.error){assignmentHost.textContent='트레이너 조회 실패: '+trainersRes.error.message;}
+ if(membersRes.error){assignmentHost.textContent='회원 조회 실패: '+membersRes.error.message;return;}
+ if(linksRes.error){if(mappingHost)mappingHost.textContent='회원 연결 조회 실패: '+linksRes.error.message;}
+ else if(mappingHost){
+  const remote=membersRes.data||[],links=linksRes.data||[],linked=Object.fromEntries(links.map(x=>[x.app_member_id,x.member_id]));
+  const local=window.withAiGetDB().members||[];
+  mappingHost.innerHTML=local.length&&remote.length?'<div style="overflow:auto"><table><thead><tr><th>기존 앱 회원</th><th>연락처</th><th>연결할 Supabase 회원</th><th>저장</th></tr></thead><tbody>'+local.map(m=>'<tr><td>'+esc(m.name)+'</td><td>'+esc(m.phone||'')+'</td><td><select id="mapMember_'+esc(m.id)+'"><option value="">연결 안 함</option>'+remote.map(r=>'<option value="'+r.id+'" '+(linked[m.id]===r.id?'selected':'')+'>'+esc(r.name)+' · '+esc(r.phone||'연락처 없음')+'</option>').join('')+'</select></td><td><button class="btn primary" onclick="saveMemberMapping('+JSON.stringify(m.id).replace(/"/g,'&quot;')+')">연결 저장</button></td></tr>').join('')+'</tbody></table></div>':'<p>기존 앱 회원 또는 Supabase 회원이 없습니다. Supabase members에 회원을 먼저 등록해야 연결할 수 있습니다.</p>';
+ }
+ if(trainersRes.error){assignmentHost.textContent='트레이너 조회 실패: '+trainersRes.error.message;}
  else{
   const trainers=trainersRes.data||[],members=membersRes.data||[];
-  if(!members.length)assignmentHost.textContent='Supabase members 테이블에 등록된 회원이 없습니다. 기존 브라우저 회원 목록과는 별도로 회원 UUID 연결 작업이 필요합니다.';
+  if(!members.length)assignmentHost.textContent='Supabase members 테이블에 등록된 회원이 없습니다.';
   else assignmentHost.innerHTML='<div style="overflow:auto"><table><thead><tr><th>회원</th><th>연락처</th><th>담당 트레이너</th><th>저장</th></tr></thead><tbody>'+members.map(m=>'<tr><td>'+esc(m.name)+'</td><td>'+esc(m.phone||'')+'</td><td><select id="assignTrainer_'+m.id+'"><option value="">미배정</option>'+trainers.map(t=>'<option value="'+t.id+'" '+(m.trainer_user_id===t.id?'selected':'')+'>'+esc(t.display_name||t.email||t.id)+'</option>').join('')+'</select></td><td><button class="btn primary" onclick="saveTrainerAssignment(\''+m.id+'\')">저장</button></td></tr>').join('')+'</tbody></table></div>';
   if(!trainers.length)assignmentHost.innerHTML+='<p class="tiny">등록된 트레이너 계정이 없습니다. 먼저 profiles.role을 trainer로 설정한 계정을 만들어야 합니다.</p>';
  }
@@ -948,6 +966,19 @@ async function loadAdminTrainerAdmin(){
    sessionHost.innerHTML='<div style="overflow:auto"><table><thead><tr><th>날짜</th><th>회원</th><th>회차</th><th>부위</th><th>목표</th><th>코칭 메모</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.session_date||'')+'</td><td>'+esc(names[x.member_id]||'회원 정보 없음')+'</td><td>'+esc(x.session_number||'')+'</td><td>'+esc(x.training_part||'')+'</td><td>'+esc(x.goal||'')+'</td><td>'+esc(x.coaching_note||'')+'</td></tr>').join('')+'</tbody></table></div><p class="tiny">최근 최대 200건을 표시합니다.</p>';
   }
  }
+}
+async function saveMemberMapping(appMemberId){
+ const memberId=$('mapMember_'+appMemberId)?.value;
+ if(!memberId){msg('연결할 Supabase 회원을 선택하세요.');return;}
+ const {error}=await supabaseClient.from('withai_member_app_links').upsert({app_member_id:appMemberId,member_id:memberId,created_by:currentUser.id},{onConflict:'app_member_id'});
+ if(error){msg('회원 연결 실패: '+error.message);return;}
+ const localMember=(window.withAiGetDB().members||[]).find(m=>m.id===appMemberId);
+ const consultation=localMember?.consultation;
+ if(consultation){
+  const saved=await supabaseClient.from('withai_consultations').upsert({member_id:memberId,consultation,updated_by:currentUser.id},{onConflict:'member_id'});
+  if(saved.error){msg('회원 연결은 저장했지만 상담 일지 동기화 실패: '+saved.error.message);return;}
+ }
+ msg('회원 연결과 기존 상담 일지 동기화를 완료했습니다.');await loadAdminTrainerAdmin();
 }
 async function saveTrainerAssignment(memberId){
  const select=$('assignTrainer_'+memberId);if(!select)return;
