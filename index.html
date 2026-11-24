@@ -110,7 +110,7 @@ textarea{min-height:76px;resize:vertical}.field label{display:block;font-size:12
    <div class="field"><label>관리자 이메일</label><input id="authEmail" type="email" autocomplete="username" placeholder="관리자 이메일"></div>
    <div class="field" style="margin-top:10px"><label>비밀번호</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="관리자 비밀번호"></div>
   </div>
-  <div class="btnrow"><button class="btn primary" id="loginBtn" type="button">바로 시작하기</button><button class="btn" id="showSignupBtn" type="button">회원가입</button><button class="btn" id="showAdminBtn" type="button">관리자 로그인</button></div>
+  <div class="btnrow"><button class="btn primary" id="loginBtn" type="button">바로 시작하기</button><button class="btn" id="showSignupBtn" type="button">회원가입</button><button class="btn" id="showAdminBtn" type="button">관리자 로그인</button><button class="btn" id="showTrainerBtn" type="button">트레이너 로그인</button></div>
   <div id="authMessage" class="auth-message">이메일 인증이나 관리자 승인 없이 바로 이용할 수 있습니다.</div>
  </div>
 </section>
@@ -448,23 +448,25 @@ let memberPortalToken=null, memberPortalPayload=null;
 const $=id=>document.getElementById(id);
 function authMsg(t){$('authMessage').textContent=t}
 function cloudMsg(t){$('cloudStatus').textContent=t}
-function showGate(){ $('authGate').style.display='flex'; $('memberPortal').style.display='none'; $('appShell').style.display='none'; $('logoutBtn').style.display='none'; }
+function showGate(){ $('authGate').style.display='flex'; $('memberPortal').style.display='none'; $('appShell').style.display='none'; $('logoutBtn').style.display='none'; const t=$('trainerShell');if(t)t.style.display='none'; }
 function showApp(){ $('authGate').style.display='none'; $('memberPortal').style.display='none'; $('appShell').style.display='grid'; $('logoutBtn').style.display='inline-block'; $('userLabel').textContent=(currentProfile?.display_name||currentUser?.email||'')+' · 관리자'; }
 function setAuthMode(mode){
  authMode=mode;
- const admin=mode==='admin', signup=mode==='signup';
- $('authTitle').textContent=admin?'관리자 로그인':signup?'회원가입 신청':'회원 로그인';
- $('authDesc').textContent=admin?'관리자 계정으로 로그인하세요.':signup?'이름과 휴대폰 번호를 입력하면 가입 신청이 접수됩니다.':'휴대폰 번호 뒷자리 4자리로 로그인하세요.';
+ const admin=mode==='admin'||mode==='trainer', trainer=mode==='trainer', signup=mode==='signup';
+ $('authTitle').textContent=trainer?'트레이너 로그인':admin?'관리자 로그인':signup?'회원가입 신청':'회원 로그인';
+ $('authDesc').textContent=trainer?'트레이너 계정으로 로그인하세요.':admin?'관리자 계정으로 로그인하세요.':signup?'이름과 휴대폰 번호를 입력하면 가입 신청이 접수됩니다.':'휴대폰 번호 뒷자리 4자리로 로그인하세요.';
  $('memberLoginFields').classList.toggle('hidden',admin||signup);
  $('memberSignupFields').classList.toggle('hidden',!signup);
  $('adminLoginFields').classList.toggle('hidden',!admin);
- $('loginBtn').textContent=admin?'관리자 로그인':signup?'가입 신청':'회원 로그인';
+ $('loginBtn').textContent=trainer?'트레이너 로그인':admin?'관리자 로그인':signup?'가입 신청':'회원 로그인';
  $('showSignupBtn').textContent=signup?'회원 로그인':'회원가입';
- $('showAdminBtn').classList.toggle('hidden',admin);
- authMsg(admin?'관리자 이메일과 비밀번호를 입력하세요.':signup?'가입 신청 후 관리자의 승인을 기다려 주세요.':'승인된 회원만 로그인할 수 있습니다.');
+ $('showAdminBtn').classList.toggle('hidden',mode==='admin');
+ $('showTrainerBtn').classList.toggle('hidden',mode==='trainer');
+ authMsg(trainer?'트레이너 이메일과 비밀번호를 입력하세요.':admin?'관리자 이메일과 비밀번호를 입력하세요.':signup?'가입 신청 후 관리자의 승인을 기다려 주세요.':'승인된 회원만 로그인할 수 있습니다.');
 }
 $('showSignupBtn').onclick=()=>setAuthMode(authMode==='signup'?'member':'signup');
 $('showAdminBtn').onclick=()=>setAuthMode(authMode==='admin'?'member':'admin');
+$('showTrainerBtn').onclick=()=>setAuthMode(authMode==='trainer'?'member':'trainer');
 
 const DIET_FOODS=[
  {name:'현미밥',kcal:152,c:32,p:2.8,f:1},
@@ -791,10 +793,10 @@ $('loginBtn').onclick=async()=>{
  $('loginBtn').disabled=true;
  try{
   await ensureSupabaseClient();
-  if(authMode==='admin'){
+  if(authMode==='admin'||authMode==='trainer'){
    const email=$('authEmail').value.trim(),password=$('authPassword').value;
    if(!email||!password)throw new Error('관리자 이메일과 비밀번호를 입력하세요.');
-   authMsg('관리자 계정을 확인하고 있습니다...');
+   authMsg(authMode==='trainer'?'트레이너 계정을 확인하고 있습니다...':'관리자 계정을 확인하고 있습니다...');
    const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;await checkSession();
   }else if(authMode==='signup'){
    const name=$('signupName').value.trim();
@@ -818,12 +820,52 @@ $('loginBtn').onclick=async()=>{
    memberPortalToken=data.token||null;
    renderMemberPortal(data);
   }
- }catch(e){authMsg((authMode==='signup'?'가입 신청 실패: ':authMode==='admin'?'관리자 로그인 실패: ':'회원 로그인 실패: ')+(e?.message||String(e)));}
+ }catch(e){authMsg((authMode==='signup'?'가입 신청 실패: ':authMode==='trainer'?'트레이너 로그인 실패: ':authMode==='admin'?'관리자 로그인 실패: ':'회원 로그인 실패: ')+(e?.message||String(e)));}
  finally{$('loginBtn').disabled=false;}
 };
 $('memberLogoutBtn').onclick=()=>{memberPortalToken=null;memberPortalPayload=null;showGate();$('memberLoginLast4').value='';authMsg('로그아웃했습니다.');};
 $('logoutBtn').onclick=async()=>{await ensureSupabaseClient();await supabaseClient.auth.signOut();currentUser=null;currentProfile=null;window.withAiCloudEnabled=false;if(cloudChannel){await supabaseClient.removeChannel(cloudChannel);cloudChannel=null;}showGate();authMsg('관리자 로그아웃했습니다.');setAuthMode('member');};
-async function checkSession(){const {data:{session}}=await supabaseClient.auth.getSession();if(!session){showGate();return}currentUser=session.user;const {data:profile,error}=await supabaseClient.from('profiles').select('id,email,display_name,role,approval_status').eq('id',currentUser.id).maybeSingle();if(error)throw error;if(!profile){authMsg('관리자 프로필을 찾을 수 없습니다.');return}currentProfile=profile;if(profile.role==='admin'){showApp();window.withAiCloudEnabled=true;$('approvalPanel').classList.remove('hidden');await loadSnapshot();setupRealtimeSync();await loadPending();return}await supabaseClient.auth.signOut();currentUser=null;currentProfile=null;showGate();authMsg('관리자 계정만 관리자 화면에 로그인할 수 있습니다.');}
+
+function showTrainerApp(){
+ $('authGate').style.display='none';$('memberPortal').style.display='none';$('appShell').style.display='none';$('logoutBtn').style.display='inline-block';
+ let root=$('trainerShell');
+ if(!root){root=document.createElement('section');root.id='trainerShell';root.style.cssText='display:none;min-height:100vh;background:#f4f6fa;padding:24px;';document.body.appendChild(root);}
+ root.style.display='block';
+ $('userLabel').textContent=(currentProfile?.display_name||currentUser?.email||'')+' · 트레이너';
+ root.innerHTML=`<div style="max-width:1100px;margin:auto"><header style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><h1>WithAi 트레이너 공간</h1><p>배정된 회원과 해당 회원의 레슨·상담 기록만 관리할 수 있습니다.</p></div></header><div class="panel"><h2>담당 회원</h2><div id="trainerMemberList">불러오는 중...</div></div><div class="panel" id="trainerWorkPanel" style="display:none"><h2 id="trainerMemberTitle">회원 레슨 기록</h2><div id="trainerConsultView"></div><h3>레슨 기록 작성</h3><div class="formgrid"><div class="field"><label>레슨 날짜</label><input id="trDate" type="date"></div><div class="field"><label>회차</label><input id="trNo" type="number" min="1" value="1"></div><div class="field"><label>운동 부위</label><input id="trPart" placeholder="예: 하체"></div><div class="field"><label>RPE</label><input id="trRpe" type="number" min="1" max="10" value="6"></div><div class="field full"><label>레슨 목표</label><input id="trGoal"></div><div class="field full"><label>운동 내용 (JSON 대신 운동명을 줄바꿈으로 입력)</label><textarea id="trExercises" placeholder="고블릿 스쿼트&#10;레그프레스"></textarea></div><div class="field"><label>컨디션</label><input id="trCondition" value="보통"></div><div class="field full"><label>코칭 메모 / 다음 목표</label><textarea id="trNote"></textarea></div><div class="field full"><label>영상 URL</label><input id="trVideo" type="url"></div></div><button class="btn primary" onclick="saveTrainerSession()">레슨 기록 저장</button><div id="trainerSessionHistory" style="margin-top:18px"></div></div></div>`;
+ $('trDate').value=localDateString(new Date());loadTrainerMembers();
+}
+let trainerSelectedMember=null;
+async function loadTrainerMembers(){
+ const host=$('trainerMemberList');if(!host)return;host.textContent='담당 회원을 불러오는 중...';
+ const {data,error}=await supabaseClient.from('members').select('id,name,goal,status').eq('trainer_user_id',currentUser.id).order('name');
+ if(error){host.textContent='회원 조회 실패: '+error.message;return;}
+ if(!data?.length){host.textContent='배정된 회원이 없습니다. 관리자에게 회원 배정을 요청하세요.';return;}
+ host.innerHTML=data.map(m=>`<button class="btn" style="margin:4px" onclick="openTrainerMember('${m.id}')">${esc(m.name)} · ${esc(m.goal||'목표 미설정')}</button>`).join('');
+}
+async function openTrainerMember(id){
+ const {data:memberData,error}=await supabaseClient.from('members').select('id,name,goal,status').eq('id',id).single();
+ if(error){msg('회원 조회 실패: '+error.message);return;}
+ trainerSelectedMember=memberData;$('trainerWorkPanel').style.display='block';$('trainerMemberTitle').textContent=memberData.name+' 회원 레슨 기록';
+ const {data:consult}=await supabaseClient.from('withai_consultations').select('consultation,updated_at').eq('member_id',id).maybeSingle();
+ $('trainerConsultView').innerHTML='<h3>초기 상담 일지</h3>'+(consult?.consultation?'<pre style="white-space:pre-wrap">'+esc(JSON.stringify(consult.consultation,null,2))+'</pre>':'<p>등록된 상담 일지가 없습니다.</p>');
+ await loadTrainerSessions(id);
+}
+async function loadTrainerSessions(id){
+ const {data,error}=await supabaseClient.from('training_sessions').select('id,session_date,session_number,training_part,goal,exercises,rpe,condition,coaching_note,video_url').eq('member_id',id).order('session_date',{ascending:false});
+ $('trainerSessionHistory').innerHTML=error?'레슨 조회 실패: '+esc(error.message):(data?.length?data.map(x=>'<div class="panel"><b>'+esc(x.session_date)+' · '+esc(x.session_number)+'회차 · '+esc(x.training_part)+'</b><p>'+esc(x.goal||'')+'</p><p>'+esc(x.coaching_note||'')+'</p>'+(x.video_url?'<a href="'+esc(safeUrl(x.video_url))+'" target="_blank" rel="noopener">영상 보기</a>':'')+'</div>').join(''):'<p>레슨 기록이 없습니다.</p>');
+}
+async function saveTrainerSession(){
+ if(!trainerSelectedMember)return;
+ const names=$('trExercises').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ if(!names.length){msg('운동명을 한 개 이상 입력하세요.');return;}
+ const payload={member_id:trainerSelectedMember.id,session_date:$('trDate').value||localDateString(new Date()),session_number:Number($('trNo').value)||1,training_part:$('trPart').value.trim(),goal:$('trGoal').value.trim(),exercises:names.map(name=>({name})),rpe:Number($('trRpe').value)||null,condition:$('trCondition').value.trim(),coaching_note:$('trNote').value.trim(),video_url:$('trVideo').value.trim()||null,created_by:currentUser.id};
+ const {error}=await supabaseClient.from('training_sessions').insert(payload);
+ if(error){msg('저장 실패: '+error.message);return;}
+ msg('레슨 기록을 저장했습니다.');$('trExercises').value='';$('trNote').value='';await loadTrainerSessions(trainerSelectedMember.id);
+}
+
+async function checkSession(){const {data:{session}}=await supabaseClient.auth.getSession();if(!session){showGate();return}currentUser=session.user;const {data:profile,error}=await supabaseClient.from('profiles').select('id,email,display_name,role,approval_status').eq('id',currentUser.id).maybeSingle();if(error)throw error;if(!profile){authMsg('관리자 프로필을 찾을 수 없습니다.');return}currentProfile=profile;if(profile.role==='admin'){showApp();window.withAiCloudEnabled=true;$('approvalPanel').classList.remove('hidden');await loadSnapshot();setupRealtimeSync();await loadPending();return}if(profile.role==='trainer'){showTrainerApp();return}await supabaseClient.auth.signOut();currentUser=null;currentProfile=null;showGate();authMsg('관리자 또는 트레이너 계정만 로그인할 수 있습니다.');}
 async function loadSnapshot(options={}){
  if(!currentUser||cloudSyncBusy)return;
  cloudSyncBusy=true;
