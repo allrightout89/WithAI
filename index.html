@@ -392,7 +392,29 @@ function showMember(id){let m=member(id);if(!m)return;let ss=db.sessions.filter(
 <div class="field full"><label>8. 초기 레슨 방향 및 단계별 계획</label><textarea id="consultPlan" placeholder="우선순위, 초기 강도·빈도, 먼저 익힐 움직임, 재평가 항목과 시점">${esc(c.plan||'')}</textarea></div>
 <div class="field full"><label>9. 트레이너 종합 의견 및 다음 확인 사항</label><textarea id="consultMemo" placeholder="상담 요약, 추가 확인, 의료진 확인 또는 운동 보류 필요 여부, 다음 계획">${esc(c.memo||'')}</textarea></div>
 <div class="field"><label>다음 재평가 예정일</label><input id="consultReviewDate" type="date" value="${esc(c.reviewDate||'')}"></div></div><div class="btnrow"><button class="btn primary" onclick="saveMemberConsultation('${id}')">상담 일지 저장 및 회원에게 공유</button><button class="btn" onclick="showMember('${id}')">취소 / 다시 불러오기</button></div><h3 style="margin-top:20px">레슨 이력 (${ss.length}회)</h3>${ss.map(x=>'<p class="tiny">'+esc(x.date)+' · '+esc(x.part)+' · '+esc(x.no)+'회</p>').join('')||'<div class="empty">레슨 기록이 없습니다.</div>'}<h3>회원 개인 운동 기록 (${own.length}건)</h3>${own.map(x=>'<p class="tiny">'+esc(x.date)+' · '+esc(x.name)+' · '+esc(x.reps||'-')+'</p>').join('')||'<div class="empty">기록이 없습니다.</div>'}`;d.scrollIntoView({behavior:'smooth',block:'start'})}
-async function saveMemberConsultation(id){const m=member(id);if(!m)return;const v=k=>document.getElementById('consult'+k)?.value.trim()||'';const c={date:v('Date'),coach:v('Coach'),goal:v('Goal'),experience:v('Experience'),health:v('Health'),changes:v('Changes'),availability:v('Availability'),assessment:v('Assessment'),preferences:v('Preferences'),plan:v('Plan'),memo:v('Memo'),reviewDate:v('ReviewDate'),updatedAt:new Date().toISOString()};if(!Object.values(c).some(x=>String(x||'').trim())){msg('상담 내용을 입력해 주세요.');return}m.consultation=c;persist();try{const link=await supabaseClient.from('withai_member_app_links').select('member_id').eq('app_member_id',id).maybeSingle();if(link.data?.member_id){const saved=await supabaseClient.from('withai_consultations').upsert({member_id:link.data.member_id,consultation:c,updated_by:currentUser.id},{onConflict:'member_id'});if(saved.error)throw saved.error;} }catch(e){msg('앱 상담 일지는 저장했지만 트레이너 공유 동기화에 실패했습니다: '+e.message);showMember(id);return;}showMember(id);msg('상담 일지를 저장하고 회원·담당 트레이너와 공유했습니다.')}
+async function saveMemberConsultation(id){
+ const m=member(id);if(!m)return;
+ const v=k=>document.getElementById('consult'+k)?.value.trim()||'';
+ const c={date:v('Date'),coach:v('Coach'),goal:v('Goal'),experience:v('Experience'),health:v('Health'),changes:v('Changes'),availability:v('Availability'),assessment:v('Assessment'),preferences:v('Preferences'),plan:v('Plan'),memo:v('Memo'),reviewDate:v('ReviewDate'),updatedAt:new Date().toISOString()};
+ if(!Object.values(c).some(x=>String(x||'').trim())){msg('상담 내용을 입력해 주세요.');return;}
+ m.consultation=c;
+ persist();
+ showMember(id);
+ try{
+  const link=await supabaseClient.from('withai_member_app_links').select('member_id').eq('app_member_id',id).maybeSingle();
+  if(link.error)throw link.error;
+  if(!link.data?.member_id){
+   msg('상담 일지는 앱에 저장했습니다. 회원·트레이너 공유를 위해 관리자 화면에서 해당 회원을 Supabase 회원과 먼저 연결해 주세요.');
+   return;
+  }
+  if(!currentUser?.id)throw new Error('관리자 로그인 정보를 확인할 수 없습니다.');
+  const saved=await supabaseClient.from('withai_consultations').upsert({member_id:link.data.member_id,consultation:c,updated_by:currentUser.id},{onConflict:'member_id'});
+  if(saved.error)throw saved.error;
+  msg('상담 일지를 저장하고 연결된 회원·담당 트레이너와 공유했습니다.');
+ }catch(e){
+  msg('상담 일지는 앱에 저장했지만 회원·트레이너 공유는 실패했습니다: '+(e.message||'연결 상태를 확인해 주세요.'));
+ }
+}
 function editMember(id){let m=member(id);if(!m)return;document.getElementById('editingMemberId').value=id;document.getElementById('fName').value=m.name;document.getElementById('fPhone').value=m.phone;document.getElementById('fGoal').value=m.goal;document.getElementById('fCoach').value=m.coach;document.getElementById('fPackage').value=m.package;document.getElementById('fWeeklyGoal').value=String(m.weeklyGoalDays||3);document.getElementById('fStatus').value=m.status;document.getElementById('fSex').value=m.sex||'female';document.getElementById('fAge').value=m.age||'';document.getElementById('fHeight').value=m.height||'';document.getElementById('fWeight').value=m.weight||'';document.getElementById('fActivity').value=String(m.activityFactor||1.375);document.getElementById('fCalorieTarget').value=m.calorieTarget||'';document.getElementById('fProteinTarget').value=m.proteinTarget||'';document.getElementById('fMemo').value=m.memo;document.getElementById('memberFormTitle').textContent='회원 정보 수정';window.scrollTo({top:0,behavior:'smooth'})}
 function startForMember(id){go('session');document.getElementById('sMember').value=id}
 function deleteMember(id){
