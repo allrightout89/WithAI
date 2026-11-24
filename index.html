@@ -185,6 +185,7 @@ textarea{min-height:76px;resize:vertical}.field label{display:block;font-size:12
 <button data-page="library">▣ 운동 라이브러리</button>
 <button data-page="report">▧ 회원 리포트</button>
 <button data-page="diet">🥗 식단 관리</button>
+<button data-page="trainerAdmin">♧ 트레이너 배정 / 전체 레슨</button>
 <button data-page="settings">⚙ 데이터 백업 / 설정</button>
 </nav></aside>
 <main>
@@ -326,6 +327,12 @@ textarea{min-height:76px;resize:vertical}.field label{display:block;font-size:12
 </section>
 
 
+<section id="trainerAdmin" class="hidden">
+<h1>트레이너 배정 / 전체 레슨</h1>
+<div class="sub">Supabase 회원에게 담당 트레이너를 지정하고, 전체 레슨 기록을 확인합니다. 이 화면은 관리자만 접근합니다.</div>
+<div class="panel"><h2>회원별 담당 트레이너 지정</h2><p class="tiny">Supabase members 테이블에 등록된 회원만 표시됩니다. 트레이너 계정은 profiles의 role이 trainer인 계정입니다.</p><div id="adminTrainerAssignments">불러오는 중...</div></div>
+<div class="panel" style="margin-top:14px"><h2>전체 레슨 기록</h2><div id="adminAllTrainingSessions">불러오는 중...</div></div>
+</section>
 <section id="settings" class="hidden">
 <h1>데이터 백업 / 설정</h1><div class="sub">WithAi 클라우드 저장소와 계정 권한을 관리합니다. 백업 파일도 별도로 보관하세요.</div>
 <div class="grid2">
@@ -360,7 +367,7 @@ window.withAiGetDB=()=>db;window.withAiSetDB=(x)=>{db=x;if(!Array.isArray(db.mem
 function msg(t){let e=document.getElementById('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2400)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeUrl(s){try{let u=new URL(s);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch(e){return '#'}}
-function go(p){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));document.getElementById(p).classList.remove('hidden');document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===p));if(p==='members')renderMembers();if(p==='session')fillMemberSelect('sMember');if(p==='history'){fillMemberSelect('hMember');renderHistory()}if(p==='library'){renderLibrary();renderMemberExerciseGuideAdmin();}if(p==='diet'){fillMemberSelect('dMember');fillMemberSelect('dViewMember');let today=new Date().toISOString().slice(0,10);if(!$('dDate').value)$('dDate').value=today;if(!$('dViewDate').value)$('dViewDate').value=today;if(!$('dViewMember').value)$('dViewMember').value=$('dMember').value;initDietUI();updateDietPreview();renderDiet()}if(p==='report'){fillReportSelect();renderReport()}}
+function go(p){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));document.getElementById(p).classList.remove('hidden');document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===p));if(p==='members')renderMembers();if(p==='session')fillMemberSelect('sMember');if(p==='history'){fillMemberSelect('hMember');renderHistory()}if(p==='library'){renderLibrary();renderMemberExerciseGuideAdmin();}if(p==='diet'){fillMemberSelect('dMember');fillMemberSelect('dViewMember');let today=new Date().toISOString().slice(0,10);if(!$('dDate').value)$('dDate').value=today;if(!$('dViewDate').value)$('dViewDate').value=today;if(!$('dViewMember').value)$('dViewMember').value=$('dMember').value;initDietUI();updateDietPreview();renderDiet()}if(p==='report'){fillReportSelect();renderReport()}if(p==='trainerAdmin')loadAdminTrainerAdmin()}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
 function refreshAll(){renderDashboard();renderMembers();renderLibrary();fillMemberSelect('sMember');fillMemberSelect('hMember');fillMemberSelect('dMember');fillMemberSelect('dViewMember');fillReportSelect();renderHistory();renderReport();if(!document.getElementById('diet').classList.contains('hidden'))renderDiet()}
 function renderDashboard(){document.getElementById('mCount').textContent=db.members.length+'명';document.getElementById('sCount').textContent=db.sessions.length+'회';let now=new Date(),ym=now.toISOString().slice(0,7);document.getElementById('monthCount').textContent=db.sessions.filter(s=>(s.date||'').startsWith(ym)).length+'회';document.getElementById('libCount').textContent=db.library.length+'개';let rows=db.sessions.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,7);document.getElementById('recentSessions').innerHTML=rows.length?`<table><thead><tr><th>날짜</th><th>회원</th><th>운동</th><th>회차</th></tr></thead><tbody>${rows.map(s=>`<tr><td>${esc(s.date)}</td><td>${esc(member(s.memberId)?.name||'삭제 회원')}</td><td>${esc(s.part)}</td><td>${esc(s.no)}회</td></tr>`).join('')}</tbody></table>`:'<div class="empty">아직 레슨 기록이 없습니다.</div>'}
@@ -913,6 +920,42 @@ $('saveCloudNowBtn').onclick=async()=>{
  const {error}=await supabaseClient.from('withai_app_snapshots').upsert({owner_user_id:currentUser.id,data:window.withAiGetDB(),updated_at:new Date().toISOString()},{onConflict:'owner_user_id'});
  if(error)cloudMsg('저장 실패: '+error.message);else{lastSnapshotUpdatedAt=new Date().toISOString();hasSnapshot=true;cloudMsg('현재 데이터의 클라우드 저장 완료 · '+new Date().toLocaleString('ko-KR'));}
 };
+async function loadAdminTrainerAdmin(){
+ const assignmentHost=$('adminTrainerAssignments'),sessionHost=$('adminAllTrainingSessions');
+ if(!assignmentHost||!sessionHost)return;
+ assignmentHost.textContent='회원과 트레이너 목록을 불러오는 중...';sessionHost.textContent='레슨 기록을 불러오는 중...';
+ const [membersRes,trainersRes,sessionsRes]=await Promise.all([
+  supabaseClient.from('members').select('id,name,phone,goal,trainer_user_id').order('name'),
+  supabaseClient.from('profiles').select('id,display_name,email').eq('role','trainer').order('display_name'),
+  supabaseClient.from('training_sessions').select('id,member_id,session_date,session_number,training_part,goal,coaching_note,created_by').order('session_date',{ascending:false}).limit(200)
+ ]);
+ if(membersRes.error){assignmentHost.textContent='회원 조회 실패: '+membersRes.error.message;}
+ else if(trainersRes.error){assignmentHost.textContent='트레이너 조회 실패: '+trainersRes.error.message;}
+ else{
+  const trainers=trainersRes.data||[],members=membersRes.data||[];
+  if(!members.length)assignmentHost.textContent='Supabase members 테이블에 등록된 회원이 없습니다. 기존 브라우저 회원 목록과는 별도로 회원 UUID 연결 작업이 필요합니다.';
+  else assignmentHost.innerHTML='<div style="overflow:auto"><table><thead><tr><th>회원</th><th>연락처</th><th>담당 트레이너</th><th>저장</th></tr></thead><tbody>'+members.map(m=>'<tr><td>'+esc(m.name)+'</td><td>'+esc(m.phone||'')+'</td><td><select id="assignTrainer_'+m.id+'"><option value="">미배정</option>'+trainers.map(t=>'<option value="'+t.id+'" '+(m.trainer_user_id===t.id?'selected':'')+'>'+esc(t.display_name||t.email||t.id)+'</option>').join('')+'</select></td><td><button class="btn primary" onclick="saveTrainerAssignment(\''+m.id+'\')">저장</button></td></tr>').join('')+'</tbody></table></div>';
+  if(!trainers.length)assignmentHost.innerHTML+='<p class="tiny">등록된 트레이너 계정이 없습니다. 먼저 profiles.role을 trainer로 설정한 계정을 만들어야 합니다.</p>';
+ }
+ if(sessionsRes.error)sessionHost.textContent='전체 레슨 조회 실패: '+sessionsRes.error.message;
+ else{
+  const rows=sessionsRes.data||[];
+  if(!rows.length)sessionHost.textContent='저장된 Supabase 레슨 기록이 없습니다.';
+  else{
+   const ids=[...new Set(rows.map(x=>x.member_id).filter(Boolean))];
+   const namesRes=ids.length?await supabaseClient.from('members').select('id,name').in('id',ids):{data:[]};
+   const names=Object.fromEntries((namesRes.data||[]).map(x=>[x.id,x.name]));
+   sessionHost.innerHTML='<div style="overflow:auto"><table><thead><tr><th>날짜</th><th>회원</th><th>회차</th><th>부위</th><th>목표</th><th>코칭 메모</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.session_date||'')+'</td><td>'+esc(names[x.member_id]||'회원 정보 없음')+'</td><td>'+esc(x.session_number||'')+'</td><td>'+esc(x.training_part||'')+'</td><td>'+esc(x.goal||'')+'</td><td>'+esc(x.coaching_note||'')+'</td></tr>').join('')+'</tbody></table></div><p class="tiny">최근 최대 200건을 표시합니다.</p>';
+  }
+ }
+}
+async function saveTrainerAssignment(memberId){
+ const select=$('assignTrainer_'+memberId);if(!select)return;
+ const trainerId=select.value||null;
+ const {error}=await supabaseClient.from('members').update({trainer_user_id:trainerId}).eq('id',memberId);
+ if(error){msg('담당 트레이너 저장 실패: '+error.message);return;}
+ msg('담당 트레이너를 저장했습니다.');await loadAdminTrainerAdmin();
+}
 async function loadPending(){
  const {data,error}=await supabaseClient.rpc('withai_admin_list_signups');
  if(error){$('pendingUsers').textContent='가입 신청 목록 조회 실패: '+error.message;return}
