@@ -769,6 +769,23 @@ document.getElementById('memberExerciseName')?.addEventListener('change',renderM
 
 function memberLocalDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function memberNutritionSummary(m){const t=nutritionTargets(m||{});return t.kcal?`예상 기초대사량 ${t.bmr.toLocaleString()} kcal · 하루 총소비열량 ${t.tdee.toLocaleString()} kcal · 하루 목표 섭취량 ${t.kcal.toLocaleString()} kcal · 단백질 목표 ${t.protein}g`:'성별·나이·키·체중을 입력하면 개인별 목표 열량을 계산합니다.'}
+function renderMemberSessionHistory(sessions){
+ const host=$('memberSessions');if(!host)return;
+ const sorted=(Array.isArray(sessions)?sessions:[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ host.innerHTML=sorted.length?sorted.map(x=>'<div class="panel" style="margin:10px 0"><b>'+safeText(x.date||'날짜 미입력')+' · '+safeText(x.part||'전신')+' · '+safeText(x.no||'')+'회차</b><p class="tiny">오늘의 운동 목표: '+safeText(x.goal||'-')+'</p>'+(Array.isArray(x.exercises)&&x.exercises.length?'<div class="tiny"><b>운동 수행</b><br>'+x.exercises.map(e=>safeText(e.name)+' · '+safeText(e.weight||'-')+'kg · '+safeText(e.reps||'-')+'회 × '+safeText(e.sets||'-')+'세트').join('<br>')+'</div>':'')+'<p class="tiny">운동 강도: '+safeText(x.rpe||'-')+'/10 · 컨디션: '+safeText(x.condition||'-')+'</p><p class="tiny">잘한 점: '+safeText(x.good||'-')+'</p><p class="tiny">코치 피드백: '+safeText(x.note||'기록 없음')+'</p><p class="tiny">다음 목표: '+safeText(x.next||'-')+'</p>'+(x.video?'<p><a href="'+safeText(safeUrl(x.video))+'" target="_blank" rel="noopener">레슨 운동 영상 확인하기</a></p>':'')+'</div>').join(''):'<div class="empty">아직 공유된 레슨 일지가 없습니다. 첫 레슨 후 트레이너가 기록을 공유하면 이곳에서 확인할 수 있습니다.</div>';
+}
+async function loadMemberTrainingSessionsFromCloud(){
+ try{
+  const result=await memberPortalRpc('withai_member_get_training_sessions',{});
+  const cloudRows=Array.isArray(result.sessions)?result.sessions:[];
+  const key=x=>[x.date||x.session_date||'',x.no??x.session_number??'',x.part||x.training_part||''].join('|');
+  const cloudKeys=new Set(cloudRows.map(key));
+  const legacyRows=(memberPortalPayload?.sessions||[]).filter(x=>!cloudKeys.has(key(x)));
+  const mapped=cloudRows.map(x=>({id:x.id,date:x.session_date,part:x.training_part,no:x.session_number,goal:x.goal,exercises:Array.isArray(x.exercises)?x.exercises:[],rpe:x.rpe,condition:x.condition,note:x.coaching_note,video:x.video_url}));
+  memberPortalPayload.sessions=[...mapped,...legacyRows];
+  renderMemberSessionHistory(memberPortalPayload.sessions);
+ }catch(e){console.warn('트레이너 레슨 기록 추가 조회:',e.message||e);}
+}
 function renderMemberPortal(payload){
  memberPortalPayload=payload;memberPortalToken=payload.token||memberPortalToken;
  const m=payload.member||{},sessions=Array.isArray(payload.sessions)?payload.sessions:[],meals=Array.isArray(payload.meals)?payload.meals:[],personal=Array.isArray(payload.memberExercises)?payload.memberExercises:[];
@@ -779,8 +796,8 @@ function renderMemberPortal(payload){
  $('memberTodayLabel').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});$('memberSummary').innerHTML='<b>'+safeText(m.name||'회원')+'님, 오늘도 건강한 하루를 시작해요.</b><div class="tiny" style="margin-top:7px">운동 목표 '+safeText(m.goal||'미설정')+' · 담당 트레이너 '+safeText(m.coach||'미지정')+'</div><div class="member-statline"><span>등록 회차<strong>'+safeText(m.package??'-')+'회</strong></span><span>누적 레슨<strong>'+sessions.length+'회</strong></span><span>개인 운동 기록<strong>'+personal.length+'건</strong></span></div>';
  $('memberSelfTarget').textContent=memberNutritionSummary(m);
  const sortedSessions=sessions.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
- $('memberSessions').innerHTML=sortedSessions.length?sortedSessions.map(x=>'<div class="panel" style="margin:10px 0"><b>'+safeText(x.date||'날짜 미입력')+' · '+safeText(x.part||'전신')+' · '+safeText(x.no||'')+'회차</b><p class="tiny">오늘의 운동 목표: '+safeText(x.goal||'-')+'</p>'+(Array.isArray(x.exercises)&&x.exercises.length?'<div class="tiny"><b>운동 수행</b><br>'+x.exercises.map(e=>safeText(e.name)+' · '+safeText(e.weight||'-')+'kg · '+safeText(e.reps||'-')+'회 × '+safeText(e.sets||'-')+'세트').join('<br>')+'</div>':'')+'<p class="tiny">운동 강도: '+safeText(x.rpe||'-')+'/10 · 컨디션: '+safeText(x.condition||'-')+'</p><p class="tiny">잘한 점: '+safeText(x.good||'-')+'</p><p class="tiny">코치 피드백: '+safeText(x.note||'기록 없음')+'</p><p class="tiny">다음 목표: '+safeText(x.next||'-')+'</p>'+(x.video?'<p><a href="'+safeText(safeUrl(x.video))+'" target="_blank" rel="noopener">레슨 운동 영상 확인하기</a></p>':'')+'</div>').join(''):'<div class="empty">아직 공유된 레슨 일지가 없습니다. 첫 레슨 후 트레이너가 기록을 공유하면 이곳에서 확인할 수 있습니다.</div>';
- renderMemberConsultation(m.consultation||null);loadMemberConsultationFromCloud();
+ renderMemberSessionHistory(sessions);
+ renderMemberConsultation(m.consultation||null);loadMemberConsultationFromCloud();loadMemberTrainingSessionsFromCloud();
  const sortedPersonal=personal.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
  $('memberExerciseHistory').innerHTML=sortedPersonal.length?'<h3>내 개인 운동 기록</h3>'+sortedPersonal.map(x=>'<div class="panel" style="margin:8px 0"><b>'+safeText(x.date)+' · '+safeText(x.part)+' · '+safeText(x.name)+'</b><p class="tiny">'+(x.sets?safeText(x.sets)+'세트 · ':'')+safeText(x.reps||'-')+(x.weight?' · '+safeText(x.weight)+'kg':'')+'</p>'+(x.note?'<p class="tiny">'+safeText(x.note)+'</p>':'')+'</div>').join(''):'<div class="empty">아직 개인 운동 기록이 없습니다.</div>';
  const today=memberLocalDate(),todayMeals=meals.filter(x=>x.date===today),sum=k=>todayMeals.reduce((a,x)=>a+(Number(x[k])||0),0),targets=nutritionTargets(m);
