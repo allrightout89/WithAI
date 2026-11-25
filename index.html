@@ -1031,7 +1031,7 @@ async function loadAdminTrainerAdmin(){
  if(!assignmentHost||!sessionHost)return;
  assignmentHost.textContent='기존 WithAi 회원과 트레이너 목록을 불러오는 중...';sessionHost.textContent='레슨 기록을 불러오는 중...';
  const [trainersRes,assignmentsRes]=await Promise.all([
-  supabaseClient.from('profiles').select('id,display_name,email').eq('role','trainer').order('display_name'),
+  supabaseClient.from('profiles').select('id,display_name,email,role').in('role',['trainer','admin']).order('display_name'),
   supabaseClient.from('withai_app_member_assignments').select('app_member_id,trainer_user_id,member_name')
  ]);
  if(trainersRes.error){assignmentHost.textContent='트레이너 조회 실패: '+trainersRes.error.message;return;}
@@ -1053,18 +1053,28 @@ async function loadAdminTrainerAdmin(){
  sessionHost.innerHTML=rows?.length?'<div style="overflow:auto"><table><thead><tr><th>날짜</th><th>회원</th><th>회차</th><th>부위</th><th>목표</th><th>코칭 메모</th><th>관리</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.session_date||'')+'</td><td>'+esc(memberNames[x.app_member_id]||assignedById[x.app_member_id]?.member_name||'회원 정보 없음')+'</td><td>'+esc(x.session_number||'')+'</td><td>'+esc(x.training_part||'')+'</td><td>'+esc(x.goal||'')+'</td><td>'+esc(x.coaching_note||x.next_goal||'')+'</td><td><button class="btn" onclick="editSharedTrainingSession(\''+x.id+'\')">수정</button> <button class="btn danger" onclick="deleteSharedTrainingSession(\''+x.id+'\')">삭제</button></td></tr>').join('')+'</tbody></table></div><p class="tiny">최근 최대 300건을 표시합니다.</p>':'<div class="empty">아직 공유된 레슨 기록이 없습니다.</div>';
 }
 async function saveTrainerAssignment(appMemberId){
- const select=$('assignTrainer_'+appMemberId);if(!select)return;
- const trainerId=select.value||null;
+ const input=$('assignTrainer_'+appMemberId);if(!input)return;
+ const typedName=(input.value||'').trim();
  const db=window.withAiGetDB(),memberRow=(db.members||[]).find(m=>String(m.id)===String(appMemberId));
  if(!memberRow){msg('기존 WithAi 회원을 찾지 못했습니다.');return;}
- const trainerName=trainerId?(select.options[select.selectedIndex]?.textContent||'담당 트레이너'):'미배정';
+ let staff=null;
+ if(typedName){
+  const {data:staffRows,error:staffError}=await supabaseClient.from('profiles').select('id,display_name,email,role').in('role',['trainer','admin']);
+  if(staffError){msg('관리자·트레이너 계정 조회 실패: '+staffError.message);return;}
+  const matches=(staffRows||[]).filter(x=>[x.display_name,x.email].some(v=>String(v||'').trim().toLowerCase()===typedName.toLowerCase()));
+  if(matches.length===0){msg('일치하는 관리자 또는 트레이너 계정이 없습니다. 등록된 계정 이름을 정확히 입력해 주세요.');return;}
+  if(matches.length>1){msg('같은 이름의 계정이 여러 개입니다. 이메일 주소를 입력해 구분해 주세요.');return;}
+  staff=matches[0];
+ }
+ const trainerId=staff?.id||null;
+ const trainerName=staff?(staff.display_name||staff.email||typedName):'담당 트레이너';
  memberRow.coach=trainerId?trainerName:'담당 트레이너';
  persist();
  try{
   const count=await syncLegacyMemberData(memberRow,trainerId);
-  msg(trainerId?'담당 트레이너 지정 완료 · 기존 레슨 '+count+'건을 회원·트레이너 화면에 동기화했습니다.':'담당 트레이너를 해제했습니다.');
+  msg(trainerId?trainerName+' 담당자 지정 완료 · 기존 레슨 '+count+'건을 회원·담당자 화면에 동기화했습니다.':'담당자를 해제했습니다.');
   await loadAdminTrainerAdmin();
- }catch(error){msg('담당 트레이너 저장 또는 기존 레슨 동기화 실패: '+(error.message||error));}
+ }catch(error){msg('담당자 저장 또는 기존 레슨 동기화 실패: '+(error.message||error));}
 }
 async function loadPending(){
  const {data,error}=await supabaseClient.rpc('withai_admin_list_signups');
