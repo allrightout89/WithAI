@@ -1121,7 +1121,7 @@ function renderMemberPortal(payload){
  $('memberSelfTarget').textContent=memberNutritionSummary(m);
  const sortedSessions=sessions.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
  renderMemberSessionHistory(sessions);
- loadMemberTrainingSessionsFromCloud();
+ loadMemberTrainingSessionsFromCloud();loadMemberCalendar();
  const sortedPersonal=personal.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
  $('memberExerciseHistory').innerHTML=sortedPersonal.length?'<h3>내 개인 운동 기록</h3>'+sortedPersonal.map(x=>'<div class="panel" style="margin:8px 0"><b>'+safeText(x.date)+' · '+safeText(x.part)+' · '+safeText(x.name)+'</b><p class="tiny">'+(x.sets?safeText(x.sets)+'세트 · ':'')+safeText(x.reps||'-')+(x.weight?' · '+safeText(x.weight)+'kg':'')+'</p>'+(x.note?'<p class="tiny">'+safeText(x.note)+'</p>':'')+'</div>').join(''):'<div class="empty">아직 개인 운동 기록이 없습니다.</div>';
  const today=memberLocalDate(),todayMeals=meals.filter(x=>x.date===today),sum=k=>todayMeals.reduce((a,x)=>a+(Number(x[k])||0),0),targets=nutritionTargets(m);
@@ -1131,7 +1131,7 @@ function renderMemberPortal(payload){
  const homeLesson=$('memberHomeLesson');if(homeLesson){const latest=sortedSessions[0];homeLesson.innerHTML=latest?'<b>'+safeText(latest.date||'')+' · '+safeText(latest.part||'전신')+' · '+safeText(latest.no||'')+'회차</b><p class="tiny" style="margin-top:7px">'+safeText(latest.note||latest.good||'트레이너가 공유한 레슨 기록이 있습니다.')+'</p>':'<div class="empty">아직 공유된 레슨 일지가 없습니다.</div>'; }
  switchMemberTab('home');previewMemberMeal();
 }
-function switchMemberTab(tab){document.querySelectorAll('.member-tabs [data-member-tab]').forEach(b=>b.classList.toggle('active',b.dataset.memberTab===tab));document.querySelectorAll('.member-view').forEach(v=>v.classList.toggle('hidden',v.id!=='memberView-'+tab));window.scrollTo({top:0,behavior:'smooth'});}
+function switchMemberTab(tab){if(tab==='calendar'&&memberPortalToken)loadMemberCalendar();document.querySelectorAll('.member-tabs [data-member-tab]').forEach(b=>b.classList.toggle('active',b.dataset.memberTab===tab));document.querySelectorAll('.member-view').forEach(v=>v.classList.toggle('hidden',v.id!=='memberView-'+tab));window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('.member-tabs [data-member-tab]').forEach(b=>b.addEventListener('click',()=>switchMemberTab(b.dataset.memberTab)));
 async function memberPortalRpc(name,args){if(!memberPortalToken)throw new Error('회원 로그인 정보가 만료되었습니다. 다시 로그인해 주세요.');const {data,error}=await supabaseClient.rpc(name,{p_token:memberPortalToken,...args});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'저장하지 못했습니다.');return data;}
 function renderMemberConsultation(consultation){
@@ -1227,7 +1227,7 @@ async function openTrainerMember(id){
  if(consultError){msg('상담 일지 조회 실패: '+consultError.message);return;}
  const c=consult?.consultation||{};
  $('trainerConsultView').innerHTML='<h3>초기 상담 일지</h3><div class="formgrid"><div class="field"><label>상담일</label><input id="trConsultDate" type="date" value="'+esc(c.date||localDateString(new Date()))+'"></div><div class="field"><label>담당 트레이너</label><input id="trConsultCoach" value="'+esc(c.coach||currentProfile?.display_name||'')+'"></div>'+[['Goal','운동 목적 및 목표'],['Experience','운동 경험 및 과거 이력'],['Health','질환·수술·부상·통증 및 제한 사항'],['Changes','최근 3개월간 신체 변화'],['Availability','생활 패턴 및 운동 가능 시간'],['Assessment','자세·움직임 평가 및 기초 측정'],['Preferences','회원의 걱정·선호·동기 요인'],['Plan','초기 레슨 방향 및 단계별 계획'],['Memo','트레이너 종합 의견 및 다음 확인 사항'],['ReviewDate','다음 재평가 예정일']].map(([k,label])=>'<div class="field full"><label>'+label+'</label><textarea id="trConsult'+k+'">'+esc(c[k==='ReviewDate'?'reviewDate':k.toLowerCase()]||'')+'</textarea></div>').join('')+'</div><button class="btn primary" onclick="saveTrainerConsultation()">상담 일지 내부 저장</button>';
- await loadTrainerSessions(id);
+ await loadTrainerSessions(id);await loadTrainerPersonalWorkoutHistory(id);
 }
 async function saveTrainerConsultation(){
  if(!trainerSelectedMember)return;
@@ -1284,6 +1284,64 @@ async function deleteSharedTrainingSession(id){
  else if(trainerSelectedMember)await loadTrainerSessions(trainerSelectedMember.app_member_id);
 }
 
+
+
+let memberCalendarData={appointments:[],personal_workouts:[]};
+let memberReminderTimers=[];
+function renderMemberCalendar(){
+ const appointments=memberCalendarData.appointments||[],plans=memberCalendarData.personal_workouts||[];
+ const events=[
+  ...appointments.map(a=>({id:a.id,type:a.event_type||'lesson',date:(a.starts_at||'').slice(0,10),time:(a.starts_at||'').slice(11,16),title:a.title||'PT 레슨',duration:a.duration_minutes||50,note:a.note||'',status:a.status})),
+  ...plans.map(p=>({id:p.id,type:'personal',date:p.scheduled_date,time:'',title:p.title||'개인운동',duration:null,note:p.coach_note||'',focus:p.focus,exercises:p.exercises||[],status:p.status}))
+ ].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+ const today=memberLocalDate(),upcoming=events.filter(e=>e.date>=today);
+ const summary=$('memberCalendarSummary');
+ if(summary)summary.innerHTML='<div class="grid3"><div class="statbox"><span class="tiny">전체 예정 일정</span><b>'+upcoming.length+'건</b></div><div class="statbox"><span class="tiny">레슨 일정</span><b>'+upcoming.filter(e=>e.type==='lesson').length+'건</b></div><div class="statbox"><span class="tiny">개인운동 일정</span><b>'+upcoming.filter(e=>e.type==='personal').length+'건</b></div></div>';
+ const host=$('memberCalendarList');
+ if(host)host.innerHTML=events.length?events.map(e=>'<article class="panel" style="margin-top:12px;border-left:4px solid '+(e.type==='lesson'?'#6689a5':'#8cae69')+'"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><span class="tag '+(e.type==='lesson'?'':'green')+'">'+(e.type==='lesson'?'PT 레슨':'개인운동')+'</span><b style="display:block;margin-top:9px;font-size:15px">'+safeText(e.title)+'</b><div class="tiny" style="margin-top:5px">'+safeText(e.date)+' '+safeText(e.time||'')+(e.duration?' · '+e.duration+'분':'')+'</div></div><span class="tag">'+(e.status==='completed'?'완료':e.status==='cancelled'?'취소':'예정')+'</span></div>'+(e.focus?'<p class="tiny">운동 목적: '+safeText(e.focus)+'</p>':'')+(e.exercises?.length?'<div style="margin-top:10px">'+e.exercises.map(x=>'<div style="padding:8px 10px;background:#f7faf6;border-radius:9px;margin:5px 0;font-size:12px"><b>'+safeText(x.name||'운동')+'</b><span class="muted"> · '+safeText(x.sets||'-')+'세트 · '+safeText(x.reps||'-')+(x.weight?' · '+safeText(x.weight):'')+'</span></div>').join('')+'</div>':'')+(e.note?'<p style="white-space:pre-wrap;font-size:12px;color:#637168;margin:10px 0 0">'+safeText(e.note)+'</p>':'')+(e.type==='lesson'?'<button class="btn primary" style="margin-top:12px" onclick="switchMemberTab(\\'lessons\\')">레슨 일지 확인</button>':'<button class="btn primary" style="margin-top:12px" onclick="switchMemberTab(\\'exercise\\')">개인운동 기록하기</button>')+'</article>').join(''):'<div class="empty" style="margin-top:12px">아직 등록된 일정이 없습니다. 트레이너가 일정을 등록하면 이곳에 표시됩니다.</div>';
+ const planHost=$('memberAssignedWorkoutList');
+ if(planHost)planHost.innerHTML=plans.length?plans.slice().sort((a,b)=>b.scheduled_date.localeCompare(a.scheduled_date)).map(p=>'<div class="panel" style="margin:9px 0"><b>'+safeText(p.scheduled_date)+' · '+safeText(p.title)+'</b><p class="tiny">'+safeText(p.focus||'')+'</p>'+(p.exercises||[]).map(x=>'<div class="tiny" style="padding:7px 0;border-bottom:1px solid #edf1ed">'+safeText(x.name)+' · '+safeText(x.sets||'-')+'세트 × '+safeText(x.reps||'-')+(x.weight?' · '+safeText(x.weight):'')+'</div>').join('')+(p.coach_note?'<p class="tiny" style="white-space:pre-wrap">'+safeText(p.coach_note)+'</p>':'')+'</div>').join(''):'<div class="empty">아직 트레이너가 지정한 개인운동이 없습니다.</div>';
+}
+async function loadMemberCalendar(){
+ try{const result=await memberPortalRpc('withai_member_get_calendar',{});memberCalendarData={appointments:result.appointments||[],personal_workouts:result.personal_workouts||[]};renderMemberCalendar();armMemberReminders();}
+ catch(e){console.warn('회원 캘린더 조회 실패:',e.message||e);const host=$('memberCalendarList');if(host)host.innerHTML='<div class="empty">일정 정보를 불러오지 못했습니다. 관리자에게 캘린더 SQL 적용 여부를 확인해 주세요.</div>';}
+}
+async function enableMemberReminders(){
+ if(!('Notification' in window)){msg('이 브라우저는 알림 기능을 지원하지 않습니다.');return}
+ const permission=await Notification.requestPermission();
+ if(permission==='granted'){msg('일정 알림이 허용되었습니다. 앱을 열어 둔 동안 예정 일정 30분 전에 알려드립니다.');armMemberReminders();}
+ else msg('브라우저 알림이 허용되지 않았습니다. 브라우저 설정에서 알림을 허용해 주세요.');
+}
+function armMemberReminders(){
+ memberReminderTimers.forEach(clearTimeout);memberReminderTimers=[];
+ if(!('Notification' in window)||Notification.permission!=='granted')return;
+ const now=Date.now(),events=(memberCalendarData.appointments||[]).filter(a=>a.status!=='cancelled');
+ events.forEach(a=>{const when=new Date(a.starts_at).getTime()-30*60*1000,delay=when-now;if(delay>0&&delay<24*60*60*1000){const timer=setTimeout(()=>{try{new Notification('WithAi 일정 알림',{body:(a.event_type==='personal'?'개인운동':'PT 레슨')+' · '+new Date(a.starts_at).toLocaleString('ko-KR')+' · 30분 후 시작'})}catch(e){}},delay);memberReminderTimers.push(timer);}});
+}
+window.withAiPersistAppointment=async(row)=>{
+ if(!supabaseClient||!currentUser)return;
+ const {data:assignment,error:lookupError}=await supabaseClient.from('withai_app_member_assignments').select('trainer_user_id').eq('app_member_id',String(row.memberId)).maybeSingle();
+ if(lookupError)throw lookupError;
+ const startsAt=new Date(row.date+'T'+row.time+':00').toISOString();
+ const payload={app_member_id:String(row.memberId),event_type:row.type==='personal'?'personal':'lesson',title:row.type==='personal'?'개인운동 방문':'PT 레슨',starts_at:startsAt,duration_minutes:Number(row.duration)||50,status:row.status==='완료'?'completed':row.status==='취소'?'cancelled':row.status==='노쇼'?'no_show':'scheduled',note:row.memo||null,trainer_user_id:assignment?.trainer_user_id||null,created_by:currentUser.id};
+ const {error}=await supabaseClient.from('withai_app_appointments').insert(payload);if(error)throw error;
+};
+async function saveTrainerPersonalWorkout(){
+ if(!trainerSelectedMember)return;
+ const lines=$('trPersonalExercises').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ if(!lines.length){msg('운동 종목을 한 개 이상 입력해 주세요.');return}
+ const exercises=lines.map(line=>{const p=line.split('|').map(x=>x.trim());return {name:p[0]||'',sets:p[1]||'',reps:p[2]||'',weight:p[3]||''}});
+ const payload={app_member_id:trainerSelectedMember.app_member_id,scheduled_date:$('trPersonalDate').value||localDateString(new Date()),title:$('trPersonalTitle').value.trim()||'개인운동 프로그램',focus:$('trPersonalFocus').value.trim(),exercises,coach_note:$('trPersonalNote').value.trim(),trainer_user_id:currentUser.id,created_by:currentUser.id};
+ const {error}=await supabaseClient.from('withai_app_personal_workouts').insert(payload);
+ if(error){msg('개인운동 처방 저장 실패: '+error.message+' · 캘린더 SQL 적용 여부를 확인해 주세요.');return}
+ msg('개인운동 처방을 회원에게 공유했습니다.');$('trPersonalExercises').value='';$('trPersonalNote').value='';await loadTrainerPersonalWorkoutHistory(trainerSelectedMember.app_member_id);
+}
+async function loadTrainerPersonalWorkoutHistory(id){
+ const host=$('trainerPersonalWorkoutHistory');if(!host)return;
+ const {data,error}=await supabaseClient.from('withai_app_personal_workouts').select('*').eq('app_member_id',id).order('scheduled_date',{ascending:false});
+ if(error){host.textContent='개인운동 처방 조회 실패: '+error.message;return}
+ host.innerHTML=data?.length?'<h3>등록한 개인운동 처방</h3>'+data.map(p=>'<div class="panel" style="margin:8px 0"><b>'+esc(p.scheduled_date)+' · '+esc(p.title)+'</b><p class="tiny">'+esc(p.focus||'')+'</p><p class="tiny">'+esc((p.exercises||[]).map(x=>x.name+' '+x.sets+'세트 × '+x.reps).join(' / '))+'</p></div>').join(''):'<div class="empty">등록된 개인운동 처방이 없습니다.</div>';
+}
 
 async function checkSession(){const {data:{session}}=await supabaseClient.auth.getSession();if(!session){showGate();return}currentUser=session.user;const {data:profile,error}=await supabaseClient.from('profiles').select('id,email,display_name,role,approval_status').eq('id',currentUser.id).maybeSingle();if(error)throw error;if(!profile){authMsg('관리자 프로필을 찾을 수 없습니다.');return}currentProfile=profile;if(profile.role==='admin'){showApp();window.withAiCloudEnabled=true;$('approvalPanel').classList.remove('hidden');await loadSnapshot();setupRealtimeSync();await loadPending();return}if(profile.role==='trainer'){showTrainerApp();return}await supabaseClient.auth.signOut();currentUser=null;currentProfile=null;showGate();authMsg('관리자 또는 트레이너 계정만 로그인할 수 있습니다.');}
 async function loadSnapshot(options={}){
