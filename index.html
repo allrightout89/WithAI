@@ -417,7 +417,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
   <section id="memberView-nutrition" class="member-view hidden">
    <div class="member-section-heading"><div><h2>식단 관리</h2><p>음식과 섭취량을 입력하면 열량과 주요 영양소를 계산합니다.</p></div></div>
    <div class="member-panel"><h2>음식 기록하기</h2><div class="formgrid">
-    <div class="field"><label>식사 구분</label><select id="memberMealType"><option>아침</option><option>점심</option><option>저녁</option><option>간식</option></select></div><div class="field full"><label>영양소별 음식 선택</label><input id="memberMealSearch" type="search" placeholder="선택한 영양소 안에서 음식 검색" oninput="renderMemberFoodPicker()"><div class="tiny">탄수화물 → 단백질 → 지방 탭에서 음식을 골라 여러 종류를 한 번에 기록할 수 있습니다. 음식은 100g당 가장 많이 포함된 영양소 기준으로 분류됩니다.</div><div id="memberMealFoodPicker" class="member-food-picker"></div></div>
+    <div class="field"><label>식사 구분</label><select id="memberMealType"><option>아침</option><option>점심</option><option>저녁</option><option>간식</option></select></div><div class="field full"><label>영양소별 음식 선택</label><input id="memberMealSearch" type="search" placeholder="선택한 영양소 안에서 음식 검색" oninput="renderMemberFoodPicker()"><div class="tiny">탄수화물·단백질·지방·과일·채소 탭은 서로 겹치지 않게 분류했습니다. 과일은 과일 탭에, 채소와 김치·깍두기는 채소 탭에만 표시됩니다.</div><div id="memberMealFoodPicker" class="member-food-picker"></div></div>
 <div class="field full"><label>목록에 없는 음식 직접 추가</label><div class="formgrid"><div class="field"><label>음식 이름</label><input id="memberCustomFoodName" placeholder="예: 직접 만든 샌드위치"></div><div class="field"><label>섭취 열량 (kcal)</label><input id="memberCustomFoodKcal" type="number" min="0" max="10000" step="1" placeholder="예: 350"></div><div class="field"><label>섭취량 (g)</label><input id="memberCustomFoodGrams" type="number" min="1" max="3000" value="100"></div></div><div class="btnrow"><button type="button" class="btn" onclick="addMemberCustomFood()">직접 입력한 음식 추가</button></div><div class="tiny">입력한 칼로리는 해당 섭취량 전체의 열량으로 기록됩니다. 영양소 정보가 없는 경우 탄수화물·단백질·지방은 0으로 기록됩니다.</div></div>
         <div class="field"><label>식사 날짜</label><input id="memberMealDate" type="date"></div>
     <div class="field full"><label>선택한 음식과 섭취량</label><div id="memberMealSelected" class="member-meal-selected"><span class="tiny">아직 선택한 음식이 없습니다.</span></div></div>
@@ -1401,8 +1401,27 @@ const MEMBER_VEGETABLE_FOOD_NAMES=new Set([
 '브로콜리','양배추','양상추','시금치','깻잎','상추','오이','토마토','방울토마토','당근','파프리카','양파','버섯','애호박','가지','콩나물','숙주나물','무','김치','깍두기','미역(불린)','아스파라거스','콜리플라워','청경채','케일','샐러리','비트','고사리(삶은)','도라지','연근','우엉',
 '대파','쪽파','부추','마늘','생강','풋고추','청양고추','홍고추','배추','알배추','얼갈이배추','열무','갓','미나리','쑥갓','근대','아욱','취나물','참나물','냉이','달래','마늘쫑','고구마줄기','무청(삶은)','시래기(삶은)','우거지','죽순','콜라비','순무','방울양배추','적양배추','새송이버섯','표고버섯','느타리버섯','팽이버섯','목이버섯(불린)','양송이버섯','쥬키니호박','오크라','루꼴라','치커리','적근대','비타민채'
 ]);
+// 과일·채소는 영양소 비율과 관계없이 각각의 전용 탭에만 표시
+const MEMBER_FRUIT_FOOD_NAMES=new Set([
+'바나나','사과','배','귤','감귤','오렌지','키위','그린키위','골드키위','딸기','블루베리','포도','샤인머스캣','청포도','거봉','캠벨포도','수박','참외','복숭아','백도복숭아','황도복숭아','천도복숭아','자두','체리','수입 체리','파인애플','망고','애플망고','멜론(칸탈루프)','허니듀 멜론','머스크멜론','아보카도','건포도','라즈베리','블랙베리','구아바','용과','파파야','패션프루트','대추야자(건조)','건무화과','푸룬(건자두)','석류','살구','코코넛 과육','한라봉','천혜향','레드향','황금향','금귤(낑깡)','단감','홍시','곶감','오디','복분자','산딸기','앵두','매실','유자','대추(생과)','크랜베리','망고스틴','두리안'
+]);
+const MEMBER_VEGETABLE_FOOD_NAMES=new Set([
+'브로콜리','양배추','양상추','시금치','깻잎','상추','오이','토마토','방울토마토','당근','파프리카','양파','버섯','애호박','가지','콩나물','숙주나물','무','김치','깍두기','미역(불린)','아스파라거스','콜리플라워','청경채','케일','샐러리','비트','고사리(삶은)','도라지','연근','우엉',
+'대파','쪽파','부추','마늘','생강','풋고추','청양고추','홍고추','배추','알배추','얼갈이배추','열무','갓','미나리','쑥갓','근대','아욱','취나물','참나물','냉이','달래','마늘쫑','고구마줄기','무청(삶은)','시래기(삶은)','우거지','죽순','콜라비','순무','방울양배추','적양배추','새송이버섯','표고버섯','느타리버섯','팽이버섯','목이버섯(불린)','양송이버섯','쥬키니호박','오크라','루꼴라','치커리','적근대','비타민채'
+]);
+// 명칭만 다른 중복 항목은 대표 이름으로 통일하고, 정확히 같은 이름도 한 번만 유지
+const MEMBER_FOOD_ALIASES={'감귤':'귤','그린키위':'키위'};
+const memberFoodSeen=new Set();
+for(let i=DIET_FOODS.length-1;i>=0;i--){
+ const food=DIET_FOODS[i],canonical=MEMBER_FOOD_ALIASES[food.name]||food.name;
+ if(memberFoodSeen.has(canonical)){DIET_FOODS.splice(i,1);continue;}
+ memberFoodSeen.add(canonical);
+ if(canonical!==food.name)food.name=canonical;
+}
 function memberFoodMacroLabel(food){
  const name=String(food?.name||'').trim();
+ if(MEMBER_FRUIT_FOOD_NAMES.has(name))return 'fruits';
+ if(MEMBER_VEGETABLE_FOOD_NAMES.has(name))return 'vegetables';
  if(MEMBER_PROTEIN_FOOD_NAMES.has(name))return 'protein';
  const vals=[['carbs',Number(food.c)||0],['protein',Number(food.p)||0],['fat',Number(food.f)||0]];
  vals.sort((a,b)=>b[1]-a[1]);
@@ -1411,9 +1430,9 @@ function memberFoodMacroLabel(food){
 function setMemberFoodMacro(macro){memberFoodMacro=macro;renderMemberFoodPicker()}
 function renderMemberFoodPicker(){
  const root=$('memberMealFoodPicker');if(!root)return;const q=($('memberMealSearch')?.value||'').trim().toLocaleLowerCase();
- const foods=DIET_FOODS.filter(f=>(memberFoodMacro==='vegetables'?MEMBER_VEGETABLE_FOOD_NAMES.has(f.name):memberFoodMacroLabel(f)===memberFoodMacro)&&(!q||f.name.toLocaleLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'ko'));
- const tabs=[['carbs','탄수화물'],['protein','단백질'],['fat','지방'],['vegetables','채소류']];
- root.innerHTML='<div class="btnrow" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px">'+tabs.map(([key,label])=>'<button type="button" class="btn '+(memberFoodMacro===key?'primary':'')+'" onclick="setMemberFoodMacro(\''+key+'\')">'+label+'</button>').join('')+'</div><div class="tiny" style="margin-bottom:8px">'+({carbs:'탄수화물 중심 음식',protein:'고기·생선·달걀·콩류 등 단백질 중심 음식',fat:'지방 함량이 높은 음식',vegetables:'아스파라거스·브로콜리·잎채소·버섯 등 채소류'}[memberFoodMacro])+' · 영양소 함량은 100g 기준</div>'+foods.map(f=>`<label class="member-food-option"><input type="checkbox" ${selectedMemberFoods.has(f.name)?'checked':''} onchange="toggleMemberFood(${JSON.stringify(f.name).replace(/"/g,'&quot;')},this.checked)"><span>${safeText(f.name)}</span></label>`).join('')||'<span class="tiny">이 분류에 해당하는 음식이 없습니다.</span>';
+ const foods=DIET_FOODS.filter(f=>memberFoodMacroLabel(f)===memberFoodMacro&&(!q||f.name.toLocaleLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+ const tabs=[['carbs','탄수화물'],['protein','단백질'],['fat','지방'],['fruits','과일'],['vegetables','채소']];
+ root.innerHTML='<div class="btnrow" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px">'+tabs.map(([key,label])=>'<button type="button" class="btn '+(memberFoodMacro===key?'primary':'')+'" onclick="setMemberFoodMacro(\''+key+'\')">'+label+'</button>').join('')+'</div><div class="tiny" style="margin-bottom:8px">'+({carbs:'밥·빵·면·감자 등 탄수화물 식품',protein:'고기·생선·달걀·콩류 등 단백질 식품',fat:'견과류·기름 등 지방 식품',fruits:'한국인이 자주 먹는 제철·일반 과일',vegetables:'아스파라거스·브로콜리·잎채소·버섯·김치·깍두기 등 채소류'}[memberFoodMacro])+' · 영양소 함량은 100g 기준</div>'+foods.map(f=>`<label class="member-food-option"><input type="checkbox" ${selectedMemberFoods.has(f.name)?'checked':''} onchange="toggleMemberFood(${JSON.stringify(f.name).replace(/"/g,'&quot;')},this.checked)"><span>${safeText(f.name)}</span></label>`).join('')||'<span class="tiny">이 분류에 해당하는 음식이 없습니다.</span>';
 }
 function toggleMemberFood(name,checked){if(checked){if(!selectedMemberFoods.has(name))selectedMemberFoods.set(name,100);}else selectedMemberFoods.delete(name);renderMemberFoodPicker();renderMemberMealSelected();previewMemberMeal();}
 function updateMemberFoodGrams(name,value){const grams=Number(value);if(Number.isFinite(grams)&&grams>=1&&grams<=3000)selectedMemberFoods.set(name,grams);previewMemberMeal();}
