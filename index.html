@@ -510,9 +510,11 @@ async function deleteLessonDate(memberId,date){
  const memberName=member(memberId)?.name||'선택 회원';
  if(!confirm(memberName+' 회원의 '+label+' 레슨 '+targets.length+'건과 연결된 리포트를 모두 삭제할까요? 삭제 후 복구할 수 없습니다.'))return;
  if(window.withAiCloudEnabled&&supabaseClient&&currentUser){
-  const {error}=await supabaseClient.from('withai_app_training_sessions')
+  let cloudDelete=supabaseClient.from('withai_app_training_sessions')
    .update({deleted_at:new Date().toISOString()})
-   .eq('app_member_id',String(memberId)).eq('session_date',date).is('deleted_at',null);
+   .eq('app_member_id',String(memberId)).is('deleted_at',null);
+  cloudDelete=date?cloudDelete.eq('session_date',date):cloudDelete.is('session_date',null);
+  const {error}=await cloudDelete;
   if(error){msg('클라우드 삭제 실패: '+error.message+' · 화면 데이터는 변경하지 않았습니다.');return}
  }
  db.sessions=db.sessions.filter(x=>!(String(x.memberId)===String(memberId)&&(x.date||'')===date));
