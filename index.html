@@ -372,16 +372,39 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
    <button type="button" data-member-tab="profile"><span>♙</span>내 정보</button>
   </nav>
   <section id="memberView-home" class="member-view">
-   <div class="member-section-heading"><div><h2>오늘의 요약</h2><p>필요한 메뉴를 선택해 바로 이동할 수 있어요.</p></div><span class="member-date" id="memberTodayLabel"></span></div>
+   <div class="member-section-heading"><div><h2>My Training Calendar</h2><p>날짜를 선택하면 레슨일지와 개인운동 훈련일지를 확인할 수 있어요.</p></div><span class="member-date" id="memberTodayLabel"></span></div>
    <div id="memberSummary" class="member-overview"></div>
-   <div class="member-shortcuts">
-    <button type="button" class="member-shortcut" onclick="switchMemberTab('exercise')"><span class="shortcut-icon">＋</span><b>운동 기록하기</b><small>오늘 수행한 운동을 남겨보세요</small><i>→</i></button>
-    <button type="button" class="member-shortcut" onclick="switchMemberTab('nutrition')"><span class="shortcut-icon">◉</span><b>식단 기록하기</b><small>섭취한 음식과 영양소 확인</small><i>→</i></button>
-    <button type="button" class="member-shortcut" onclick="switchMemberTab('lessons')"><span class="shortcut-icon">▤</span><b>레슨 일지 확인</b><small>트레이너 피드백과 영상 보기</small><i>→</i></button>
-    <button type="button" class="member-shortcut" onclick="switchMemberTab('profile')"><span class="shortcut-icon">♙</span><b>내 신체 정보</b><small>체중·목표·활동 수준 관리</small><i>→</i></button>
+   <div class="member-panel member-home-calendar-panel">
+    <div class="calendar-toolbar"><button class="btn" type="button" onclick="shiftMemberHomeCalendar(-1)">이전 달</button><b id="memberHomeCalendarMonth"></b><button class="btn" type="button" onclick="shiftMemberHomeCalendar(1)">다음 달</button></div>
+    <div class="member-calendar-legend"><span><i class="lesson-dot"></i> PT 레슨</span><span><i class="personal-dot"></i> 개인운동</span><span><i class="consult-dot"></i> 식단 기록</span></div>
+    <div id="memberHomeCalendarGrid" class="withai-calendar-grid"></div>
+    <div id="memberHomeCalendarDetails" class="calendar-details"><div class="empty">날짜를 선택하면 일정과 기록이 표시됩니다.</div></div>
    </div>
-   <div class="member-panel"><div class="member-panel-title"><div><h2>오늘의 식단 현황</h2><p>목표 섭취량 대비 오늘의 기록</p></div><button class="btn" onclick="switchMemberTab('nutrition')">자세히 보기 →</button></div><div id="memberHomeNutrition"></div></div>
-   <div class="member-panel"><div class="member-panel-title"><div><h2>최근 레슨</h2><p>트레이너가 공유한 최근 피드백</p></div><button class="btn" onclick="switchMemberTab('lessons')">전체 보기 →</button></div><div id="memberHomeLesson"></div></div>
+   <div class="member-panel takeat-panel">
+    <div class="takeat-heading"><div><span class="takeat-kicker">TAKEAT · TAKE + EAT</span><h2>오늘 먹은 것을 기록해요</h2><p>선택한 날짜의 목표 섭취 열량과 실제 섭취량을 비교합니다.</p></div><span class="takeat-mark">T</span></div>
+    <div id="memberTakeatSummary"></div>
+    <div class="takeat-entry">
+     <div class="takeat-entry-title"><b>빠른 식단 기록</b><span id="memberTakeatSelectedDate"></span></div>
+     <div class="takeat-form-grid">
+      <label>식사<select id="memberTakeatMeal"><option>아침</option><option>점심</option><option>저녁</option><option>간식</option></select></label>
+      <label>음식명<input id="memberTakeatFood" type="text" placeholder="예: 닭가슴살 샐러드"></label>
+      <label>섭취 열량(kcal)<input id="memberTakeatKcal" type="number" min="0" max="10000" placeholder="예: 420"></label>
+     </div>
+     <div class="takeat-form-grid takeat-macros">
+      <label>탄수화물(g)<input id="memberTakeatCarbs" type="number" min="0" placeholder="선택"></label>
+      <label>단백질(g)<input id="memberTakeatProtein" type="number" min="0" placeholder="선택"></label>
+      <label>지방(g)<input id="memberTakeatFat" type="number" min="0" placeholder="선택"></label>
+     </div>
+     <label class="takeat-note-label">메모<input id="memberTakeatNote" type="text" placeholder="선택 사항"></label>
+     <button class="btn primary takeat-save" type="button" onclick="saveMemberTakeatEntry()">이 날짜 식단 저장</button>
+    </div>
+    <div id="memberTakeatMeals" class="takeat-meal-list"></div>
+    <div class="takeat-foot"><button class="btn" type="button" onclick="switchMemberTab('nutrition')">상세 식단 기록 및 음식 검색 →</button></div>
+   </div>
+   <div class="member-shortcuts member-home-shortcuts">
+    <button type="button" class="member-shortcut" onclick="switchMemberTab('progress')"><span class="shortcut-icon">↗</span><b>신체 변화 보기</b><small>체중·체성분·운동 성과</small><i>→</i></button>
+    <button type="button" class="member-shortcut" onclick="switchMemberTab('lessons')"><span class="shortcut-icon">▤</span><b>전체 레슨일지</b><small>지난 수업 피드백 모아보기</small><i>→</i></button>
+   </div>
   </section>
   <section id="memberView-progress" class="member-view hidden">
    <div class="member-section-heading"><div><h2>나의 신체 변화</h2><p>센터에서 측정한 체중과 체성분의 변화를 확인하세요.</p></div></div>
@@ -1629,5 +1652,79 @@ window.withAiPersistAppointment=async(row)=>{
  const payload={app_member_id:String(row.memberId),event_type:row.type==='consultation'?'consultation':row.type==='personal'?'personal':'lesson',title:row.type==='consultation'?'상담 일정':row.type==='personal'?'개인운동 방문':'PT 레슨',starts_at:startsAt,duration_minutes:Number(row.duration)||50,status:row.status==='완료'?'completed':row.status==='취소'?'cancelled':row.status==='노쇼'?'no_show':'scheduled',note:row.memo||null,trainer_user_id:assignment?.trainer_user_id||null,created_by:currentUser.id};
  const {data,error}=await supabaseClient.from('withai_app_appointments').insert(payload).select('id').single();if(error)throw error;return data.id;
 };
+</script>
+<style>
+.member-home-calendar-panel{padding:18px!important}.member-calendar-legend{display:flex;gap:16px;flex-wrap:wrap;margin:4px 0 12px;font-size:11px;color:#647268}.member-calendar-legend span{display:flex;align-items:center;gap:6px}.member-calendar-legend i{width:8px;height:8px;border-radius:50%;display:inline-block}.lesson-dot{background:#4d8060}.personal-dot{background:#7385c0}.consult-dot{background:#e1a34e}
+.member-home-calendar-panel .withai-calendar-day{min-height:82px}.member-home-calendar-panel .calendar-event-chip{padding:2px 4px}.member-home-calendar-panel .calendar-event-chip.lesson{background:#e7f1e8;color:#315d3e}.member-home-calendar-panel .calendar-event-chip.personal{background:#edf0fb;color:#485c9a}.member-home-calendar-panel .calendar-event-chip.meal{background:#fff2df;color:#95611e}
+.takeat-panel{overflow:hidden}.takeat-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.takeat-kicker{font-size:10px;letter-spacing:2px;font-weight:800;color:#5f846b}.takeat-heading h2{margin:5px 0;font-size:21px}.takeat-heading p{margin:0;color:#77847a;font-size:12px}.takeat-mark{width:42px;height:42px;border-radius:14px;background:#e8f0e8;color:#3b6848;display:grid;place-items:center;font-size:21px;font-weight:800}
+.takeat-summary{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:16px;margin:16px 0;border-radius:14px;background:linear-gradient(120deg,#f1f6ef,#faf8f1)}.takeat-kcal-big{font-size:28px;font-weight:800;color:#263b2d;letter-spacing:-1px}.takeat-kcal-big small{font-size:12px;font-weight:600;color:#748077;letter-spacing:0}.takeat-delta{font-size:13px;font-weight:800;text-align:right}.takeat-delta.under{color:#4d8060}.takeat-delta.over{color:#c06d4b}.takeat-delta.neutral{color:#647268}.takeat-progress-track{height:9px;background:#e0e8df;border-radius:20px;overflow:hidden;margin-top:10px}.takeat-progress-fill{height:100%;border-radius:20px;background:#679477;transition:width .2s}.takeat-target-line{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#738076;margin-top:7px}
+.takeat-entry{border:1px solid #e7ece6;border-radius:13px;padding:14px}.takeat-entry-title{display:flex;justify-content:space-between;gap:8px;margin-bottom:12px}.takeat-entry-title span{font-size:11px;color:#738076}.takeat-form-grid{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:9px}.takeat-form-grid label,.takeat-note-label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#6d796f}.takeat-form-grid input,.takeat-form-grid select,.takeat-note-label input{min-width:0;width:100%;padding:10px;border:1px solid #e0e7df;border-radius:9px;background:#fff;color:#26372b;font:inherit;font-size:13px}.takeat-macros{margin-top:9px}.takeat-note-label{margin-top:9px}.takeat-save{width:100%;margin-top:12px}.takeat-meal-list{margin-top:12px}.takeat-meal-item{display:flex;justify-content:space-between;gap:10px;padding:9px 2px;border-bottom:1px solid #edf0eb;font-size:12px}.takeat-meal-item:last-child{border-bottom:0}.takeat-meal-item small{color:#77847a}.takeat-foot{display:flex;justify-content:flex-end;margin-top:10px}.member-home-shortcuts{margin-top:14px}
+@media(max-width:600px){.member-home-calendar-panel{padding:12px!important}.member-home-calendar-panel .withai-calendar-day{min-height:65px}.takeat-summary{padding:12px}.takeat-form-grid{grid-template-columns:1fr 1fr}.takeat-form-grid label:nth-child(2){grid-column:span 2}.takeat-macros label{grid-column:auto}.takeat-heading h2{font-size:18px}}
+</style><script>
+let memberHomeCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let memberHomeCalendarSelected=memberLocalDate();
+function memberHomeMealRows(date){return (memberPortalPayload?.meals||[]).filter(x=>x.date===date)}
+function renderMemberHomeCalendar(){
+ const appointments=memberCalendarData?.appointments||[],plans=memberCalendarData?.personal_workouts||[];
+ const events=[
+  ...appointments.filter(a=>a.event_type!=='consultation').map(a=>({date:(a.starts_at||'').slice(0,10),time:(a.starts_at||'').slice(11,16),type:'lesson',shortTitle:'PT 레슨',title:a.title||'PT 레슨'})),
+  ...plans.map(p=>({date:p.scheduled_date,time:p.scheduled_time||'',type:'personal',shortTitle:'개인운동',title:p.title||'개인운동'})),
+  ...[...new Set((memberPortalPayload?.meals||[]).map(m=>m.date))].map(date=>({date,time:'',type:'meal',shortTitle:'Takeat',title:'식단 기록'}))
+ ];
+ if(!memberHomeCalendarSelected)memberHomeCalendarSelected=memberLocalDate();
+ withAiRenderMonth('memberHomeCalendarGrid','memberHomeCalendarMonth',memberHomeCalendarMonth,events,memberHomeCalendarSelected,'selectMemberHomeCalendarDate');
+ selectMemberHomeCalendarDate(memberHomeCalendarSelected);
+}
+function shiftMemberHomeCalendar(n){memberHomeCalendarMonth=new Date(memberHomeCalendarMonth.getFullYear(),memberHomeCalendarMonth.getMonth()+n,1);renderMemberHomeCalendar();}
+function selectMemberHomeCalendarDate(date){
+ memberHomeCalendarSelected=date;
+ const events=[...(memberCalendarData?.appointments||[]).filter(a=>a.event_type!=='consultation').map(a=>({date:(a.starts_at||'').slice(0,10),time:(a.starts_at||'').slice(11,16),type:'lesson',data:a})),...(memberCalendarData?.personal_workouts||[]).map(p=>({date:p.scheduled_date,time:p.scheduled_time||'',type:'personal',data:p}))].filter(x=>x.date===date);
+ const host=$('memberHomeCalendarDetails');if(!host)return;
+ let out='<div class="calendar-detail-heading"><b>'+safeText(date)+' · 일정 및 기록</b></div>';
+ if(!events.length)out+='<p class="tiny">등록된 운동 일정이 없습니다. 식단은 아래 Takeat에서 이 날짜로 기록할 수 있어요.</p>';
+ events.sort((a,b)=>(a.time||'').localeCompare(b.time||'')).forEach(e=>{
+  if(e.type==='lesson'){
+   const a=e.data,sessionRows=(memberPortalPayload?.sessions||[]).filter(x=>(x.date||x.session_date||'')===date);
+   out+='<div class="calendar-detail-event"><span class="tag">PT 레슨</span><b style="margin-left:8px">'+safeText(e.time||'시간 미정')+' · '+safeText(a.duration_minutes||50)+'분</b><div class="tiny">'+(a.status==='completed'?'수업 완료':'예약된 레슨')+'</div>';
+   out+=sessionRows.length?sessionRows.map(x=>'<div class="home-session-card"><b>'+safeText(x.part||x.training_part||'전신')+' · '+safeText(x.no||x.session_number||'')+'회차</b><p>목표: '+safeText(x.goal||'-')+'</p><p>운동: '+safeText((x.exercises||[]).map(v=>v.name+' '+(v.sets||'-')+'세트 × '+(v.reps||'-')).join(' / ')||'-')+'</p><p>코칭: '+safeText(x.note||x.coaching_note||'기록 없음')+'</p>'+(x.video||x.video_url?'<a href="'+safeText(safeUrl(x.video||x.video_url))+'" target="_blank" rel="noopener">레슨 영상 보기</a>':'')+'</div>').join(''):'<p class="tiny">아직 이 날짜의 레슨일지가 등록되지 않았습니다. 트레이너 또는 관리자가 작성하면 여기에 표시됩니다.</p>';
+   out+='</div>';
+  }else{
+   const p=e.data,logs=(memberPortalPayload?.memberExercises||[]).filter(x=>(x.date||'')===date);
+   out+='<div class="calendar-detail-event"><span class="tag green">개인운동</span><b style="margin-left:8px">'+safeText(e.time||'시간 미정')+'</b><h4>'+safeText(p.title||'개인운동 프로그램')+'</h4><p class="tiny">운동 목적: '+safeText(p.focus||'-')+'</p>'+(p.exercises||[]).map(v=>'<p class="tiny">• '+safeText(v.name)+' · '+safeText(v.sets||'-')+'세트 × '+safeText(v.reps||'-')+(v.weight?' · '+safeText(v.weight):'')+'</p>').join('')+(p.coach_note?'<p class="tiny">트레이너 전달: '+safeText(p.coach_note)+'</p>':'')+(logs.length?'<b class="tiny">회원 수행 기록</b>'+logs.map(v=>'<p class="tiny">'+safeText(v.name)+' · '+safeText(v.sets||'-')+'세트 × '+safeText(v.reps||'-')+(v.weight?' · '+safeText(v.weight)+'kg':'')+'</p>').join(''):'<p class="tiny">아직 회원이 입력한 수행 기록은 없습니다.</p>')+'</div>';
+  }
+ });
+ host.innerHTML=out;
+ const dateLabel=$('memberTakeatSelectedDate');if(dateLabel)dateLabel.textContent=date;
+ const mealDate=$('memberMealDate');if(mealDate)mealDate.value=date;
+ renderMemberTakeat();
+}
+function renderMemberTakeat(){
+ const date=memberHomeCalendarSelected||memberLocalDate(),meals=memberHomeMealRows(date),m=memberPortalPayload?.member||{},target=nutritionTargets(m).kcal||0;
+ const total=Math.round(meals.reduce((sum,x)=>sum+(Number(x.kcal)||0),0)),diff=total-target;
+ const summary=$('memberTakeatSummary');
+ if(summary){
+  const pct=target?Math.round(total/target*100):0,deltaText=!target?'목표 열량을 설정해 주세요':diff>0?'+'+diff.toLocaleString()+' kcal 초과':diff<0?diff.toLocaleString()+' kcal 남음':'목표 섭취량 도달';
+  summary.innerHTML='<div class="takeat-summary"><div><div class="takeat-kcal-big">'+total.toLocaleString()+' <small>/ '+(target?target.toLocaleString():'-')+' kcal</small></div><div class="takeat-progress-track"><div class="takeat-progress-fill" style="width:'+Math.min(100,pct)+'%"></div></div><div class="takeat-target-line"><span>실제 섭취 '+total.toLocaleString()+' kcal</span><span>목표 '+(target?target.toLocaleString():'미설정')+' kcal</span></div></div><div class="takeat-delta '+(!target?'neutral':diff>0?'over':'under')+'">'+deltaText+'</div></div>';
+ }
+ const list=$('memberTakeatMeals');
+ if(list)list.innerHTML=meals.length?meals.map(x=>'<div class="takeat-meal-item"><span><b>'+safeText(x.meal||'식사')+'</b> · '+safeText(x.food||'음식')+' <small>'+safeText(x.grams||'')+'g</small></span><b>'+Math.round(Number(x.kcal)||0)+' kcal</b></div>').join(''):'<div class="empty">선택한 날짜에 등록된 식단이 없습니다. 위에서 음식을 기록해 보세요.</div>';
+}
+async function saveMemberTakeatEntry(){
+ try{
+  const food=$('memberTakeatFood').value.trim(),raw=$('memberTakeatKcal').value,date=memberHomeCalendarSelected||memberLocalDate();
+  if(!food)throw new Error('음식명을 입력해 주세요.');
+  if(raw===''||!Number.isFinite(Number(raw))||Number(raw)<0||Number(raw)>10000)throw new Error('섭취 열량을 0~10,000 kcal 사이로 입력해 주세요.');
+  const num=id=>{const v=$(id).value;return v===''?0:Number(v)};
+  await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal:$('memberTakeatMeal').value,food,grams:0,kcal:Number(raw),carbs:num('memberTakeatCarbs'),protein:num('memberTakeatProtein'),fat:num('memberTakeatFat'),note:$('memberTakeatNote').value.trim()}});
+  $('memberTakeatFood').value='';$('memberTakeatKcal').value='';$('memberTakeatCarbs').value='';$('memberTakeatProtein').value='';$('memberTakeatFat').value='';$('memberTakeatNote').value='';
+  await reloadMemberPortal();
+  memberHomeCalendarSelected=date;renderMemberHomeCalendar();
+  alert('Takeat 식단 기록을 저장했습니다.');
+ }catch(e){alert('식단 저장 실패: '+(e.message||e));}
+}
+const __withAiLoadMemberCalendar=window.loadMemberCalendar;
+window.loadMemberCalendar=async function(){const result=await __withAiLoadMemberCalendar.apply(this,arguments);renderMemberHomeCalendar();return result;};
+const __withAiRenderMemberPortal=window.renderMemberPortal;
+window.renderMemberPortal=function(payload){const result=__withAiRenderMemberPortal.apply(this,arguments);setTimeout(()=>{renderMemberHomeCalendar();renderMemberTakeat();},0);return result;};
 </script>
 </body></html>
