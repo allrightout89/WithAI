@@ -388,7 +388,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
      <div class="takeat-form-grid">
       <label>식사<select id="memberTakeatMeal"><option>아침</option><option>점심</option><option>저녁</option><option>간식</option></select></label>
       <label>음식명<input id="memberTakeatFood" type="text" placeholder="예: 닭가슴살 샐러드"></label>
-      <label>섭취 열량(kcal)<input id="memberTakeatKcal" type="number" min="0" max="10000" placeholder="예: 420"></label>
+      <label>섭취 열량(kcal)<input id="memberTakeatKcal" type="number" min="0" max="10000" placeholder="예: 420"></label><label>섭취량(g)<input id="memberTakeatGrams" type="number" min="1" max="3000" value="100"></label>
      </div>
      <div class="takeat-form-grid takeat-macros">
       <label>탄수화물(g)<input id="memberTakeatCarbs" type="number" min="0" placeholder="선택"></label>
@@ -1583,7 +1583,7 @@ function withAiRenderMonth(hostId,labelId,month,events,selected,onSelect){
  const first=new Date(month.getFullYear(),month.getMonth(),1),start=new Date(first);start.setDate(first.getDate()-first.getDay());
  const today=withAiDateKey(new Date());let out=withAiCalendarWeekdays.map(x=>'<div class="withai-calendar-weekday">'+x+'</div>').join('');
  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const key=withAiDateKey(d),dayEvents=events.filter(e=>e.date===key);
-  out+='<button type="button" class="withai-calendar-day '+(d.getMonth()!==month.getMonth()?'is-outside ':'')+(key===selected?'is-selected ':'')+(key===today?'is-today':'')+'" onclick="'+onSelect+'(\''+key+'\')"><span class="calendar-day-number">'+d.getDate()+'</span>'+dayEvents.slice(0,3).map(e=>'<span class="calendar-event-chip '+(e.type==='consultation'?'consultation':e.type==='personal'?'personal':'')+'">'+safeText(e.time||'종일')+' '+safeText(e.shortTitle||e.title||'일정')+'</span>').join('')+(dayEvents.length>3?'<span class="calendar-event-chip">+'+(dayEvents.length-3)+'건</span>':'')+'</button>';
+  out+='<button type="button" class="withai-calendar-day '+(d.getMonth()!==month.getMonth()?'is-outside ':'')+(key===selected?'is-selected ':'')+(key===today?'is-today':'')+'" onclick="'+onSelect+'(\''+key+'\')"><span class="calendar-day-number">'+d.getDate()+'</span>'+dayEvents.slice(0,3).map(e=>'<span class="calendar-event-chip '+(e.type==='consultation'?'consultation':e.type==='personal'?'personal':e.type==='meal'?'meal':'lesson')+'">'+safeText(e.time||'종일')+' '+safeText(e.shortTitle||e.title||'일정')+'</span>').join('')+(dayEvents.length>3?'<span class="calendar-event-chip">+'+(dayEvents.length-3)+'건</span>':'')+'</button>';
  }
  host.innerHTML=out;
 }
@@ -1715,13 +1715,15 @@ async function saveMemberTakeatEntry(){
   if(!food)throw new Error('음식명을 입력해 주세요.');
   if(raw===''||!Number.isFinite(Number(raw))||Number(raw)<0||Number(raw)>10000)throw new Error('섭취 열량을 0~10,000 kcal 사이로 입력해 주세요.');
   const num=id=>{const v=$(id).value;return v===''?0:Number(v)};
-  await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal:$('memberTakeatMeal').value,food,grams:0,kcal:Number(raw),carbs:num('memberTakeatCarbs'),protein:num('memberTakeatProtein'),fat:num('memberTakeatFat'),note:$('memberTakeatNote').value.trim()}});
-  $('memberTakeatFood').value='';$('memberTakeatKcal').value='';$('memberTakeatCarbs').value='';$('memberTakeatProtein').value='';$('memberTakeatFat').value='';$('memberTakeatNote').value='';
+  await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal:$('memberTakeatMeal').value,food,grams:Number($('memberTakeatGrams').value||100),kcal:Number(raw),carbs:num('memberTakeatCarbs'),protein:num('memberTakeatProtein'),fat:num('memberTakeatFat'),note:$('memberTakeatNote').value.trim()}});
+  $('memberTakeatFood').value='';$('memberTakeatKcal').value='';$('memberTakeatGrams').value='100';$('memberTakeatCarbs').value='';$('memberTakeatProtein').value='';$('memberTakeatFat').value='';$('memberTakeatNote').value='';
   await reloadMemberPortal();
   memberHomeCalendarSelected=date;renderMemberHomeCalendar();
   alert('Takeat 식단 기록을 저장했습니다.');
  }catch(e){alert('식단 저장 실패: '+(e.message||e));}
 }
+const __withAiLoadMemberTraining=window.loadMemberTrainingSessionsFromCloud;
+if(typeof __withAiLoadMemberTraining==='function')window.loadMemberTrainingSessionsFromCloud=async function(){const result=await __withAiLoadMemberTraining.apply(this,arguments);renderMemberHomeCalendar();return result;};
 const __withAiLoadMemberCalendar=window.loadMemberCalendar;
 window.loadMemberCalendar=async function(){const result=await __withAiLoadMemberCalendar.apply(this,arguments);renderMemberHomeCalendar();return result;};
 const __withAiRenderMemberPortal=window.renderMemberPortal;
