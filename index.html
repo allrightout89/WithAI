@@ -381,25 +381,10 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
     <div id="memberHomeCalendarDetails" class="calendar-details"><div class="empty">날짜를 선택하면 일정과 기록이 표시됩니다.</div></div>
    </div>
    <div class="member-panel takeat-panel">
-    <div class="takeat-heading"><div><span class="takeat-kicker">TAKEAT · TAKE + EAT</span><h2>오늘 먹은 것을 기록해요</h2><p>선택한 날짜의 목표 섭취 열량과 실제 섭취량을 비교합니다.</p></div><span class="takeat-mark">T</span></div>
+    <div class="takeat-heading"><div><span class="takeat-kicker">TAKEAT · TAKE + EAT</span><h2>선택한 날짜의 식단</h2><p>캘린더에서 날짜를 선택하면 해당 날짜의 식단 현황이 표시됩니다.</p></div><span class="takeat-mark">T</span></div>
     <div id="memberTakeatSummary"></div>
-    <div class="takeat-entry">
-     <div class="takeat-entry-title"><b>빠른 식단 기록</b><span id="memberTakeatSelectedDate"></span></div>
-     <div class="takeat-form-grid">
-      <label>식사<select id="memberTakeatMeal"><option>아침</option><option>점심</option><option>저녁</option><option>간식</option></select></label>
-      <label>음식명<input id="memberTakeatFood" type="text" placeholder="예: 닭가슴살 샐러드"></label>
-      <label>섭취 열량(kcal)<input id="memberTakeatKcal" type="number" min="0" max="10000" placeholder="예: 420"></label><label>섭취량(g)<input id="memberTakeatGrams" type="number" min="1" max="3000" value="100"></label>
-     </div>
-     <div class="takeat-form-grid takeat-macros">
-      <label>탄수화물(g)<input id="memberTakeatCarbs" type="number" min="0" placeholder="선택"></label>
-      <label>단백질(g)<input id="memberTakeatProtein" type="number" min="0" placeholder="선택"></label>
-      <label>지방(g)<input id="memberTakeatFat" type="number" min="0" placeholder="선택"></label>
-     </div>
-     <label class="takeat-note-label">메모<input id="memberTakeatNote" type="text" placeholder="선택 사항"></label>
-     <button class="btn primary takeat-save" type="button" onclick="saveMemberTakeatEntry()">이 날짜 식단 저장</button>
-    </div>
     <div id="memberTakeatMeals" class="takeat-meal-list"></div>
-    <div class="takeat-foot"><button class="btn primary" type="button" onclick="openTakeatFoodEditor()">음식 검색·직접 입력으로 기록하기 →</button></div>
+    <div class="takeat-foot"><button class="btn primary" type="button" onclick="openTakeatFoodEditor()">같은 식단관리 화면에서 음식 검색·입력하기 →</button></div>
    </div>
    <div class="member-shortcuts member-home-shortcuts">
     <button type="button" class="member-shortcut" onclick="switchMemberTab('progress')"><span class="shortcut-icon">↗</span><b>신체 변화 보기</b><small>체중·체성분·운동 성과</small><i>→</i></button>
@@ -1267,8 +1252,7 @@ function renderMemberPortal(payload){
  loadMemberTrainingSessionsFromCloud();loadMemberCalendar();
  const sortedPersonal=personal.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
  $('memberExerciseHistory').innerHTML=sortedPersonal.length?'<h3>내 개인 운동 기록</h3>'+sortedPersonal.map(x=>'<div class="panel" style="margin:8px 0"><b>'+safeText(x.date)+' · '+safeText(x.part)+' · '+safeText(x.name)+'</b><p class="tiny">'+(x.sets?safeText(x.sets)+'세트 · ':'')+safeText(x.reps||'-')+(x.weight?' · '+safeText(x.weight)+'kg':'')+'</p>'+(x.note?'<p class="tiny">'+safeText(x.note)+'</p>':'')+'</div>').join(''):'<div class="empty">아직 개인 운동 기록이 없습니다.</div>';
- const today=memberLocalDate(),todayMeals=meals.filter(x=>x.date===today),sum=k=>todayMeals.reduce((a,x)=>a+(Number(x[k])||0),0),targets=nutritionTargets(m);
- const recentMeals=meals.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,20);$('memberMealHistory').innerHTML='<h3>오늘 섭취 현황</h3><div class="diet-summary-grid"><div class="diet-stat"><div class="name">섭취 열량</div><strong>'+Math.round(sum('kcal')).toLocaleString()+' kcal</strong><small>목표 '+(targets.kcal?targets.kcal.toLocaleString()+' kcal':'정보 입력 필요')+'</small></div><div class="diet-stat"><div class="name">단백질</div><strong>'+Math.round(sum('protein'))+'g</strong><small>목표 '+(targets.protein||'-')+'g</small></div><div class="diet-stat"><div class="name">탄수화물 / 지방</div><strong>'+Math.round(sum('carbs'))+'g / '+Math.round(sum('fat'))+'g</strong><small>오늘 기록 기준</small></div></div><h3 style="margin-top:14px">최근 식단 기록</h3>'+(recentMeals.length?recentMeals.map(x=>'<p class="tiny">'+safeText(x.date)+' · '+safeText(x.meal)+' · '+safeText(x.food)+' '+safeText(x.grams)+'g · '+Math.round(Number(x.kcal)||0)+' kcal</p>').join(''):'<p class="tiny">아직 식단 기록이 없습니다.</p>');
+ renderMemberMealHistory(memberLocalDate());
  const foodSelect=$('memberMealFood');if(foodSelect&&!foodSelect.options.length){foodSelect.innerHTML=DIET_FOODS.map((f,i)=>'<option value="'+i+'">'+safeText(f.name)+'</option>').join('');}
  const homeNutrition=$('memberHomeNutrition');if(homeNutrition){const hk=Math.round(sum('kcal')),goal=targets.kcal||0,pct=goal?Math.min(100,Math.round(hk/goal*100)):0;homeNutrition.innerHTML='<div class="diet-summary-grid"><div class="diet-stat"><div class="name">섭취 열량</div><strong>'+hk.toLocaleString()+' kcal</strong><small>목표 '+(goal?goal.toLocaleString()+' kcal':'신체정보 입력 필요')+'</small><div class="diet-progress"><span style="width:'+pct+'%"></span></div></div><div class="diet-stat"><div class="name">단백질</div><strong>'+Math.round(sum('protein'))+'g</strong><small>목표 '+(targets.protein||'-')+'g</small></div><div class="diet-stat"><div class="name">탄수화물 / 지방</div><strong>'+Math.round(sum('carbs'))+' / '+Math.round(sum('fat'))+'g</strong><small>오늘 기록 기준</small></div></div>';}
  const homeLesson=$('memberHomeLesson');if(homeLesson){const latest=sortedSessions[0];homeLesson.innerHTML=latest?'<b>'+safeText(latest.date||'')+' · '+safeText(latest.part||'전신')+' · '+safeText(latest.no||'')+'회차</b><p class="tiny" style="margin-top:7px">'+safeText(latest.note||latest.good||'트레이너가 공유한 레슨 기록이 있습니다.')+'</p>':'<div class="empty">아직 공유된 레슨 일지가 없습니다.</div>'; }
@@ -1294,6 +1278,15 @@ async function saveMemberSelfProfile(){try{const age=$('memberSelfAge').value,he
 async function saveMemberExercise(){try{const name=$('memberExerciseName').value.trim();if(!name)throw new Error('운동 종목을 입력해 주세요.');await memberPortalRpc('withai_member_save_exercise',{p_entry:{date:$('memberExerciseDate').value||memberLocalDate(),part:$('memberExercisePart').value,name,sets:$('memberExerciseSets').value?Number($('memberExerciseSets').value):null,reps:$('memberExerciseReps').value,weight:$('memberExerciseWeight').value?Number($('memberExerciseWeight').value):null,note:$('memberExerciseNote').value.trim()}});$('memberExerciseName').value='';$('memberExerciseSets').value='';$('memberExerciseReps').value='';$('memberExerciseWeight').value='';$('memberExerciseNote').value='';await reloadMemberPortal();alert('개인 운동 기록을 저장했습니다.');}catch(e){alert('운동 기록 저장 실패: '+(e.message||e));}}
 let selectedMemberFoods=new Map();
  let selectedMemberCustomFoods=new Map();
+function renderMemberMealHistory(date){
+ const root=$('memberMealHistory');if(!root)return;
+ const meals=(memberPortalPayload?.meals||[]),dayMeals=meals.filter(x=>x.date===date);
+ const m=memberPortalPayload?.member||{},targets=nutritionTargets(m);
+ const sum=k=>dayMeals.reduce((a,x)=>a+(Number(x[k])||0),0);
+ const recentMeals=meals.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,20);
+ root.innerHTML='<h3>'+safeText(date)+' 섭취 현황</h3><div class="diet-summary-grid"><div class="diet-stat"><div class="name">섭취 열량</div><strong>'+Math.round(sum('kcal')).toLocaleString()+' kcal</strong><small>목표 '+(targets.kcal?targets.kcal.toLocaleString()+' kcal':'정보 입력 필요')+'</small></div><div class="diet-stat"><div class="name">단백질</div><strong>'+Math.round(sum('protein'))+'g</strong><small>목표 '+(targets.protein||'-')+'g</small></div><div class="diet-stat"><div class="name">탄수화물 / 지방</div><strong>'+Math.round(sum('carbs'))+'g / '+Math.round(sum('fat'))+'g</strong><small>선택 날짜 기록 기준</small></div></div><h3 style="margin-top:14px">선택 날짜 식단 기록</h3>'+(dayMeals.length?dayMeals.map(x=>'<p class="tiny">'+safeText(x.meal)+' · '+safeText(x.food)+' '+safeText(x.grams)+'g · '+Math.round(Number(x.kcal)||0)+' kcal</p>').join(''):'<p class="tiny">선택한 날짜에 등록된 식단이 없습니다.</p>')+'<h3 style="margin-top:14px">최근 식단 기록</h3>'+(recentMeals.length?recentMeals.map(x=>'<p class="tiny">'+safeText(x.date)+' · '+safeText(x.meal)+' · '+safeText(x.food)+' '+safeText(x.grams)+'g · '+Math.round(Number(x.kcal)||0)+' kcal</p>').join(''):'<p class="tiny">아직 식단 기록이 없습니다.</p>');
+}
+$('memberMealDate')?.addEventListener('change',()=>renderMemberMealHistory($('memberMealDate').value||memberLocalDate()));
 function renderMemberFoodPicker(){
  const root=$('memberMealFoodPicker');if(!root)return;const q=($('memberMealSearch')?.value||'').trim().toLocaleLowerCase();
  const foods=DIET_FOODS.filter(f=>!q||f.name.toLocaleLowerCase().includes(q));
@@ -1305,7 +1298,7 @@ function removeMemberFood(name){selectedMemberFoods.delete(name);renderMemberFoo
 function renderMemberMealSelected(){const root=$('memberMealSelected');if(!root)return;const items=[...selectedMemberFoods.entries()];root.innerHTML=items.length?items.map(([name,grams])=>{const custom=selectedMemberCustomFoods.get(name),safeName=JSON.stringify(name).replace(/"/g,'&quot;');return `<div class="member-meal-row"><b>${safeText(name)}${custom?' · 직접 입력':''}</b><label class="tiny">섭취량(g)<input type="number" min="1" max="3000" value="${grams}" onchange="updateMemberFoodGrams(${safeName},this.value)" oninput="updateMemberFoodGrams(${safeName},this.value)"></label><button type="button" class="member-meal-remove" onclick="removeMemberFood(${safeName})">삭제</button></div>`}).join(''):'<span class="tiny">아직 선택한 음식이 없습니다.</span>';}
 function previewMemberMeal(){const items=[...selectedMemberFoods.entries()];let totals={kcal:0,c:0,p:0,f:0};items.forEach(([name,g])=>{const custom=selectedMemberCustomFoods.get(name);if(custom){totals.kcal+=custom.kcal;return;}const food=DIET_FOODS.find(x=>x.name===name);if(!food)return;const k=g/100;totals.kcal+=food.kcal*k;totals.c+=food.c*k;totals.p+=food.p*k;totals.f+=food.f*k;});if($('memberMealPreview'))$('memberMealPreview').textContent=items.length?`선택 ${items.length}종 · 약 ${Math.round(totals.kcal)} kcal · 탄수화물 ${totals.c.toFixed(1)}g · 단백질 ${totals.p.toFixed(1)}g · 지방 ${totals.f.toFixed(1)}g`:'음식을 여러 개 선택하면 전체 섭취 열량과 영양소가 합산됩니다.';}
 function addMemberCustomFood(){const name=$('memberCustomFoodName').value.trim(),rawKcal=$('memberCustomFoodKcal').value,kcal=Number(rawKcal),grams=Number($('memberCustomFoodGrams').value||100);if(!name)return alert('음식 이름을 입력해 주세요.');if(rawKcal===''||!Number.isFinite(kcal)||kcal<0||kcal>10000)return alert('섭취 열량을 0~10000 kcal 사이로 입력해 주세요.');if(!Number.isFinite(grams)||grams<1||grams>3000)return alert('섭취량은 1~3000g 사이로 입력해 주세요.');if(DIET_FOODS.some(x=>x.name.toLocaleLowerCase()===name.toLocaleLowerCase()))return alert('이미 음식 목록에 있는 이름입니다. 위 검색 목록에서 선택해 주세요.');if(selectedMemberFoods.has(name))return alert('이미 선택한 음식입니다.');selectedMemberFoods.set(name,grams);selectedMemberCustomFoods.set(name,{kcal});$('memberCustomFoodName').value='';$('memberCustomFoodKcal').value='';$('memberCustomFoodGrams').value='100';renderMemberMealSelected();previewMemberMeal();}
-async function saveMemberMeal(){try{const items=[...selectedMemberFoods.entries()];if(!items.length)throw new Error('섭취한 음식을 한 가지 이상 선택해 주세요.');const date=$('memberMealDate').value||memberLocalDate(),meal=$('memberMealType').value,note=$('memberMealNote').value.trim();for(const [name,grams] of items){if(!Number.isFinite(Number(grams))||Number(grams)<1||Number(grams)>3000)throw new Error(name+' 섭취량을 1~3000g 사이로 입력해 주세요.');}const saveBtn=document.querySelector('#memberView-nutrition .btn.primary');if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='저장 중...';}try{for(const [name,grams] of items){const custom=selectedMemberCustomFoods.get(name);if(custom){await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal,food:name,grams:Number(grams),kcal:custom.kcal,carbs:0,protein:0,fat:0,note}});}else{const f=DIET_FOODS.find(x=>x.name===name);if(!f)throw new Error(name+' 음식 정보를 찾을 수 없습니다.');const scale=Number(grams)/100;await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal,food:f.name,grams:Number(grams),kcal:f.kcal*scale,carbs:f.c*scale,protein:f.p*scale,fat:f.f*scale,note}});}}}finally{if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='식단 기록 저장';}}selectedMemberFoods.clear();selectedMemberCustomFoods.clear();$('memberMealNote').value='';renderMemberFoodPicker();renderMemberMealSelected();previewMemberMeal();await reloadMemberPortal();if(window.__takeatReturnToHome){window.__takeatReturnToHome=false;memberHomeCalendarSelected=date;switchMemberTab('home');renderMemberHomeCalendar();}alert(items.length+'가지 음식 기록을 저장했습니다.');}catch(e){alert('식단 저장 실패: '+(e.message||e));}}
+async function saveMemberMeal(){try{const items=[...selectedMemberFoods.entries()];if(!items.length)throw new Error('섭취한 음식을 한 가지 이상 선택해 주세요.');const date=$('memberMealDate').value||memberLocalDate(),meal=$('memberMealType').value,note=$('memberMealNote').value.trim();for(const [name,grams] of items){if(!Number.isFinite(Number(grams))||Number(grams)<1||Number(grams)>3000)throw new Error(name+' 섭취량을 1~3000g 사이로 입력해 주세요.');}const saveBtn=document.querySelector('#memberView-nutrition .btn.primary');if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='저장 중...';}try{for(const [name,grams] of items){const custom=selectedMemberCustomFoods.get(name);if(custom){await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal,food:name,grams:Number(grams),kcal:custom.kcal,carbs:0,protein:0,fat:0,note}});}else{const f=DIET_FOODS.find(x=>x.name===name);if(!f)throw new Error(name+' 음식 정보를 찾을 수 없습니다.');const scale=Number(grams)/100;await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal,food:f.name,grams:Number(grams),kcal:f.kcal*scale,carbs:f.c*scale,protein:f.p*scale,fat:f.f*scale,note}});}}}finally{if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='식단 기록 저장';}}selectedMemberFoods.clear();selectedMemberCustomFoods.clear();$('memberMealNote').value='';renderMemberFoodPicker();renderMemberMealSelected();previewMemberMeal();await reloadMemberPortal();memberHomeCalendarSelected=date;renderMemberHomeCalendar();renderMemberMealHistory(date);$('memberMealDate').value=date;alert(items.length+'가지 음식 기록을 저장했습니다.');}catch(e){alert('식단 저장 실패: '+(e.message||e));}}
 $('memberExerciseName')?.addEventListener('input',renderMemberExerciseGuide);
 $('memberExerciseName')?.addEventListener('change',renderMemberExerciseGuide);
 $('loginBtn').onclick=async()=>{
@@ -1838,10 +1831,18 @@ function selectMemberHomeCalendarDate(date,scroll=true,eventType=null,eventId=nu
  const grid=$('memberHomeCalendarGrid');if(grid){grid.querySelectorAll('.home-calendar-day').forEach(cell=>cell.classList.remove('is-selected'));const cells=[...grid.querySelectorAll('.home-calendar-day')];const idx=Math.round((new Date(date+'T12:00:00')-new Date(new Date(memberHomeCalendarMonth.getFullYear(),memberHomeCalendarMonth.getMonth(),1).getFullYear(),new Date(memberHomeCalendarMonth.getFullYear(),memberHomeCalendarMonth.getMonth(),1).getMonth(),1))/86400000);const firstDay=new Date(memberHomeCalendarMonth.getFullYear(),memberHomeCalendarMonth.getMonth(),1).getDay();const cell=cells[firstDay+new Date(date+'T12:00:00').getDate()-1];if(cell)cell.classList.add('is-selected');}
 }
 function openMemberHomeTakeat(date){
- memberHomeCalendarSelected=date;memberHomeTakeatOpen=true;
- if(new Date(date+'T12:00:00').getMonth()!==memberHomeCalendarMonth.getMonth())memberHomeCalendarMonth=new Date(new Date(date+'T12:00:00').getFullYear(),new Date(date+'T12:00:00').getMonth(),1);
+ memberHomeCalendarSelected=date;
+ memberHomeTakeatOpen=true;
+ const selected=new Date(date+'T12:00:00');
+ if(selected.getMonth()!==memberHomeCalendarMonth.getMonth()||selected.getFullYear()!==memberHomeCalendarMonth.getFullYear())memberHomeCalendarMonth=new Date(selected.getFullYear(),selected.getMonth(),1);
  renderMemberHomeCalendar();
- const panel=document.querySelector('.takeat-panel');if(panel){panel.classList.add('is-open');panel.scrollIntoView({behavior:'smooth',block:'start'});}
+ const mealDate=$('memberMealDate');if(mealDate)mealDate.value=date;
+ switchMemberTab('nutrition');
+ renderMemberMealHistory(date);
+ const search=$('memberMealSearch');if(search)search.value='';
+ selectedMemberFoods.clear();selectedMemberCustomFoods.clear();
+ renderMemberFoodPicker();renderMemberMealSelected();previewMemberMeal();
+ const heading=$('memberView-nutrition');if(heading)heading.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function renderMemberTakeat(){
  const date=memberHomeCalendarSelected||memberLocalDate(),meals=memberHomeMealRows(date),m=memberPortalPayload?.member||{},target=nutritionTargets(m).kcal||0;
@@ -1852,28 +1853,16 @@ function renderMemberTakeat(){
   summary.innerHTML='<div class="takeat-summary"><div><div class="takeat-kcal-big">'+total.toLocaleString()+' <small>/ '+(target?target.toLocaleString():'-')+' kcal</small></div><div class="takeat-progress-track"><div class="takeat-progress-fill" style="width:'+Math.min(100,pct)+'%"></div></div><div class="takeat-target-line"><span>실제 섭취 '+total.toLocaleString()+' kcal</span><span>목표 '+(target?target.toLocaleString():'미설정')+' kcal</span></div></div><div class="takeat-delta '+(!target?'neutral':diff>0?'over':'under')+'">'+deltaText+'</div></div>';
  }
  const list=$('memberTakeatMeals');
- if(list)list.innerHTML=meals.length?meals.map(x=>'<div class="takeat-meal-item"><span><b>'+safeText(x.meal||'식사')+'</b> · '+safeText(x.food||'음식')+' <small>'+safeText(x.grams||'')+'g</small></span><b>'+Math.round(Number(x.kcal)||0)+' kcal</b></div>').join(''):'<div class="empty">선택한 날짜에 등록된 식단이 없습니다. 위에서 음식을 기록해 보세요.</div>';
+ if(list)list.innerHTML=meals.length?meals.map(x=>'<div class="takeat-meal-item"><span><b>'+safeText(x.meal||'식사')+'</b> · '+safeText(x.food||'음식')+' <small>'+safeText(x.grams||'')+'g</small></span><b>'+Math.round(Number(x.kcal)||0)+' kcal</b></div>').join(''):'<div class="empty">선택한 날짜에 등록된 식단이 없습니다. 식단관리 화면에서 음식을 기록해 보세요.</div>';
 }
 function openTakeatFoodEditor(){
- const date=memberHomeCalendarSelected||memberLocalDate();
- $('memberMealDate').value=date;$('memberMealSearch').value='';
+ const date=memberHomeCalendarSelected||$('memberMealDate')?.value||memberLocalDate();
+ $('memberMealDate').value=date;
+ switchMemberTab('nutrition');
+ renderMemberMealHistory(date);
+ $('memberMealSearch').value='';
  selectedMemberFoods.clear();selectedMemberCustomFoods.clear();
  renderMemberFoodPicker();renderMemberMealSelected();previewMemberMeal();
- window.__takeatReturnToHome=true;switchMemberTab('nutrition');$('memberMealDate').value=date;
-}
-async function saveMemberTakeatEntry(){
- try{
-  const food=$('memberTakeatFood').value.trim(),raw=$('memberTakeatKcal').value,date=memberHomeCalendarSelected||memberLocalDate();
-  if(!food)throw new Error('음식명을 입력해 주세요.');
-  if(raw===''||!Number.isFinite(Number(raw))||Number(raw)<0||Number(raw)>10000)throw new Error('섭취 열량을 0~10,000 kcal 사이로 입력해 주세요.');
-  const num=id=>{const v=$(id).value;return v===''?0:Number(v)};
-  await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal:$('memberTakeatMeal').value,food,grams:Number($('memberTakeatGrams').value||100),kcal:Number(raw),carbs:num('memberTakeatCarbs'),protein:num('memberTakeatProtein'),fat:num('memberTakeatFat'),note:$('memberTakeatNote').value.trim()}});
-  $('memberTakeatFood').value='';$('memberTakeatKcal').value='';$('memberTakeatGrams').value='100';$('memberTakeatCarbs').value='';$('memberTakeatProtein').value='';$('memberTakeatFat').value='';$('memberTakeatNote').value='';
-  await reloadMemberPortal();
-  memberHomeCalendarSelected=date;memberHomeTakeatOpen=false;renderMemberHomeCalendar();
-  document.querySelector('.takeat-panel')?.classList.remove('is-open');
-  alert('Takeat 식단 기록을 저장했습니다.');
- }catch(e){alert('식단 저장 실패: '+(e.message||e));}
 }
 const __withAiLoadMemberTraining=window.loadMemberTrainingSessionsFromCloud;
 if(typeof __withAiLoadMemberTraining==='function')window.loadMemberTrainingSessionsFromCloud=async function(){const result=await __withAiLoadMemberTraining.apply(this,arguments);renderMemberHomeCalendar();return result;};
