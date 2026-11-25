@@ -905,7 +905,7 @@ async function saveTrainerConsultation(){
  msg('상담 일지를 내부 기록으로 저장했습니다. 회원에게는 공유되지 않습니다.');
 }
 async function loadTrainerSessions(id){
- const {data,error}=await supabaseClient.from('withai_app_training_sessions').select('id,session_date,session_number,training_part,goal,exercises,rpe,condition,good,coaching_note,next_goal,video_url').eq('app_member_id',id).order('session_date',{ascending:false});
+ const {data,error}=await supabaseClient.from('withai_app_training_sessions').select('id,session_date,session_number,training_part,goal,exercises,rpe,condition,good,coaching_note,next_goal,video_url').eq('app_member_id',id).is('deleted_at',null).order('session_date',{ascending:false});
  $('trainerSessionHistory').innerHTML=error?'레슨 조회 실패: '+esc(error.message):(data?.length?data.map(x=>'<div class="panel"><b>'+esc(x.session_date||'날짜 미입력')+' · '+esc(x.session_number||'')+'회차 · '+esc(x.training_part||'')+'</b><p>'+esc(x.goal||'')+'</p><p class="tiny">운동: '+esc((x.exercises||[]).map(e=>e.name||'').join(', '))+'</p><p>'+esc(x.coaching_note||'')+'</p>'+(x.next_goal?'<p class="tiny">다음 목표: '+esc(x.next_goal)+'</p>':'')+(x.video_url?'<a href="'+esc(safeUrl(x.video_url))+'" target="_blank" rel="noopener">영상 보기</a>':'')+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" onclick="editSharedTrainingSession(\''+x.id+'\')">수정</button><button class="btn danger" onclick="deleteSharedTrainingSession(\''+x.id+'\')">삭제</button></div></div>').join(''):'<p>레슨 기록이 없습니다.</p>');
 }
 async function saveTrainerSession(){
@@ -919,7 +919,7 @@ async function saveTrainerSession(){
 }
 
 async function editSharedTrainingSession(id){
- const {data,error}=await supabaseClient.from('withai_app_training_sessions').select('*').eq('id',id).single();
+ const {data,error}=await supabaseClient.from('withai_app_training_sessions').select('*').eq('id',id).is('deleted_at',null).single();
  if(error||!data){msg('수업일지를 불러오지 못했습니다: '+(error?.message||''));return;}
  const ask=(label,value)=>prompt(label,value==null?'':String(value));
  const date=ask('레슨 날짜 (YYYY-MM-DD)',data.session_date);if(date===null)return;
@@ -943,7 +943,7 @@ async function editSharedTrainingSession(id){
 }
 async function deleteSharedTrainingSession(id){
  if(!confirm('이 수업일지를 삭제할까요? 삭제 후에는 복구할 수 없습니다.'))return;
- const {error}=await supabaseClient.from('withai_app_training_sessions').delete().eq('id',id);
+ const {error}=await supabaseClient.from('withai_app_training_sessions').update({deleted_at:new Date().toISOString()}).eq('id',id).is('deleted_at',null);
  if(error){msg('삭제 실패: '+error.message);return;}
  msg('수업일지를 삭제했습니다. 회원 화면에서도 더 이상 표시되지 않습니다.');
  if(currentProfile?.role==='admin')await loadAdminTrainerAdmin();
@@ -1038,7 +1038,7 @@ async function loadAdminTrainerAdmin(){
  if(!trainers.length)assignmentHost.innerHTML+='<p class="tiny">트레이너 계정이 없습니다. 먼저 profiles.role이 trainer인 계정을 준비해야 합니다.</p>';
  // Existing assignments are synchronized idempotently so previously written lesson logs also reach the trainer/member views.
  for(const m of members){const a=assignedById[String(m.id)];try{await syncLegacyMemberData(m,a?.trainer_user_id||null);}catch(e){console.warn('기존 레슨 동기화 실패:',m.name,e.message||e);}}
- const {data:rows,error:sessionsError}=await supabaseClient.from('withai_app_training_sessions').select('id,app_member_id,session_date,session_number,training_part,goal,coaching_note,next_goal').order('session_date',{ascending:false}).limit(300);
+ const {data:rows,error:sessionsError}=await supabaseClient.from('withai_app_training_sessions').select('id,app_member_id,session_date,session_number,training_part,goal,coaching_note,next_goal').is('deleted_at',null).order('session_date',{ascending:false}).limit(300);
  if(sessionsError){sessionHost.textContent='전체 레슨 조회 실패: '+sessionsError.message;return;}
  const memberNames=Object.fromEntries(members.map(m=>[String(m.id),m.name]));
  sessionHost.innerHTML=rows?.length?'<div style="overflow:auto"><table><thead><tr><th>날짜</th><th>회원</th><th>회차</th><th>부위</th><th>목표</th><th>코칭 메모</th><th>관리</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.session_date||'')+'</td><td>'+esc(memberNames[x.app_member_id]||assignedById[x.app_member_id]?.member_name||'회원 정보 없음')+'</td><td>'+esc(x.session_number||'')+'</td><td>'+esc(x.training_part||'')+'</td><td>'+esc(x.goal||'')+'</td><td>'+esc(x.coaching_note||x.next_goal||'')+'</td><td><button class="btn" onclick="editSharedTrainingSession(\''+x.id+'\')">수정</button> <button class="btn danger" onclick="deleteSharedTrainingSession(\''+x.id+'\')">삭제</button></td></tr>').join('')+'</tbody></table></div><p class="tiny">최근 최대 300건을 표시합니다.</p>':'<div class="empty">아직 공유된 레슨 기록이 없습니다.</div>';
