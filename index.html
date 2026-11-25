@@ -1088,6 +1088,10 @@ const DIET_FOODS=[
  {name:"코코아",kcal:75,c:12,p:3,f:2},
  {name:"프로틴 음료",kcal:65,c:4,p:10,f:1.5}
 ];
+// 음식명 공백·대소문자 차이로 생기는 중복 항목은 첫 번째 영양정보만 남깁니다.
+const _dietFoodSeen=new Set();
+for(let i=DIET_FOODS.length-1;i>=0;i--){const key=String(DIET_FOODS[i].name||'').trim().replace(/\\s+/g,' ').toLocaleLowerCase();if(_dietFoodSeen.has(key))DIET_FOODS.splice(i,1);else _dietFoodSeen.add(key);}
+
 function nutritionTargets(m){
  let bmr=0;if(m&&m.age&&m.height&&m.weight){bmr=10*Number(m.weight)+6.25*Number(m.height)-5*Number(m.age)+(m.sex==='male'?5:-161)}
  let activity=Number(m?.activityFactor)||1.375,tdee=bmr?Math.round(bmr*activity):0;
@@ -1290,7 +1294,25 @@ function renderMemberMealHistory(date){
 }
 $('memberMealDate')?.addEventListener('change',()=>{const date=$('memberMealDate').value||memberLocalDate();memberHomeCalendarSelected=date;const d=new Date(date+'T12:00:00');memberHomeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMemberMealHistory(date);renderMemberTakeat();renderMemberHomeCalendar();});
 let memberFoodMacro='carbs';
-function memberFoodMacroLabel(food){const vals=[['carbs',Number(food.c)||0],['protein',Number(food.p)||0],['fat',Number(food.f)||0]].sort((a,b)=>b[1]-a[1]);return vals[0][0]}
+// 고기·육류·수산물 및 해당 재료가 주가 되는 혼합 메뉴는 영양소 수치와 무관하게 단백질 탭에서 찾도록 분류
+const MEMBER_PROTEIN_FOOD_NAMES=new Set([
+ '닭가슴살','닭다리살(껍질 제거)','닭다리살(껍질 포함)','닭안심','훈제 닭가슴살',
+ '소고기 우둔살','소고기 등심','소고기 안심','소고기 부채살','소고기 홍두깨살','소고기 갈비살','소고기 차돌박이',
+ '돼지고기 안심','돼지고기 등심','돼지 뒷다리살','돼지 앞다리살','삼겹살','목살','돼지 갈비','오리고기(살코기)','오리훈제',
+ '닭가슴살 소시지','베이컨','햄','비엔나소시지',
+ '연어','참치(물/기름 제거)','고등어','삼치','대구','새우','오징어','문어','조개살','굴','멸치볶음','회(흰살생선)','연어초밥','초밥','어묵','맛살',
+ '김밥','참치김밥','불고기김밥','제육볶음','불고기','돈가스','치즈돈가스','닭볶음탕','김치찌개','미역국','순대','만두(찐)',
+ '피자','햄버거','치킨(후라이드)','양념치킨','닭강정','닭죽','소고기무국','순두부찌개','육개장','갈비탕','설렁탕','샤브샤브',
+ '찜닭','보쌈','족발','떡갈비','마파두부','김치만두','군만두','샌드위치(햄치즈)','핫도그','돈부리',
+ '프로틴 파우더','프로틴 음료'
+]);
+function memberFoodMacroLabel(food){
+ const name=String(food?.name||'').trim();
+ if(MEMBER_PROTEIN_FOOD_NAMES.has(name))return 'protein';
+ const vals=[['carbs',Number(food.c)||0],['protein',Number(food.p)||0],['fat',Number(food.f)||0]];
+ vals.sort((a,b)=>b[1]-a[1]);
+ return vals[0][0];
+}
 function setMemberFoodMacro(macro){memberFoodMacro=macro;renderMemberFoodPicker()}
 function renderMemberFoodPicker(){
  const root=$('memberMealFoodPicker');if(!root)return;const q=($('memberMealSearch')?.value||'').trim().toLocaleLowerCase();
