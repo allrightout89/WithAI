@@ -1046,7 +1046,7 @@ async function loadAdminTrainerAdmin(){
  }).join('')+'</tbody></table></div>';
  if(!trainers.length)assignmentHost.innerHTML+='<p class="tiny">트레이너 계정이 없습니다. 먼저 profiles.role이 trainer인 계정을 준비해야 합니다.</p>';
  // Existing assignments are synchronized idempotently so previously written lesson logs also reach the trainer/member views.
- for(const m of members){const a=assignedById[String(m.id)];if(a?.trainer_user_id){try{await syncLegacyMemberData(m,a.trainer_user_id);}catch(e){console.warn('기존 레슨 동기화 실패:',m.name,e.message||e);}}}
+ for(const m of members){const a=assignedById[String(m.id)];try{await syncLegacyMemberData(m,a?.trainer_user_id||null);}catch(e){console.warn('기존 레슨 동기화 실패:',m.name,e.message||e);}}
  const {data:rows,error:sessionsError}=await supabaseClient.from('withai_app_training_sessions').select('id,app_member_id,session_date,session_number,training_part,goal,coaching_note,next_goal').order('session_date',{ascending:false}).limit(300);
  if(sessionsError){sessionHost.textContent='전체 레슨 조회 실패: '+sessionsError.message;return;}
  const memberNames=Object.fromEntries(members.map(m=>[String(m.id),m.name]));
