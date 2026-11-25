@@ -32,6 +32,11 @@ create table if not exists public.withai_app_personal_workouts (
   updated_at timestamptz not null default now()
 );
 
+-- Extend appointment event types after the initial migration has already been applied.
+alter table public.withai_app_appointments drop constraint if exists withai_app_appointments_event_type_check;
+alter table public.withai_app_appointments add constraint withai_app_appointments_event_type_check
+  check (event_type in ('lesson','personal','consultation'));
+
 alter table public.withai_app_personal_workouts add column if not exists scheduled_time time;
 
 create table if not exists public.withai_app_body_measurements (
@@ -146,7 +151,7 @@ begin
   ) order by a.starts_at), '[]'::jsonb)
   into v_appointments
   from public.withai_app_appointments a
-  where a.app_member_id = v_app_member_id and a.status <> 'cancelled';
+  where a.app_member_id = v_app_member_id and a.status <> 'cancelled' and a.event_type in ('lesson','personal');
 
   select coalesce(jsonb_agg(jsonb_build_object(
     'id', w.id, 'scheduled_date', w.scheduled_date, 'scheduled_time', w.scheduled_time, 'title', w.title,
