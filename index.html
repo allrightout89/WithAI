@@ -376,7 +376,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
    <div id="memberSummary" class="member-overview"></div>
    <div class="member-panel member-home-calendar-panel">
     <div class="calendar-toolbar"><button class="btn" type="button" onclick="shiftMemberHomeCalendar(-1)">이전 달</button><b id="memberHomeCalendarMonth"></b><button class="btn" type="button" onclick="shiftMemberHomeCalendar(1)">다음 달</button></div>
-    <div class="member-calendar-legend"><span><i class="lesson-dot"></i> PT 레슨</span><span><i class="personal-dot"></i> 개인운동</span><span><i class="consult-dot"></i> 식단 기록</span></div>
+    <div class="member-calendar-legend"><span><i class="lesson-dot"></i> PT 레슨</span><span><i class="personal-dot"></i> 개인운동</span><span><i class="consult-dot"></i> Takeat 섭취 칼로리</span></div>
     <div id="memberHomeCalendarGrid" class="withai-calendar-grid"></div>
     <div id="memberHomeCalendarDetails" class="calendar-details"><div class="empty">날짜를 선택하면 일정과 기록이 표시됩니다.</div></div>
    </div>
@@ -1683,7 +1683,7 @@ function renderMemberHomeCalendar(){
   const d=new Date(start);d.setDate(start.getDate()+i);const key=withAiDateKey(d),events=memberHomeDayEvents(key),meals=memberHomeMealRows(key);
   const total=Math.round(meals.reduce((sum,x)=>sum+(Number(x.kcal)||0),0)),diff=total-target;
   const mealLabel=!target?'목표 미설정':!meals.length?'식단 입력':(diff>0?'+'+diff.toLocaleString():diff<0?diff.toLocaleString():'0')+' kcal';
-  const eventHtml=events.length?events.slice(0,3).map(e=>'<button type="button" class="home-cell-event '+(e.type==='personal'?'personal':'lesson')+'" onclick="selectMemberHomeCalendarDate(\''+key+'\')"><b>'+(e.time?safeText(e.time):'시간 미정')+'</b> '+safeText(e.type==='lesson'?'PT 레슨':e.title)+'</button>').join(''):'<span class="home-cell-empty">운동 일정 없음</span>';
+  const eventHtml=events.length?events.slice(0,3).map(e=>{const hasLessonLog=e.type==='lesson'&&(memberPortalPayload?.sessions||[]).some(x=>(x.date||x.session_date||'')===key);const label=e.type==='lesson'?(hasLessonLog?'수업일지':'PT 레슨'):e.title;return '<button type="button" class="home-cell-event '+(e.type==='personal'?'personal':'lesson')+'" onclick="selectMemberHomeCalendarDate(\\''+key+'\\')"><b>'+(e.time?safeText(e.time):'시간 미정')+'</b> '+safeText(label)+'</button>';}).join(''):'<span class="home-cell-empty">운동 일정 없음</span>';
   out+='<div class="home-calendar-day '+(d.getMonth()!==month.getMonth()?'is-outside ':'')+(key===memberHomeCalendarSelected?'is-selected ':'')+(key===today?'is-today':'')+'"><div class="home-calendar-day-head"><span class="calendar-day-number">'+d.getDate()+'</span></div><div class="home-calendar-exercise">'+eventHtml+(events.length>3?'<span class="home-cell-more">+'+(events.length-3)+'건 더보기</span>':'')+'</div><button type="button" class="home-calendar-takeat" onclick="openMemberHomeTakeat(\''+key+'\')"><span>TAKEAT</span><b class="'+(!target?'neutral':diff>0?'over':diff<0?'under':'neutral')+'">'+safeText(mealLabel)+'</b></button></div>';
  }
  host.innerHTML=out;
