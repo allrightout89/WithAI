@@ -400,18 +400,16 @@ async function saveMemberConsultation(id){
  persist();
  showMember(id);
  try{
-  const link=await supabaseClient.from('withai_member_app_links').select('member_id').eq('app_member_id',id).maybeSingle();
-  if(link.error)throw link.error;
-  if(!link.data?.member_id){
-   msg('상담 일지는 앱에 저장했습니다. 회원·트레이너 공유를 위해 관리자 화면에서 해당 회원을 Supabase 회원과 먼저 연결해 주세요.');
-   return;
-  }
   if(!currentUser?.id)throw new Error('관리자 로그인 정보를 확인할 수 없습니다.');
-  const saved=await supabaseClient.from('withai_consultations').upsert({member_id:link.data.member_id,consultation:c,updated_by:currentUser.id},{onConflict:'member_id'});
+  const existing=await supabaseClient.from('withai_app_member_assignments').select('trainer_user_id').eq('app_member_id',String(id)).maybeSingle();
+  if(existing.error)throw existing.error;
+  const assignment=await supabaseClient.from('withai_app_member_assignments').upsert({app_member_id:String(id),member_name:m.name||'이름 미등록',member_phone:m.phone||null,member_goal:m.goal||null,trainer_user_id:existing.data?.trainer_user_id||null,assigned_by:currentUser.id,updated_at:new Date().toISOString()},{onConflict:'app_member_id'});
+  if(assignment.error)throw assignment.error;
+  const saved=await supabaseClient.from('withai_app_consultations').upsert({app_member_id:String(id),consultation:c,updated_by:currentUser.id},{onConflict:'app_member_id'});
   if(saved.error)throw saved.error;
-  msg('상담 일지를 저장하고 연결된 회원·담당 트레이너와 공유했습니다.');
+  msg('상담 일지를 저장하고 회원 화면에 공유했습니다. 담당 트레이너가 지정되어 있으면 해당 트레이너도 확인할 수 있습니다.');
  }catch(e){
-  msg('상담 일지는 앱에 저장했지만 회원·트레이너 공유는 실패했습니다: '+(e.message||'연결 상태를 확인해 주세요.'));
+  msg('상담 일지는 앱에 저장했지만 회원·트레이너 공유는 실패했습니다: '+(e.message||'새 SQL 적용 여부를 확인해 주세요.'));
  }
 }
 function editMember(id){let m=member(id);if(!m)return;document.getElementById('editingMemberId').value=id;document.getElementById('fName').value=m.name;document.getElementById('fPhone').value=m.phone;document.getElementById('fGoal').value=m.goal;document.getElementById('fCoach').value=m.coach;document.getElementById('fPackage').value=m.package;document.getElementById('fWeeklyGoal').value=String(m.weeklyGoalDays||3);document.getElementById('fStatus').value=m.status;document.getElementById('fSex').value=m.sex||'female';document.getElementById('fAge').value=m.age||'';document.getElementById('fHeight').value=m.height||'';document.getElementById('fWeight').value=m.weight||'';document.getElementById('fActivity').value=String(m.activityFactor||1.375);document.getElementById('fCalorieTarget').value=m.calorieTarget||'';document.getElementById('fProteinTarget').value=m.proteinTarget||'';document.getElementById('fMemo').value=m.memo;document.getElementById('memberFormTitle').textContent='회원 정보 수정';window.scrollTo({top:0,behavior:'smooth'})}
