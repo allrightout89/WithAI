@@ -1667,7 +1667,7 @@ function memberHomeMealRows(date){return (memberPortalPayload?.meals||[]).filter
 function renderMemberHomeCalendar(){
  const appointments=memberCalendarData?.appointments||[],plans=memberCalendarData?.personal_workouts||[];
  const events=[
-  ...appointments.filter(a=>a.event_type!=='consultation').map(a=>({date:(a.starts_at||'').slice(0,10),time:(a.starts_at||'').slice(11,16),type:'lesson',shortTitle:'PT 레슨',title:a.title||'PT 레슨'})),
+  ...appointments.filter(a=>a.event_type!=='consultation').map(a=>({date:(a.starts_at||'').slice(0,10),time:(a.starts_at||'').slice(11,16),type:a.event_type==='personal'?'personal':'lesson',shortTitle:a.event_type==='personal'?'개인운동':'PT 레슨',title:a.title||(a.event_type==='personal'?'개인운동':'PT 레슨')})),
   ...plans.map(p=>({date:p.scheduled_date,time:p.scheduled_time||'',type:'personal',shortTitle:'개인운동',title:p.title||'개인운동'})),
   ...[...new Set((memberPortalPayload?.meals||[]).map(m=>m.date))].map(date=>({date,time:'',type:'meal',shortTitle:'Takeat',title:'식단 기록'}))
  ];
@@ -1678,7 +1678,7 @@ function renderMemberHomeCalendar(){
 function shiftMemberHomeCalendar(n){memberHomeCalendarMonth=new Date(memberHomeCalendarMonth.getFullYear(),memberHomeCalendarMonth.getMonth()+n,1);renderMemberHomeCalendar();}
 function selectMemberHomeCalendarDate(date){
  memberHomeCalendarSelected=date;
- const events=[...(memberCalendarData?.appointments||[]).filter(a=>a.event_type!=='consultation').map(a=>({date:(a.starts_at||'').slice(0,10),time:(a.starts_at||'').slice(11,16),type:'lesson',data:a})),...(memberCalendarData?.personal_workouts||[]).map(p=>({date:p.scheduled_date,time:p.scheduled_time||'',type:'personal',data:p}))].filter(x=>x.date===date);
+ const events=[...(memberCalendarData?.appointments||[]).filter(a=>a.event_type!=='consultation').map(a=>({date:(a.starts_at||'').slice(0,10),time:(a.starts_at||'').slice(11,16),type:a.event_type==='personal'?'personal':'lesson',data:a})),...(memberCalendarData?.personal_workouts||[]).map(p=>({date:p.scheduled_date,time:p.scheduled_time||'',type:'personal',data:p}))].filter(x=>x.date===date);
  const host=$('memberHomeCalendarDetails');if(!host)return;
  let out='<div class="calendar-detail-heading"><b>'+safeText(date)+' · 일정 및 기록</b></div>';
  if(!events.length)out+='<p class="tiny">등록된 운동 일정이 없습니다. 식단은 아래 Takeat에서 이 날짜로 기록할 수 있어요.</p>';
