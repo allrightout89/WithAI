@@ -3,7 +3,7 @@
 
 create table if not exists public.withai_app_appointments (
   id uuid primary key default gen_random_uuid(),
-  app_member_id text not null references public.withai_app_member_assignments(app_member_id) on delete cascade,
+  app_member_id text not null,
   event_type text not null default 'lesson' check (event_type in ('lesson','personal')),
   title text not null default 'PT 레슨',
   starts_at timestamptz not null,
