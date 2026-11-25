@@ -26,6 +26,7 @@ using (public.current_app_role() = 'admin')
 with check (public.current_app_role() = 'admin');
 
 grant select, insert, update, delete on public.withai_app_member_assignments to authenticated;
+create index if not exists withai_app_member_assignments_trainer_idx on public.withai_app_member_assignments(trainer_user_id);
 
 create table if not exists public.withai_app_training_sessions (
   id uuid primary key default gen_random_uuid(),
@@ -112,6 +113,7 @@ using (
 );
 
 grant select, insert, update, delete on public.withai_app_training_sessions to authenticated;
+create index if not exists withai_app_training_sessions_member_date_idx on public.withai_app_training_sessions(app_member_id, session_date desc);
 
 create table if not exists public.withai_app_consultations (
   app_member_id text primary key references public.withai_app_member_assignments(app_member_id) on delete cascade,
