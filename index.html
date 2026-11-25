@@ -393,7 +393,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
   </section>
   <section id="memberView-calendar" class="member-view hidden">
    <div class="member-section-heading"><div><h2>나의 일정</h2><p>레슨 일정과 트레이너가 지정한 개인운동을 확인하세요.</p></div><button class="btn" type="button" onclick="enableMemberReminders()">일정 알림 켜기</button></div>
-   <div class="member-panel"><div id="memberCalendarSummary"></div><div id="memberCalendarList"></div></div>
+   <div class="member-panel"><div id="memberCalendarSummary"></div><div class="calendar-toolbar"><button class="btn" type="button" onclick="shiftMemberCalendar(-1)">이전 달</button><b id="memberCalendarMonth"></b><button class="btn" type="button" onclick="shiftMemberCalendar(1)">다음 달</button></div><div id="memberCalendarGrid" class="withai-calendar-grid"></div><div id="memberCalendarDetails" class="calendar-details"><div class="empty">날짜를 선택하면 해당 날짜의 레슨일지 또는 개인운동 훈련일지를 확인할 수 있습니다.</div></div></div>
    <div class="member-panel" style="margin-top:14px"><h2>개인운동 처방</h2><p class="tiny">트레이너가 지정한 운동과 수행 기준입니다.</p><div id="memberAssignedWorkoutList"></div></div>
   </section>
   <section id="memberView-exercise" class="member-view hidden">
@@ -604,9 +604,10 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
 <section id="calendar" class="hidden"><h1>PT 일정 및 예약 캘린더</h1><div class="sub">예약 등록, 담당 트레이너, 수업 상태를 관리합니다.</div>
 <div class="panel"><h2>새 일정 등록</h2><div class="formgrid">
 <div class="field"><label>회원</label><select id="calMember"></select></div><div class="field"><label>담당 트레이너</label><input id="calTrainer" placeholder="담당 트레이너"></div>
-<div class="field"><label>일정 종류</label><select id="calType"><option value="lesson">PT 레슨</option><option value="personal">개인운동 방문</option></select></div><div class="field"><label>수업 날짜</label><input id="calDate" type="date"></div><div class="field"><label>시작 시간</label><input id="calTime" type="time" value="10:00"></div>
+<div class="field"><label>일정 종류</label><select id="calType"><option value="lesson">PT 레슨</option><option value="consultation">상담 일정</option><option value="personal">개인운동 방문</option></select></div><div class="field"><label>수업 날짜</label><input id="calDate" type="date"></div><div class="field"><label>시작 시간</label><input id="calTime" type="time" value="10:00"></div>
 <div class="field"><label>수업 시간(분)</label><input id="calDuration" type="number" min="15" step="15" value="50"></div><div class="field"><label>상태</label><select id="calStatus"><option>예약</option><option>완료</option><option>취소</option><option>노쇼</option></select></div>
 <div class="field full"><label>메모</label><input id="calMemo" placeholder="수업 내용 또는 전달 사항"></div></div><div class="btnrow"><button class="btn primary" onclick="saveAppointment()">일정 저장</button></div></div>
+<div class="panel"><div class="calendar-toolbar"><button class="btn" type="button" onclick="shiftStaffCalendar(-1)">이전 달</button><b id="staffCalendarMonth"></b><button class="btn" type="button" onclick="shiftStaffCalendar(1)">다음 달</button></div><div id="staffCalendarGrid" class="withai-calendar-grid"></div><div id="staffCalendarDetails" class="calendar-details"><div class="empty">날짜를 선택하면 해당 시간의 PT·상담 일정을 확인할 수 있습니다.</div></div></div>
 <div class="panel"><div class="panel-title"><h2>일정 목록</h2><div class="btnrow"><input id="calFilterDate" type="date"><button class="btn" onclick="renderCalendar()">날짜 조회</button><button class="btn" onclick="showAllAppointments()">전체 일정</button></div></div><div id="calendarList"></div></div></section>
 <section id="membership" class="hidden"><h1>회원권 및 잔여 횟수 관리</h1><div class="sub">등록 회차, 사용 회차, 만료일, 재등록 시점을 관리합니다.</div><div class="panel"><div class="tiny">회원 등록·수정 화면에서 총 등록 회차, 잔여 회차, 시작일, 만료일, 결제 금액을 입력할 수 있습니다.</div><div id="membershipTable"></div></div></section>
 <section id="progress" class="hidden"><h1>체중·체성분·운동 변화</h1><div class="sub">측정값을 날짜별로 누적해 변화를 그래프와 기록으로 확인합니다.</div>
@@ -1217,7 +1218,7 @@ function showTrainerApp(){
  if(!root){root=document.createElement('section');root.id='trainerShell';root.style.cssText='display:none;min-height:100vh;background:#f4f6fa;padding:24px;';document.body.appendChild(root);}
  root.style.display='block';
  $('userLabel').textContent=(currentProfile?.display_name||currentUser?.email||'')+' · 트레이너';
- root.innerHTML=`<div style="max-width:1100px;margin:auto"><header style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><h1>WithAi 트레이너 공간</h1><p>관리자가 지정한 담당 회원과 해당 회원의 레슨·상담 기록을 관리합니다.</p></div></header><div class="panel"><h2>담당 회원</h2><div id="trainerMemberList">불러오는 중...</div></div><div class="panel" id="trainerWorkPanel" style="display:none"><h2 id="trainerMemberTitle">회원 레슨 기록</h2><div id="trainerConsultView"></div><h3>레슨 기록 작성</h3><div class="formgrid"><div class="field"><label>레슨 날짜</label><input id="trDate" type="date"></div><div class="field"><label>회차</label><input id="trNo" type="number" min="1" value="1"></div><div class="field"><label>운동 부위</label><input id="trPart" placeholder="예: 하체"></div><div class="field"><label>RPE</label><input id="trRpe" type="number" min="1" max="10" value="6"></div><div class="field full"><label>레슨 목표</label><input id="trGoal"></div><div class="field full"><label>운동 내용 (운동명을 줄바꿈으로 입력)</label><textarea id="trExercises" placeholder="고블릿 스쿼트&#10;레그프레스"></textarea></div><div class="field"><label>컨디션</label><input id="trCondition" value="보통"></div><div class="field full"><label>코칭 메모 / 다음 목표</label><textarea id="trNote"></textarea></div><div class="field full"><label>영상 URL</label><input id="trVideo" type="url"></div></div><button class="btn primary" onclick="saveTrainerSession()">레슨 기록 저장</button><div id="trainerSessionHistory" style="margin-top:18px"></div><hr class="sectionline"><h3>레슨 외 개인운동 처방</h3><p class="tiny">회원이 혼자 방문했을 때 수행할 운동을 날짜별로 지정합니다.</p><div class="formgrid"><div class="field"><label>운동 예정일</label><input id="trPersonalDate" type="date"></div><div class="field"><label>운동 예정 시간</label><input id="trPersonalTime" type="time" value="17:00"></div><div class="field"><label>프로그램 이름</label><input id="trPersonalTitle" placeholder="예: 하체 기초 근력 A"></div><div class="field"><label>운동 부위 / 목적</label><input id="trPersonalFocus" placeholder="예: 하체 · 스쿼트 패턴"></div><div class="field full"><label>운동 목록 (운동명 | 세트 | 횟수 | 중량)</label><textarea id="trPersonalExercises" rows="5" placeholder="레그프레스 | 3 | 12 | 40kg&#10;레그컬 | 3 | 15 | 20kg&#10;트레드밀 | 1 | 15분 | 걷기"></textarea></div><div class="field full"><label>트레이너 전달 사항</label><textarea id="trPersonalNote"></textarea></div></div><button class="btn primary" onclick="saveTrainerPersonalWorkout()">개인운동 처방 저장 및 회원에게 공유</button><div id="trainerPersonalWorkoutHistory" style="margin-top:14px"></div></div></div>`;
+ root.innerHTML=`<div style="max-width:1100px;margin:auto"><header style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><h1>WithAi 트레이너 공간</h1><p>관리자가 지정한 담당 회원과 해당 회원의 레슨·상담 기록을 관리합니다.</p></div></header><div class="panel"><h2>나의 담당 회원 일정</h2><p class="tiny">담당 회원에게 예약된 PT 레슨과 상담 일정을 월간 캘린더에서 확인합니다.</p><div class="calendar-toolbar"><button class="btn" type="button" onclick="shiftTrainerCalendar(-1)">이전 달</button><b id="trainerCalendarMonth"></b><button class="btn" type="button" onclick="shiftTrainerCalendar(1)">다음 달</button></div><div id="trainerCalendarGrid" class="withai-calendar-grid"></div><div id="trainerCalendarDetails" class="calendar-details"><div class="empty">담당 회원의 일정이 표시됩니다.</div></div></div><div class="panel"><h2>담당 회원</h2><div id="trainerMemberList">불러오는 중...</div></div><div class="panel" id="trainerWorkPanel" style="display:none"><h2 id="trainerMemberTitle">회원 레슨 기록</h2><div id="trainerConsultView"></div><h3>레슨 기록 작성</h3><div class="formgrid"><div class="field"><label>레슨 날짜</label><input id="trDate" type="date"></div><div class="field"><label>회차</label><input id="trNo" type="number" min="1" value="1"></div><div class="field"><label>운동 부위</label><input id="trPart" placeholder="예: 하체"></div><div class="field"><label>RPE</label><input id="trRpe" type="number" min="1" max="10" value="6"></div><div class="field full"><label>레슨 목표</label><input id="trGoal"></div><div class="field full"><label>운동 내용 (운동명을 줄바꿈으로 입력)</label><textarea id="trExercises" placeholder="고블릿 스쿼트&#10;레그프레스"></textarea></div><div class="field"><label>컨디션</label><input id="trCondition" value="보통"></div><div class="field full"><label>코칭 메모 / 다음 목표</label><textarea id="trNote"></textarea></div><div class="field full"><label>영상 URL</label><input id="trVideo" type="url"></div></div><button class="btn primary" onclick="saveTrainerSession()">레슨 기록 저장</button><div id="trainerSessionHistory" style="margin-top:18px"></div><hr class="sectionline"><h3>레슨 외 개인운동 처방</h3><p class="tiny">회원이 혼자 방문했을 때 수행할 운동을 날짜별로 지정합니다.</p><div class="formgrid"><div class="field"><label>운동 예정일</label><input id="trPersonalDate" type="date"></div><div class="field"><label>운동 예정 시간</label><input id="trPersonalTime" type="time" value="17:00"></div><div class="field"><label>프로그램 이름</label><input id="trPersonalTitle" placeholder="예: 하체 기초 근력 A"></div><div class="field"><label>운동 부위 / 목적</label><input id="trPersonalFocus" placeholder="예: 하체 · 스쿼트 패턴"></div><div class="field full"><label>운동 목록 (운동명 | 세트 | 횟수 | 중량)</label><textarea id="trPersonalExercises" rows="5" placeholder="레그프레스 | 3 | 12 | 40kg&#10;레그컬 | 3 | 15 | 20kg&#10;트레드밀 | 1 | 15분 | 걷기"></textarea></div><div class="field full"><label>트레이너 전달 사항</label><textarea id="trPersonalNote"></textarea></div></div><button class="btn primary" onclick="saveTrainerPersonalWorkout()">개인운동 처방 저장 및 회원에게 공유</button><div id="trainerPersonalWorkoutHistory" style="margin-top:14px"></div></div></div>`;
  $('trDate').value=localDateString(new Date());if($('trPersonalDate'))$('trPersonalDate').value=localDateString(new Date());if($('trPersonalTime'))$('trPersonalTime').value='17:00';loadTrainerMembers();
 }
 let trainerSelectedMember=null;
@@ -1534,5 +1535,99 @@ let authListenerReady=false;
     showGate(); setAuthMode('member'); authMsg('초기 연결 오류: '+(e && e.message ? e.message : String(e))+' · 로그인 버튼을 눌러 다시 시도할 수 있습니다.');
   }
 })();
+</script>
+<style>
+.calendar-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0}.calendar-toolbar b{font-size:16px;color:#23372d}
+.withai-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.withai-calendar-weekday{padding:8px 3px;text-align:center;font-size:11px;font-weight:700;color:#68786d}
+.withai-calendar-day{min-height:92px;border:1px solid #e5ebe5;border-radius:10px;background:#fff;padding:6px 5px;text-align:left;overflow:hidden;color:#27372d}
+.withai-calendar-day.is-outside{opacity:.38;background:#f7f8f6}.withai-calendar-day.is-selected{outline:2px solid #547b60;background:#f1f7f0}.withai-calendar-day.is-today .calendar-day-number{background:#294b38;color:#fff;border-radius:20px;padding:2px 6px}
+.calendar-day-number{display:inline-block;font-size:12px;font-weight:700;margin-bottom:5px}.calendar-event-chip{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1.5;border-radius:4px;padding:1px 3px;margin:2px 0;background:#eaf1eb;color:#345640}.calendar-event-chip.consultation{background:#fff1dd;color:#8a5a18}.calendar-event-chip.personal{background:#edf0fa;color:#465a91}
+.calendar-details{margin-top:14px;padding:12px;border-radius:12px;background:#f7f9f6;min-height:60px}.calendar-detail-event{padding:11px 0;border-bottom:1px solid #e2e9e2}.calendar-detail-event:last-child{border-bottom:0}
+@media(max-width:600px){.withai-calendar-grid{gap:3px}.withai-calendar-day{min-height:70px;padding:4px 2px;border-radius:7px}.calendar-event-chip{font-size:9px}.calendar-toolbar b{font-size:14px}}
+</style><script>
+/* WithAi role-scoped month calendars */
+let staffCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let trainerCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let memberCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let staffCalendarRows=[],trainerCalendarRows=[],staffCalendarSelected='',trainerCalendarSelected='',memberCalendarSelected='';
+const withAiCalendarWeekdays=['일','월','화','수','목','금','토'];
+function withAiDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function withAiCalendarMonthLabel(d){return d.getFullYear()+'년 '+(d.getMonth()+1)+'월'}
+function withAiRenderMonth(hostId,labelId,month,events,selected,onSelect){
+ const host=$(hostId);if(!host)return;
+ if($(labelId))$(labelId).textContent=withAiCalendarMonthLabel(month);
+ const first=new Date(month.getFullYear(),month.getMonth(),1),start=new Date(first);start.setDate(first.getDate()-first.getDay());
+ const today=withAiDateKey(new Date());let out=withAiCalendarWeekdays.map(x=>'<div class="withai-calendar-weekday">'+x+'</div>').join('');
+ for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const key=withAiDateKey(d),dayEvents=events.filter(e=>e.date===key);
+  out+='<button type="button" class="withai-calendar-day '+(d.getMonth()!==month.getMonth()?'is-outside ':'')+(key===selected?'is-selected ':'')+(key===today?'is-today':'')+'" onclick="'+onSelect+'(\''+key+'\')"><span class="calendar-day-number">'+d.getDate()+'</span>'+dayEvents.slice(0,3).map(e=>'<span class="calendar-event-chip '+(e.type==='consultation'?'consultation':e.type==='personal'?'personal':'')+'">'+safeText(e.time||'종일')+' '+safeText(e.shortTitle||e.title||'일정')+'</span>').join('')+(dayEvents.length>3?'<span class="calendar-event-chip">+'+(dayEvents.length-3)+'건</span>':'')+'</button>';
+ }
+ host.innerHTML=out;
+}
+function withAiStaffEventRows(rows,memberNames){
+ return (rows||[]).map(a=>{const d=new Date(a.starts_at);return {id:a.id,date:withAiDateKey(d),time:d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false}),type:a.event_type||'lesson',title:a.title||'일정',shortTitle:(memberNames[a.app_member_id]||'회원')+' '+(a.event_type==='consultation'?'상담':a.event_type==='personal'?'개인운동':'PT'),memberName:memberNames[a.app_member_id]||'회원',duration:a.duration_minutes||50,status:a.status,note:a.note||''}});
+}
+async function loadStaffCalendar(){
+ const hostId=currentProfile?.role==='admin'?'staffCalendarGrid':'trainerCalendarGrid';
+ const detailId=currentProfile?.role==='admin'?'staffCalendarDetails':'trainerCalendarDetails';
+ const labelId=currentProfile?.role==='admin'?'staffCalendarMonth':'trainerCalendarMonth';
+ if(!$(hostId)||!supabaseClient||!currentUser)return;
+ const {data,error}=await supabaseClient.from('withai_app_appointments').select('id,app_member_id,event_type,title,starts_at,duration_minutes,status,note,trainer_user_id').in('event_type',['lesson','consultation']).neq('status','cancelled').order('starts_at');
+ if(error){$(hostId).innerHTML='<div class="empty">일정을 불러오지 못했습니다: '+safeText(error.message)+'</div>';return;}
+ let names={};
+ if(currentProfile?.role==='admin'){(window.withAiGetDB()?.members||[]).forEach(m=>names[String(m.id)]=m.name);}
+ else {const {data:assigned}=await supabaseClient.from('withai_app_member_assignments').select('app_member_id,member_name').eq('trainer_user_id',currentUser.id);(assigned||[]).forEach(m=>names[m.app_member_id]=m.member_name);}
+ const rows=withAiStaffEventRows(data,names);
+ if(currentProfile?.role==='admin'){staffCalendarRows=rows;withAiRenderMonth(hostId,labelId,staffCalendarMonth,rows,staffCalendarSelected,'selectStaffCalendarDate');}
+ else {trainerCalendarRows=rows;withAiRenderMonth(hostId,labelId,trainerCalendarMonth,rows,trainerCalendarSelected,'selectTrainerCalendarDate');}
+ const chosen=currentProfile?.role==='admin'?staffCalendarSelected:trainerCalendarSelected;
+ if(chosen)withAiRenderStaffDetails(detailId,rows,chosen);
+}
+function withAiRenderStaffDetails(hostId,rows,date){
+ const host=$(hostId);if(!host)return;const matches=rows.filter(e=>e.date===date).sort((a,b)=>a.time.localeCompare(b.time));
+ host.innerHTML='<b>'+safeText(date)+' 일정</b>'+(matches.length?matches.map(e=>'<div class="calendar-detail-event"><b>'+safeText(e.time)+' · '+safeText(e.title)+'</b><div class="tiny">'+safeText(e.memberName)+' · '+(e.type==='consultation'?'상담':e.type==='lesson'?'PT 레슨':'개인운동')+' · '+e.duration+'분 · '+(e.status==='completed'?'완료':'예약')+'</div>'+(e.note?'<p class="tiny">'+safeText(e.note)+'</p>':'')+'</div>').join(''):'<p class="tiny">이 날짜에 예약된 PT·상담 일정이 없습니다.</p>');
+}
+function selectStaffCalendarDate(date){staffCalendarSelected=date;withAiRenderMonth('staffCalendarGrid','staffCalendarMonth',staffCalendarMonth,staffCalendarRows,date,'selectStaffCalendarDate');withAiRenderStaffDetails('staffCalendarDetails',staffCalendarRows,date)}
+function selectTrainerCalendarDate(date){trainerCalendarSelected=date;withAiRenderMonth('trainerCalendarGrid','trainerCalendarMonth',trainerCalendarMonth,trainerCalendarRows,date,'selectTrainerCalendarDate');withAiRenderStaffDetails('trainerCalendarDetails',trainerCalendarRows,date)}
+function shiftStaffCalendar(n){staffCalendarMonth=new Date(staffCalendarMonth.getFullYear(),staffCalendarMonth.getMonth()+n,1);withAiRenderMonth('staffCalendarGrid','staffCalendarMonth',staffCalendarMonth,staffCalendarRows,staffCalendarSelected,'selectStaffCalendarDate')}
+function shiftTrainerCalendar(n){trainerCalendarMonth=new Date(trainerCalendarMonth.getFullYear(),trainerCalendarMonth.getMonth()+n,1);withAiRenderMonth('trainerCalendarGrid','trainerCalendarMonth',trainerCalendarMonth,trainerCalendarRows,trainerCalendarSelected,'selectTrainerCalendarDate')}
+function shiftMemberCalendar(n){memberCalendarMonth=new Date(memberCalendarMonth.getFullYear(),memberCalendarMonth.getMonth()+n,1);withAiRenderMonth('memberCalendarGrid','memberCalendarMonth',memberCalendarMonth,[...(memberCalendarData.appointments||[]).map(a=>({date:(a.starts_at||'').slice(0,10),time:(a.starts_at||'').slice(11,16),type:a.event_type||'lesson',shortTitle:'PT 레슨',title:a.title})),...(memberCalendarData.personal_workouts||[]).map(p=>({date:p.scheduled_date,time:p.scheduled_time||'',type:'personal',shortTitle:'개인운동',title:p.title}))],memberCalendarSelected,'selectMemberCalendarDate')}
+function selectMemberCalendarDate(date){memberCalendarSelected=date;shiftMemberCalendar(0);const host=$('memberCalendarDetails');if(!host)return;
+ const ap=(memberCalendarData.appointments||[]).filter(a=>(a.starts_at||'').slice(0,10)===date),plans=(memberCalendarData.personal_workouts||[]).filter(p=>p.scheduled_date===date);
+ let out='<b>'+safeText(date)+' 일정 및 훈련일지</b>';
+ if(!ap.length&&!plans.length)out+='<p class="tiny">등록된 일정이 없습니다.</p>';
+ ap.forEach(a=>{const time=new Date(a.starts_at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false});const sessions=(memberPortalPayload?.sessions||[]).filter(x=>(x.date||x.session_date||'')===date);
+  out+='<div class="calendar-detail-event"><b>'+safeText(time)+' · PT 레슨</b><p class="tiny">'+(a.status==='completed'?'완료':'예정')+'</p>'+(sessions.length?sessions.map(x=>'<div class="panel"><b>'+safeText(x.part||x.training_part||'전신')+' · '+safeText(x.no||x.session_number||'')+'회차</b><p class="tiny">목표: '+safeText(x.goal||'-')+'</p><p class="tiny">운동: '+safeText((x.exercises||[]).map(e=>e.name+' '+(e.sets||'-')+'세트 × '+(e.reps||'-')).join(' / ')||'-')+'</p><p class="tiny">코치 피드백: '+safeText(x.note||x.coaching_note||'기록 없음')+'</p>'+(x.video?'<a href="'+safeText(safeUrl(x.video))+'" target="_blank" rel="noopener">레슨 영상 보기</a>':'')+'</div>').join(''):'<p class="tiny">아직 해당 날짜에 공유된 레슨일지가 없습니다.</p>')+'</div>';
+ });
+ plans.forEach(p=>{const logs=(memberPortalPayload?.memberExercises||[]).filter(x=>(x.date||'')===date);out+='<div class="calendar-detail-event"><b>'+safeText(p.scheduled_time||'시간 미정')+' · 개인운동 훈련일지</b><h4>'+safeText(p.title||'개인운동')+'</h4><p class="tiny">운동 목적: '+safeText(p.focus||'-')+'</p>'+(p.exercises||[]).map(x=>'<p class="tiny">• '+safeText(x.name)+' · '+safeText(x.sets||'-')+'세트 × '+safeText(x.reps||'-')+(x.weight?' · '+safeText(x.weight):'')+'</p>').join('')+(p.coach_note?'<p class="tiny">트레이너 전달 사항: '+safeText(p.coach_note)+'</p>':'')+(logs.length?'<hr><b>회원 수행 기록</b>'+logs.map(x=>'<p class="tiny">'+safeText(x.name)+' · '+safeText(x.sets||'-')+'세트 × '+safeText(x.reps||'-')+(x.weight?' · '+safeText(x.weight)+'kg':'')+'</p>').join(''):'<p class="tiny">아직 회원이 입력한 수행 기록은 없습니다.</p>')+'</div>';});
+ host.innerHTML=out;
+}
+function renderMemberCalendar(){
+ const appointments=memberCalendarData.appointments||[],plans=memberCalendarData.personal_workouts||[];
+ const events=[...appointments.map(a=>({id:a.id,type:a.event_type||'lesson',date:(a.starts_at||'').slice(0,10),time:(a.starts_at||'').slice(11,16),title:a.title||'PT 레슨',duration:a.duration_minutes||50,note:a.note||'',status:a.status})),...plans.map(p=>({id:p.id,type:'personal',date:p.scheduled_date,time:p.scheduled_time||'',title:p.title||'개인운동',status:p.status}))];
+ const today=memberLocalDate(),upcoming=events.filter(e=>e.date>=today),summary=$('memberCalendarSummary');
+ if(summary)summary.innerHTML='<div class="grid3"><div class="statbox"><span class="tiny">전체 예정 일정</span><b>'+upcoming.length+'건</b></div><div class="statbox"><span class="tiny">레슨 일정</span><b>'+upcoming.filter(e=>e.type==='lesson').length+'건</b></div><div class="statbox"><span class="tiny">개인운동 일정</span><b>'+upcoming.filter(e=>e.type==='personal').length+'건</b></div></div>';
+ if(!memberCalendarSelected)memberCalendarSelected=today;
+ withAiRenderMonth('memberCalendarGrid','memberCalendarMonth',memberCalendarMonth,events,memberCalendarSelected,'selectMemberCalendarDate');
+ selectMemberCalendarDate(memberCalendarSelected);
+}
+const __withAiOriginalGo=window.go;
+if(typeof __withAiOriginalGo==='function')window.go=function(p){__withAiOriginalGo(p);if(p==='calendar')loadStaffCalendar();};
+const __withAiOriginalTrainerInit=window.initTrainerPortal;
+if(typeof __withAiOriginalTrainerInit==='function')window.initTrainerPortal=function(){const r=__withAiOriginalTrainerInit.apply(this,arguments);setTimeout(loadStaffCalendar,0);return r;};
+const __withAiOriginalSaveAppointment=window.saveAppointment;
+window.saveAppointment=async function(){
+ const type=$('calType')?.value||'lesson';
+ const ok=await __withAiOriginalSaveAppointment();
+ if(ok!==false){loadStaffCalendar();}
+};
+window.withAiPersistAppointment=async(row)=>{
+ if(!supabaseClient||!currentUser)throw new Error('로그인 세션이 없습니다.');
+ const {data:assignment,error:lookupError}=await supabaseClient.from('withai_app_member_assignments').select('trainer_user_id').eq('app_member_id',String(row.memberId)).maybeSingle();
+ if(lookupError)throw lookupError;
+ const startsAt=new Date(row.date+'T'+row.time+':00').toISOString();
+ const payload={app_member_id:String(row.memberId),event_type:row.type==='consultation'?'consultation':row.type==='personal'?'personal':'lesson',title:row.type==='consultation'?'상담 일정':row.type==='personal'?'개인운동 방문':'PT 레슨',starts_at:startsAt,duration_minutes:Number(row.duration)||50,status:row.status==='완료'?'completed':row.status==='취소'?'cancelled':row.status==='노쇼'?'no_show':'scheduled',note:row.memo||null,trainer_user_id:assignment?.trainer_user_id||null,created_by:currentUser.id};
+ const {data,error}=await supabaseClient.from('withai_app_appointments').insert(payload).select('id').single();if(error)throw error;return data.id;
+};
 </script>
 </body></html>
