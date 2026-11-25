@@ -377,6 +377,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
    <div class="member-panel member-home-calendar-panel">
     <div class="calendar-toolbar"><button class="btn" type="button" onclick="shiftMemberHomeCalendar(-1)">이전 달</button><b id="memberHomeCalendarMonth"></b><button class="btn" type="button" onclick="shiftMemberHomeCalendar(1)">다음 달</button></div>
     <div class="member-calendar-legend"><span><i class="lesson-dot"></i> PT 레슨</span><span><i class="personal-dot"></i> 개인운동</span><span><i class="consult-dot"></i> Takeat 섭취 칼로리</span></div>
+    <div id="memberAchievementSummary" class="member-achievement-summary"></div>
     <div id="memberHomeCalendarGrid" class="withai-calendar-grid"></div>
     <div id="memberHomeCalendarDetails" class="calendar-details"><div class="empty">날짜를 선택하면 일정과 기록이 표시됩니다.</div></div>
    </div>
@@ -1905,7 +1906,7 @@ window.withAiPersistAppointment=async(row)=>{
 .home-calendar-day{min-width:0;min-height:145px;border:1px solid #e4eae4;border-radius:10px;background:#fff;padding:5px;display:flex;flex-direction:column;overflow:hidden}.home-calendar-day.is-outside{opacity:.38;background:#f7f8f6}.home-calendar-day.is-selected{outline:2px solid #547b60;background:#f4f8f2}.home-calendar-day.is-today .calendar-day-number{background:#294b38;color:#fff;border-radius:20px;padding:2px 6px}.home-calendar-day-head{height:22px;flex:0 0 22px}.home-calendar-exercise{flex:1;min-height:50px;display:flex;flex-direction:column;gap:3px;overflow:hidden;padding-bottom:4px}.home-cell-event{display:block;width:100%;min-width:0;border:0;border-radius:5px;padding:4px 3px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;cursor:pointer}.home-cell-event.lesson{background:#e7f1e8;color:#315d3e}.home-cell-event.personal{background:#edf0fb;color:#485c9a}.home-cell-event b{font-weight:800}.home-cell-empty{font-size:9px;color:#a1aaa1;padding:5px 2px}.home-cell-more{font-size:9px;color:#69786c}.home-calendar-takeat{margin-top:auto;width:100%;min-height:34px;border:1px solid #e9e4d5;border-radius:6px;background:#fbf8ef;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:4px 5px;cursor:pointer;text-align:left}.home-calendar-takeat span{font-size:8px;letter-spacing:1px;font-weight:900;color:#927b45}.home-calendar-takeat b{font-size:10px;line-height:1.3;color:#526858}.home-calendar-takeat b.over{color:#bd624c}.home-calendar-takeat b.under{color:#4b8060}.home-calendar-takeat b.neutral{color:#7b806f}
 .takeat-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.takeat-kicker{font-size:10px;letter-spacing:2px;font-weight:800;color:#5f846b}.takeat-heading h2{margin:5px 0;font-size:21px}.takeat-heading p{margin:0;color:#77847a;font-size:12px}.takeat-mark{width:42px;height:42px;border-radius:14px;background:#e8f0e8;color:#3b6848;display:grid;place-items:center;font-size:21px;font-weight:800}
 .takeat-summary{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:16px;margin:16px 0;border-radius:14px;background:linear-gradient(120deg,#f1f6ef,#faf8f1)}.takeat-kcal-big{font-size:28px;font-weight:800;color:#263b2d;letter-spacing:-1px}.takeat-kcal-big small{font-size:12px;font-weight:600;color:#748077;letter-spacing:0}.takeat-delta{font-size:13px;font-weight:800;text-align:right}.takeat-delta.under{color:#4d8060}.takeat-delta.over{color:#c06d4b}.takeat-delta.neutral{color:#647268}.takeat-progress-track{height:9px;background:#e0e8df;border-radius:20px;overflow:hidden;margin-top:10px}.takeat-progress-fill{height:100%;border-radius:20px;background:#679477;transition:width .2s}.takeat-target-line{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#738076;margin-top:7px}
-.takeat-entry{border:1px solid #e7ece6;border-radius:13px;padding:14px}.takeat-entry-title{display:flex;justify-content:space-between;gap:8px;margin-bottom:12px}.takeat-entry-title span{font-size:11px;color:#738076}.takeat-form-grid{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:9px}.takeat-form-grid label,.takeat-note-label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#6d796f}.takeat-form-grid input,.takeat-form-grid select,.takeat-note-label input{min-width:0;width:100%;padding:10px;border:1px solid #e0e7df;border-radius:9px;background:#fff;color:#26372b;font:inherit;font-size:13px}.takeat-macros{margin-top:9px}.takeat-note-label{margin-top:9px}.takeat-save{width:100%;margin-top:12px}.takeat-meal-list{margin-top:12px}.takeat-meal-item{display:flex;justify-content:space-between;gap:10px;padding:9px 2px;border-bottom:1px solid #edf0eb;font-size:12px}.takeat-meal-item:last-child{border-bottom:0}.takeat-meal-item small{color:#77847a}.takeat-foot{display:flex;justify-content:flex-end;margin-top:10px}.member-home-shortcuts{margin-top:14px}
+.takeat-entry{border:1px solid #e7ece6;border-radius:13px;padding:14px}.takeat-entry-title{display:flex;justify-content:space-between;gap:8px;margin-bottom:12px}.takeat-entry-title span{font-size:11px;color:#738076}.takeat-form-grid{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:9px}.takeat-form-grid label,.takeat-note-label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#6d796f}.takeat-form-grid input,.takeat-form-grid select,.takeat-note-label input{min-width:0;width:100%;padding:10px;border:1px solid #e0e7df;border-radius:9px;background:#fff;color:#26372b;font:inherit;font-size:13px}.takeat-macros{margin-top:9px}.takeat-note-label{margin-top:9px}.takeat-save{width:100%;margin-top:12px}.takeat-meal-list{margin-top:12px}.takeat-meal-item{display:flex;justify-content:space-between;gap:10px;padding:9px 2px;border-bottom:1px solid #edf0eb;font-size:12px}.takeat-meal-item:last-child{border-bottom:0}.takeat-meal-item small{color:#77847a}.takeat-foot{display:flex;justify-content:flex-end;margin-top:10px}.member-home-shortcuts{margin-top:14px}.member-day-achievement-icons{font-size:10px;line-height:1.2;white-space:nowrap}.member-achievement-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:14px 0}.member-achievement-stat{border:1px solid #e8eee8;border-radius:12px;padding:12px;background:#fbfdfb}.member-achievement-stat b{display:block;font-size:19px;color:#253b2d}.member-achievement-stat span{font-size:11px;color:#718074}.member-achievement-streak{grid-column:1/-1;padding:11px 13px;border-radius:11px;background:#f3f8f2;font-size:12px;color:#405b45}.member-day-reward{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 12px}.member-day-reward span{display:inline-flex;align-items:center;gap:4px;padding:6px 9px;border-radius:20px;background:#f0f7ef;color:#426448;font-size:11px;font-weight:700}.member-day-reward .nutrition{background:#f4f5fb;color:#5b628d}.member-day-praise{padding:11px 13px;border-radius:11px;background:#fbfaf2;color:#655b36;font-size:12px;line-height:1.6;margin:8px 0 13px}@media(max-width:600px){.member-achievement-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.member-achievement-stat{padding:9px 7px}.member-achievement-stat b{font-size:16px}.member-achievement-stat span{font-size:10px}}
 @media(max-width:600px){.member-home-calendar-panel{padding:12px!important}.home-calendar-day{min-height:112px;padding:3px}.home-calendar-exercise{min-height:38px}.home-cell-event{font-size:8px;padding:3px 2px}.home-calendar-takeat{min-height:30px;padding:3px}.home-calendar-takeat b{font-size:9px}.takeat-summary{padding:12px}.takeat-form-grid{grid-template-columns:1fr 1fr}.takeat-form-grid label:nth-child(2){grid-column:span 2}.takeat-macros label{grid-column:auto}.takeat-heading h2{font-size:18px}}
 </style><script>
 let memberHomeCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
@@ -1918,19 +1919,65 @@ function memberHomeDayEvents(date){
  const sessionEvents=(memberPortalPayload?.sessions||[]).filter(x=>(x.date||x.session_date||'')===date&&!appointments.some(a=>(a.starts_at||'').slice(0,10)===date)).map(x=>({date,time:'',type:'lesson',title:'수업일지',id:x.id,data:{...x,sessionLogOnly:true}}));
  return [...appointments,...plans,...sessionEvents].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
 }
+function memberAchievementDateSet(rows,dateFn){
+ const set=new Set();
+ (Array.isArray(rows)?rows:[]).forEach(x=>{const d=dateFn(x);if(/^\\d{4}-\\d{2}-\\d{2}$/.test(String(d||'')))set.add(d)});
+ return set;
+}
+function memberDayAchievement(date){
+ const sessions=memberPortalPayload?.sessions||[],personal=memberPortalPayload?.memberExercises||[],meals=memberHomeMealRows(date);
+ const sessionDone=sessions.some(x=>(x.date||x.session_date||'')===date);
+ const appointmentDone=(memberCalendarData?.appointments||[]).some(x=>(x.starts_at||'').slice(0,10)===date&&String(x.status||'').toLowerCase()==='completed');
+ const personalDone=personal.some(x=>(x.date||'')===date);
+ const exercise=sessionDone||appointmentDone||personalDone;
+ const m=memberPortalPayload?.member||{},t=nutritionTargets(m),kcal=meals.reduce((a,x)=>a+(Number(x.kcal)||0),0),protein=meals.reduce((a,x)=>a+(Number(x.protein)||0),0);
+ const nutrition=!!(meals.length&&t.kcal>0&&t.protein>0&&kcal>=t.kcal*.9&&kcal<=t.kcal*1.1&&protein>=t.protein*.9);
+ const recorded=meals.length>0;
+ let praise='';
+ if(exercise&&nutrition)praise='오늘은 운동과 식단 모두 실천했어요! 정말 멋진 하루예요.';
+ else if(exercise&&recorded)praise='운동도 실천하고 식단도 기록했어요. 좋은 흐름을 이어가고 있어요!';
+ else if(exercise)praise='오늘도 몸을 움직였어요. 꾸준한 실천이 변화를 만들어요!';
+ else if(nutrition)praise='오늘의 영양 목표를 잘 지켰어요. 몸에 좋은 선택을 했네요!';
+ else if(recorded)praise='오늘의 식단을 꼼꼼히 기록했어요. 기록하는 습관도 큰 시작이에요!';
+ return {exercise,nutrition,recorded,kcal:Math.round(kcal),protein:Math.round(protein),praise};
+}
+function memberAchievementStreak(dateSet,today){
+ let cursor=new Date(today+'T12:00:00');
+ if(!dateSet.has(today))cursor.setDate(cursor.getDate()-1);
+ let count=0;
+ while(count<366){const key=withAiDateKey(cursor);if(!dateSet.has(key))break;count++;cursor.setDate(cursor.getDate()-1);}
+ return count;
+}
+function renderMemberAchievementSummary(){
+ const host=$('memberAchievementSummary');if(!host)return;
+ const month=memberHomeCalendarMonth,monthKey=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');
+ const sessions=memberPortalPayload?.sessions||[],personal=memberPortalPayload?.memberExercises||[],meals=memberPortalPayload?.meals||[];
+ const exerciseDates=memberAchievementDateSet([...sessions,...personal],x=>x.date||x.session_date);
+ (memberCalendarData?.appointments||[]).filter(x=>String(x.status||'').toLowerCase()==='completed').forEach(x=>{const d=(x.starts_at||'').slice(0,10);if(d)exerciseDates.add(d)});
+ const nutritionDates=new Set();
+ const allDates=new Set([...exerciseDates,...meals.map(x=>x.date).filter(Boolean)]);
+ allDates.forEach(d=>{if(memberDayAchievement(d).nutrition)nutritionDates.add(d)});
+ const monthExercise=[...exerciseDates].filter(d=>d.startsWith(monthKey)).length;
+ const monthMeal=[...new Set(meals.filter(x=>(x.date||'').startsWith(monthKey)).map(x=>x.date))].length;
+ const monthNutrition=[...nutritionDates].filter(d=>d.startsWith(monthKey)).length;
+ const today=memberLocalDate(),exerciseStreak=memberAchievementStreak(exerciseDates,today),nutritionStreak=memberAchievementStreak(nutritionDates,today);
+ const streakText=exerciseStreak>=2?'운동 '+exerciseStreak+'일 연속 실천 중이에요!':nutritionStreak>=2?'영양 목표 '+nutritionStreak+'일 연속 달성 중이에요!':'작은 실천이 모여 건강한 습관이 됩니다.';
+ host.innerHTML='<div class="member-achievement-stat"><b>'+monthExercise+'일</b><span>이번 달 운동 실천</span></div><div class="member-achievement-stat"><b>'+monthMeal+'일</b><span>이번 달 식단 기록</span></div><div class="member-achievement-stat"><b>'+monthNutrition+'일</b><span>영양 목표 달성</span></div><div class="member-achievement-streak">🔥 '+safeText(streakText)+' <span style="color:#718074"> · 운동 '+exerciseStreak+'일 / 영양 '+nutritionStreak+'일 연속</span></div>';
+}
 function renderMemberHomeCalendar(){
  const host=$('memberHomeCalendarGrid');if(!host)return;
- const appointments=memberCalendarData?.appointments||[],plans=memberCalendarData?.personal_workouts||[];
  const month=memberHomeCalendarMonth,first=new Date(month.getFullYear(),month.getMonth(),1),start=new Date(first);start.setDate(first.getDate()-first.getDay());
  const today=memberLocalDate(),m=memberPortalPayload?.member||{},target=nutritionTargets(m).kcal||0;
  $('memberHomeCalendarMonth').textContent=withAiCalendarMonthLabel(month);
+ renderMemberAchievementSummary();
  let out=withAiCalendarWeekdays.map(x=>'<div class="withai-calendar-weekday">'+x+'</div>').join('');
  for(let i=0;i<42;i++){
-  const d=new Date(start);d.setDate(start.getDate()+i);const key=withAiDateKey(d),events=memberHomeDayEvents(key),meals=memberHomeMealRows(key);
+  const d=new Date(start);d.setDate(start.getDate()+i);const key=withAiDateKey(d),events=memberHomeDayEvents(key),meals=memberHomeMealRows(key),achievement=memberDayAchievement(key);
   const total=Math.round(meals.reduce((sum,x)=>sum+(Number(x.kcal)||0),0)),diff=total-target;
   const mealLabel=!target?'목표 미설정':!meals.length?'식단 입력':(diff>0?'+'+diff.toLocaleString():diff<0?diff.toLocaleString():'0')+' kcal';
+  const marks=(achievement.exercise?'💪':'')+(achievement.nutrition?' 🥗':achievement.recorded?' 📝':'');
   const eventHtml=events.length?events.slice(0,3).map(e=>{const hasLessonLog=e.type==='lesson'&&(memberPortalPayload?.sessions||[]).some(x=>(x.date||x.session_date||'')===key);const label=e.type==='lesson'?(hasLessonLog||e.data?.sessionLogOnly?'수업일지':'PT 레슨'):'훈련일지';return '<button type="button" class="home-cell-event '+(e.type==='personal'?'personal':'lesson')+'" onclick="openMemberHomeCalendarEntry(\''+key+'\',\''+e.type+'\',\''+String(e.id||'')+'\')"><b>'+(e.time?safeText(e.time):'시간 미정')+'</b> '+safeText(label)+'</button>';}).join(''):'<span class="home-cell-empty">운동 일정 없음</span>';
-  out+='<div class="home-calendar-day '+(d.getMonth()!==month.getMonth()?'is-outside ':'')+(key===memberHomeCalendarSelected?'is-selected ':'')+(key===today?'is-today':'')+'"><div class="home-calendar-day-head"><span class="calendar-day-number">'+d.getDate()+'</span></div><div class="home-calendar-exercise">'+eventHtml+(events.length>3?'<span class="home-cell-more">+'+(events.length-3)+'건 더보기</span>':'')+'</div><button type="button" class="home-calendar-takeat" onclick="openMemberHomeTakeat(\''+key+'\')"><span>TAKEAT</span><b class="'+(!target?'neutral':diff>0?'over':diff<0?'under':'neutral')+'">'+safeText(mealLabel)+'</b></button></div>';
+  out+='<div class="home-calendar-day '+(d.getMonth()!==month.getMonth()?'is-outside ':'')+(key===memberHomeCalendarSelected?'is-selected ':'')+(key===today?'is-today':'')+'"><div class="home-calendar-day-head"><span class="calendar-day-number">'+d.getDate()+'</span><span class="member-day-achievement-icons">'+marks+'</span></div><div class="home-calendar-exercise">'+eventHtml+(events.length>3?'<span class="home-cell-more">+'+(events.length-3)+'건 더보기</span>':'')+'</div><button class="home-calendar-takeat" type="button" onclick="openMemberHomeTakeat(\''+key+'\')"><span>TAKEAT</span><b class="'+(!target?'neutral':diff>0?'over':diff<0?'under':'neutral')+'">'+safeText(mealLabel)+'</b></button></div>';
  }
  host.innerHTML=out;
  selectMemberHomeCalendarDate(memberHomeCalendarSelected,false);
@@ -1951,6 +1998,13 @@ function selectMemberHomeCalendarDate(date,scroll=true,eventType=null,eventId=nu
  if(eventType)events=events.filter(e=>e.type===eventType&&String(e.id||'')===String(eventId||''));
  const host=$('memberHomeCalendarDetails');if(!host)return;
  let out='<div class="calendar-detail-heading"><b>'+safeText(date)+' · 운동 일정</b></div>';
+ const achievement=memberDayAchievement(date),rewardTags=[];
+ if(achievement.exercise)rewardTags.push('<span>💪 운동 실천 완료</span>');
+ if(achievement.recorded)rewardTags.push('<span class="nutrition">📝 식단 기록 완료</span>');
+ if(achievement.nutrition)rewardTags.push('<span class="nutrition">🥗 영양 목표 달성</span>');
+ out+='<div class="member-day-reward">'+(rewardTags.join('')||'<span>🌱 오늘의 기록을 차근차근 쌓아가요</span>')+'</div>';
+ if(achievement.praise)out+='<div class="member-day-praise">'+safeText(achievement.praise)+'</div>';
+
  if(!events.length)out+='<p class="tiny">이 날짜에 등록된 레슨 또는 개인운동 일정이 없습니다.</p>';
  events.forEach(e=>{
   if(e.type==='lesson'&&e.data?.sessionLogOnly){
