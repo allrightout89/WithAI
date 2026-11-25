@@ -915,7 +915,7 @@ async function saveTrainerConsultation(){
 }
 async function loadTrainerSessions(id){
  const {data,error}=await supabaseClient.from('withai_app_training_sessions').select('id,session_date,session_number,training_part,goal,exercises,rpe,condition,good,coaching_note,next_goal,video_url').eq('app_member_id',id).order('session_date',{ascending:false});
- $('trainerSessionHistory').innerHTML=error?'레슨 조회 실패: '+esc(error.message):(data?.length?data.map(x=>'<div class="panel"><b>'+esc(x.session_date||'날짜 미입력')+' · '+esc(x.session_number||'')+'회차 · '+esc(x.training_part||'')+'</b><p>'+esc(x.goal||'')+'</p><p class="tiny">운동: '+esc((x.exercises||[]).map(e=>e.name||'').join(', '))+'</p><p>'+esc(x.coaching_note||'')+'</p>'+(x.next_goal?'<p class="tiny">다음 목표: '+esc(x.next_goal)+'</p>':'')+(x.video_url?'<a href="'+esc(safeUrl(x.video_url))+'" target="_blank" rel="noopener">영상 보기</a>':'')+'</div>').join(''):'<p>레슨 기록이 없습니다.</p>');
+ $('trainerSessionHistory').innerHTML=error?'레슨 조회 실패: '+esc(error.message):(data?.length?data.map(x=>'<div class="panel"><b>'+esc(x.session_date||'날짜 미입력')+' · '+esc(x.session_number||'')+'회차 · '+esc(x.training_part||'')+'</b><p>'+esc(x.goal||'')+'</p><p class="tiny">운동: '+esc((x.exercises||[]).map(e=>e.name||'').join(', '))+'</p><p>'+esc(x.coaching_note||'')+'</p>'+(x.next_goal?'<p class="tiny">다음 목표: '+esc(x.next_goal)+'</p>':'')+(x.video_url?'<a href="'+esc(safeUrl(x.video_url))+'" target="_blank" rel="noopener">영상 보기</a>':'')+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" onclick="editSharedTrainingSession(\''+x.id+'\')">수정</button><button class="btn danger" onclick="deleteSharedTrainingSession(\''+x.id+'\')">삭제</button></div></div>').join(''):'<p>레슨 기록이 없습니다.</p>');
 }
 async function saveTrainerSession(){
  if(!trainerSelectedMember)return;
@@ -926,6 +926,39 @@ async function saveTrainerSession(){
  if(error){msg('저장 실패: '+error.message);return;}
  msg('레슨 기록을 저장했습니다.');$('trExercises').value='';$('trNote').value='';await loadTrainerSessions(trainerSelectedMember.app_member_id);
 }
+
+async function editSharedTrainingSession(id){
+ const {data,error}=await supabaseClient.from('withai_app_training_sessions').select('*').eq('id',id).single();
+ if(error||!data){msg('수업일지를 불러오지 못했습니다: '+(error?.message||''));return;}
+ const ask=(label,value)=>prompt(label,value==null?'':String(value));
+ const date=ask('레슨 날짜 (YYYY-MM-DD)',data.session_date);if(date===null)return;
+ const no=ask('레슨 회차',data.session_number);if(no===null)return;
+ const part=ask('운동 부위',data.training_part);if(part===null)return;
+ const goal=ask('레슨 목표',data.goal);if(goal===null)return;
+ const exerciseText=(data.exercises||[]).map(e=>e.name||'').join('\n');
+ const exercises=ask('운동 내용 (한 줄에 한 운동)',exerciseText);if(exercises===null)return;
+ const rpe=ask('RPE (1~10, 비우면 미입력)',data.rpe);if(rpe===null)return;
+ const condition=ask('컨디션',data.condition);if(condition===null)return;
+ const good=ask('잘된 점',data.good);if(good===null)return;
+ const note=ask('코칭 메모',data.coaching_note);if(note===null)return;
+ const next=ask('다음 목표',data.next_goal);if(next===null)return;
+ const video=ask('영상 URL',data.video_url);if(video===null)return;
+ const payload={session_date:date||null,session_number:Number(no)||null,training_part:part,goal,exercises:exercises.split(/\n+/).map(v=>v.trim()).filter(Boolean).map(name=>({name})),rpe:rpe===''?null:Number(rpe),condition,good,coaching_note:note,next_goal:next,video_url:video||null};
+ const {error:updateError}=await supabaseClient.from('withai_app_training_sessions').update(payload).eq('id',id);
+ if(updateError){msg('수정 실패: '+updateError.message);return;}
+ msg('수업일지를 수정했습니다. 회원 화면에도 변경 내용이 반영됩니다.');
+ if(currentProfile?.role==='admin')await loadAdminTrainerAdmin();
+ else if(trainerSelectedMember)await loadTrainerSessions(trainerSelectedMember.app_member_id);
+}
+async function deleteSharedTrainingSession(id){
+ if(!confirm('이 수업일지를 삭제할까요? 삭제 후에는 복구할 수 없습니다.'))return;
+ const {error}=await supabaseClient.from('withai_app_training_sessions').delete().eq('id',id);
+ if(error){msg('삭제 실패: '+error.message);return;}
+ msg('수업일지를 삭제했습니다. 회원 화면에서도 더 이상 표시되지 않습니다.');
+ if(currentProfile?.role==='admin')await loadAdminTrainerAdmin();
+ else if(trainerSelectedMember)await loadTrainerSessions(trainerSelectedMember.app_member_id);
+}
+
 
 async function checkSession(){const {data:{session}}=await supabaseClient.auth.getSession();if(!session){showGate();return}currentUser=session.user;const {data:profile,error}=await supabaseClient.from('profiles').select('id,email,display_name,role,approval_status').eq('id',currentUser.id).maybeSingle();if(error)throw error;if(!profile){authMsg('관리자 프로필을 찾을 수 없습니다.');return}currentProfile=profile;if(profile.role==='admin'){showApp();window.withAiCloudEnabled=true;$('approvalPanel').classList.remove('hidden');await loadSnapshot();setupRealtimeSync();await loadPending();return}if(profile.role==='trainer'){showTrainerApp();return}await supabaseClient.auth.signOut();currentUser=null;currentProfile=null;showGate();authMsg('관리자 또는 트레이너 계정만 로그인할 수 있습니다.');}
 async function loadSnapshot(options={}){
@@ -1017,7 +1050,7 @@ async function loadAdminTrainerAdmin(){
  const {data:rows,error:sessionsError}=await supabaseClient.from('withai_app_training_sessions').select('id,app_member_id,session_date,session_number,training_part,goal,coaching_note,next_goal').order('session_date',{ascending:false}).limit(300);
  if(sessionsError){sessionHost.textContent='전체 레슨 조회 실패: '+sessionsError.message;return;}
  const memberNames=Object.fromEntries(members.map(m=>[String(m.id),m.name]));
- sessionHost.innerHTML=rows?.length?'<div style="overflow:auto"><table><thead><tr><th>날짜</th><th>회원</th><th>회차</th><th>부위</th><th>목표</th><th>코칭 메모</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.session_date||'')+'</td><td>'+esc(memberNames[x.app_member_id]||assignedById[x.app_member_id]?.member_name||'회원 정보 없음')+'</td><td>'+esc(x.session_number||'')+'</td><td>'+esc(x.training_part||'')+'</td><td>'+esc(x.goal||'')+'</td><td>'+esc(x.coaching_note||x.next_goal||'')+'</td></tr>').join('')+'</tbody></table></div><p class="tiny">최근 최대 300건을 표시합니다.</p>':'<div class="empty">아직 공유된 레슨 기록이 없습니다.</div>';
+ sessionHost.innerHTML=rows?.length?'<div style="overflow:auto"><table><thead><tr><th>날짜</th><th>회원</th><th>회차</th><th>부위</th><th>목표</th><th>코칭 메모</th><th>관리</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.session_date||'')+'</td><td>'+esc(memberNames[x.app_member_id]||assignedById[x.app_member_id]?.member_name||'회원 정보 없음')+'</td><td>'+esc(x.session_number||'')+'</td><td>'+esc(x.training_part||'')+'</td><td>'+esc(x.goal||'')+'</td><td>'+esc(x.coaching_note||x.next_goal||'')+'</td><td><button class="btn" onclick="editSharedTrainingSession(\''+x.id+'\')">수정</button> <button class="btn danger" onclick="deleteSharedTrainingSession(\''+x.id+'\')">삭제</button></td></tr>').join('')+'</tbody></table></div><p class="tiny">최근 최대 300건을 표시합니다.</p>':'<div class="empty">아직 공유된 레슨 기록이 없습니다.</div>';
 }
 async function saveTrainerAssignment(appMemberId){
  const select=$('assignTrainer_'+appMemberId);if(!select)return;
