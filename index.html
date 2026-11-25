@@ -1613,8 +1613,8 @@ function renderMemberCalendar(){
 }
 const __withAiOriginalGo=window.go;
 if(typeof __withAiOriginalGo==='function')window.go=function(p){__withAiOriginalGo(p);if(p==='calendar')loadStaffCalendar();};
-const __withAiOriginalTrainerInit=window.initTrainerPortal;
-if(typeof __withAiOriginalTrainerInit==='function')window.initTrainerPortal=function(){const r=__withAiOriginalTrainerInit.apply(this,arguments);setTimeout(loadStaffCalendar,0);return r;};
+const __withAiOriginalTrainerInit=window.showTrainerApp;
+if(typeof __withAiOriginalTrainerInit==='function')window.showTrainerApp=function(){const r=__withAiOriginalTrainerInit.apply(this,arguments);setTimeout(loadStaffCalendar,0);return r;};
 const __withAiOriginalSaveAppointment=window.saveAppointment;
 window.saveAppointment=async function(){
  const type=$('calType')?.value||'lesson';
