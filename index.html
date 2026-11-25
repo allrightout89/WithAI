@@ -784,6 +784,7 @@ async function loadMemberTrainingSessionsFromCloud(){
   const mapped=cloudRows.map(x=>({id:x.id,date:x.session_date,part:x.training_part,no:x.session_number,goal:x.goal,exercises:Array.isArray(x.exercises)?x.exercises:[],rpe:x.rpe,condition:x.condition,good:x.good,note:x.coaching_note,next:x.next_goal,video:x.video_url}));
   memberPortalPayload.sessions=[...mapped,...legacyRows];
   renderMemberSessionHistory(memberPortalPayload.sessions);
+  const lessonCount=$('memberSummary')?.querySelector('.member-statline span:nth-child(2) strong');if(lessonCount)lessonCount.textContent=memberPortalPayload.sessions.length+'회';
  }catch(e){console.warn('트레이너 레슨 기록 추가 조회:',e.message||e);}
 }
 function renderMemberPortal(payload){
@@ -1008,7 +1009,7 @@ async function loadAdminTrainerAdmin(){
  const assignedById=Object.fromEntries(assignments.map(x=>[x.app_member_id,x]));
  if(!members.length){assignmentHost.textContent='기존 WithAi 회원 목록이 비어 있습니다. 관리자 데이터 동기화 상태를 확인하세요.';return;}
  assignmentHost.innerHTML='<div style="overflow:auto"><table><thead><tr><th>회원</th><th>연락처</th><th>목표</th><th>담당 트레이너</th><th>기존 레슨</th><th>저장</th></tr></thead><tbody>'+members.map(m=>{
-  const a=assignedById[String(m.id)],selected=a?.trainer_user_id||'';
+  const a=assignedById[String(m.id)],matchedTrainer=trainers.find(t=>(t.display_name||t.email||'')===String(m.coach||'')),selected=a?.trainer_user_id||matchedTrainer?.id||'';
   const count=(db.sessions||[]).filter(x=>String(x.memberId)===String(m.id)).length;
   return '<tr><td>'+esc(m.name)+'</td><td>'+esc(m.phone||'')+'</td><td>'+esc(m.goal||'')+'</td><td><select id="assignTrainer_'+esc(m.id)+'"><option value="">미배정</option>'+trainers.map(t=>'<option value="'+t.id+'" '+(selected===t.id?'selected':'')+'>'+esc(t.display_name||t.email||t.id)+'</option>').join('')+'</select></td><td>'+count+'회</td><td><button class="btn primary" onclick="saveTrainerAssignment('+JSON.stringify(String(m.id)).replace(/"/g,'&quot;')+')">저장</button></td></tr>';
  }).join('')+'</tbody></table></div>';
@@ -1025,7 +1026,7 @@ async function saveTrainerAssignment(appMemberId){
  const trainerId=select.value||null;
  const db=window.withAiGetDB(),memberRow=(db.members||[]).find(m=>String(m.id)===String(appMemberId));
  if(!memberRow){msg('기존 WithAi 회원을 찾지 못했습니다.');return;}
- const trainerName=trainerId?(document.querySelector('#assignTrainer_'+CSS.escape(appMemberId)+' option:checked')?.textContent||'담당 트레이너'):'미배정';
+ const trainerName=trainerId?(select.options[select.selectedIndex]?.textContent||'담당 트레이너'):'미배정';
  memberRow.coach=trainerId?trainerName:'담당 트레이너';
  persist();
  try{
