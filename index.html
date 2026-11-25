@@ -90,6 +90,64 @@ textarea{min-height:76px;resize:vertical}.field label{display:block;font-size:12
 
 .exercise-guide-detail{white-space:pre-line;line-height:1.65}
 
+
+/* WithAi visual refinement: clearer hierarchy, calmer surfaces, accessible controls */
+:root{
+ --bg:#f4f6f8;--paper:#ffffff;--ink:#17212b;--muted:#697586;
+ --line:#e5e9ee;--yellow:#e7cb24;--dark:#17212b;
+ --green:#16845d;--red:#b94343;--blue:#315b9a;
+}
+body{font-family:Inter,"Pretendard","Noto Sans KR",Arial,sans-serif;letter-spacing:-.15px}
+header{height:72px;padding:0 28px;box-shadow:0 2px 14px rgba(17,25,35,.10)}
+.brand{letter-spacing:-.45px}.brand small{font-size:9px;letter-spacing:1.8px}
+.shell{grid-template-columns:248px minmax(0,1fr)}
+aside{padding:22px 14px;background:#fbfcfd}
+nav button{padding:12px 14px;margin:4px 0;border-radius:11px;font-weight:650;transition:background .18s ease,color .18s ease,transform .18s ease}
+nav button.active{background:#fff7cc;color:#25220d;box-shadow:inset 3px 0 0 var(--yellow)}
+nav button:hover{background:#f1f4f6;transform:translateX(2px)}
+main{padding:30px clamp(18px,2.4vw,36px)}
+h1{font-size:27px;letter-spacing:-.9px;font-weight:850}
+h2{font-size:18px;letter-spacing:-.45px;font-weight:800}
+.sub{line-height:1.65}
+.card,.panel{border:1px solid #e8ecf0;border-radius:16px;padding:19px;box-shadow:0 3px 14px rgba(22,34,48,.035)}
+.cards{gap:15px;margin:20px 0}
+.metric{font-size:29px;letter-spacing:-1px}
+.label{font-weight:650;letter-spacing:-.1px}
+.grid2,.grid3{gap:16px}
+.membercard{border-radius:15px;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.membercard:hover{border-color:#d9c64b;box-shadow:0 8px 22px rgba(22,34,48,.07);transform:translateY(-2px)}
+input,select,textarea{border-color:#dce2e8;border-radius:10px;padding:11px 12px;transition:border-color .15s ease,box-shadow .15s ease}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#b8a21b;box-shadow:0 0 0 3px rgba(231,203,36,.18)}
+.field label{font-weight:750;color:#465261}
+.btn{border-radius:10px;padding:10px 14px;transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
+.btn:hover{box-shadow:0 4px 12px rgba(20,30,42,.09);transform:translateY(-1px)}
+.btn:focus-visible,nav button:focus-visible{outline:3px solid rgba(231,203,36,.55);outline-offset:2px}
+.btn.primary{background:#17212b;border-color:#17212b}
+.btn.yellow{background:#f1d94a;border-color:#e6cd38}
+table{border-collapse:separate;border-spacing:0}
+th{background:#f7f9fb;padding:12px 10px;font-weight:800}
+td{padding:12px 10px}
+tr:last-child td{border-bottom:0}
+.toast{box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.auth-card{border-radius:22px;box-shadow:0 18px 55px rgba(18,29,42,.09)}
+.report{border-radius:18px}
+@media(max-width:900px){
+ .shell{grid-template-columns:1fr}
+ aside{padding:8px 10px}
+ nav button{padding:10px 12px}
+ main{padding:20px}
+}
+@media(max-width:600px){
+ header{height:62px;padding:0 15px}
+ .shell{min-height:calc(100vh - 62px)}
+ main{padding:16px 13px}
+ h1{font-size:23px}
+ .cards{gap:9px}
+ .card,.panel{padding:14px;border-radius:13px}
+ .metric{font-size:24px}
+ .btn{min-height:40px}
+}
+
 </style></head>
 <body>
 <header><div class="brand">내 몸 공작소 <small>PT STUDIO · MEMBER MANAGEMENT</small></div><div class="topright"><span class="badge">WithAi CLOUD v2.6 회원 셀프관리</span><span id="userLabel" style="font-size:12px;color:#cbd5e1">로그인 필요</span><button class="btn" id="logoutBtn" type="button" style="display:none">로그아웃</button></div></header>
