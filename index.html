@@ -402,6 +402,11 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#b7a52b;box-shado
 <button data-page="library">▣ 운동 라이브러리</button>
 <button data-page="report">▧ 회원 리포트</button>
 <button data-page="diet">🥗 식단 관리</button>
+<button data-page="calendar">▦ PT 일정 / 예약</button>
+<button data-page="membership">▣ 회원권 / 잔여 횟수</button>
+<button data-page="progress">↗ 체중·체성분 변화</button>
+<button data-page="alerts">◷ 자동 알림 / 재등록</button>
+<button data-page="analytics">₩ 매출 / 유지 현황</button>
 <button data-page="trainerAdmin">♧ 트레이너 배정 / 전체 레슨</button>
 <button data-page="settings">⚙ 데이터 백업 / 설정</button>
 </nav></aside>
@@ -432,6 +437,10 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#b7a52b;box-shado
 <div class="field"><label>주요 목표</label><select id="fGoal"><option>근력 향상</option><option>체중 감량</option><option>체중 증가</option><option>체형 개선</option><option>기초 체력 향상</option><option>움직임 개선</option><option>건강 유지</option></select></div>
 <div class="field"><label>담당 트레이너</label><input id="fCoach" value="담당 트레이너"></div>
 <div class="field"><label>등록 회차</label><input id="fPackage" type="number" min="0" value="10"></div>
+<div class="field"><label>잔여 회차</label><input id="fRemaining" type="number" min="0" placeholder="신규 등록 시 등록 회차와 동일"></div>
+<div class="field"><label>회원권 시작일</label><input id="fPackageStart" type="date"></div>
+<div class="field"><label>회원권 만료일</label><input id="fPackageEnd" type="date"></div>
+<div class="field"><label>등록 / 결제 금액(원)</label><input id="fPackagePrice" type="number" min="0" step="10000"></div>
 <div class="field"><label>주간 목표 출석 일수</label><select id="fWeeklyGoal"><option value="1">주 1일</option><option value="2">주 2일</option><option value="3" selected>주 3일</option><option value="4">주 4일</option><option value="5">주 5일</option><option value="6">주 6일</option><option value="7">주 7일</option></select><div class="tiny">일주일 동안 출석하기로 한 목표 일수</div></div>
 <div class="field"><label>회원 상태</label><select id="fStatus"><option>이용 중</option><option>휴회</option><option>종료</option></select></div>
 <div class="field"><label>성별 (기초대사량 계산용)</label><select id="fSex"><option value="female">여성</option><option value="male">남성</option></select></div>
@@ -551,6 +560,27 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#b7a52b;box-shado
 <div class="panel"><h2>회원별 담당 트레이너 지정</h2><p class="tiny">현재 WithAi 회원 목록에서 담당 트레이너를 선택하고 저장하세요. 저장하면 해당 트레이너 계정의 담당 회원으로 연결되며, 기존 레슨일지도 자동 공유됩니다.</p><div id="adminTrainerAssignments">불러오는 중...</div></div>
 <div class="panel" style="margin-top:14px"><h2>전체 레슨 기록</h2><div id="adminAllTrainingSessions">불러오는 중...</div></div>
 </section>
+
+<section id="calendar" class="hidden"><h1>PT 일정 및 예약 캘린더</h1><div class="sub">예약 등록, 담당 트레이너, 수업 상태를 관리합니다.</div>
+<div class="panel"><h2>새 일정 등록</h2><div class="formgrid">
+<div class="field"><label>회원</label><select id="calMember"></select></div><div class="field"><label>담당 트레이너</label><input id="calTrainer" placeholder="담당 트레이너"></div>
+<div class="field"><label>수업 날짜</label><input id="calDate" type="date"></div><div class="field"><label>시작 시간</label><input id="calTime" type="time" value="10:00"></div>
+<div class="field"><label>수업 시간(분)</label><input id="calDuration" type="number" min="15" step="15" value="50"></div><div class="field"><label>상태</label><select id="calStatus"><option>예약</option><option>완료</option><option>취소</option><option>노쇼</option></select></div>
+<div class="field full"><label>메모</label><input id="calMemo" placeholder="수업 내용 또는 전달 사항"></div></div><div class="btnrow"><button class="btn primary" onclick="saveAppointment()">일정 저장</button></div></div>
+<div class="panel"><div class="panel-title"><h2>일정 목록</h2><div class="btnrow"><input id="calFilterDate" type="date"><button class="btn" onclick="renderCalendar()">날짜 조회</button><button class="btn" onclick="showAllAppointments()">전체 일정</button></div></div><div id="calendarList"></div></div></section>
+<section id="membership" class="hidden"><h1>회원권 및 잔여 횟수 관리</h1><div class="sub">등록 회차, 사용 회차, 만료일, 재등록 시점을 관리합니다.</div><div class="panel"><div class="tiny">회원 등록·수정 화면에서 총 등록 회차, 잔여 회차, 시작일, 만료일, 결제 금액을 입력할 수 있습니다.</div><div id="membershipTable"></div></div></section>
+<section id="progress" class="hidden"><h1>체중·체성분·운동 변화</h1><div class="sub">측정값을 날짜별로 누적해 변화를 그래프와 기록으로 확인합니다.</div>
+<div class="panel"><h2>신체 측정 기록 추가</h2><div class="formgrid"><div class="field"><label>회원</label><select id="measureMember"></select></div><div class="field"><label>측정 날짜</label><input id="measureDate" type="date"></div>
+<div class="field"><label>체중(kg)</label><input id="measureWeight" type="number" step="0.1"></div><div class="field"><label>체지방률(%)</label><input id="measureFat" type="number" step="0.1"></div>
+<div class="field"><label>골격근량(kg)</label><input id="measureMuscle" type="number" step="0.1"></div><div class="field"><label>허리둘레(cm)</label><input id="measureWaist" type="number" step="0.1"></div></div><div class="btnrow"><button class="btn primary" onclick="saveMeasurement()">측정 기록 저장</button></div></div>
+<div class="panel"><div class="field"><label>회원 선택</label><select id="progressMember" onchange="renderProgress()"></select></div><div id="progressSummary"></div></div></section>
+<section id="alerts" class="hidden"><h1>자동 알림 및 재등록 관리</h1><div class="sub">잔여 횟수와 만료일, 최근 레슨일을 기준으로 관리가 필요한 회원을 자동 분류합니다.</div>
+<div class="cards"><div class="card"><div class="label">만료 임박</div><div class="metric" id="alertExpiry">0명</div></div><div class="card"><div class="label">잔여 2회 이하</div><div class="metric" id="alertSessions">0명</div></div><div class="card"><div class="label">최근 21일 레슨 없음</div><div class="metric" id="alertInactive">0명</div></div></div>
+<div class="panel"><h2>확인 및 연락이 필요한 회원</h2><div id="alertList"></div><p class="tiny">현재는 앱 내 자동 분류 알림입니다. 문자·카카오톡 자동 발송은 외부 발송 서비스 연결 및 동의 절차가 필요합니다.</p></div></section>
+<section id="analytics" class="hidden"><h1>관리자 매출 및 회원 유지 현황</h1><div class="sub">결제 내역을 기록해 월별 매출과 회원 유지 지표를 확인합니다.</div>
+<div class="panel"><h2>결제 기록 추가</h2><div class="formgrid"><div class="field"><label>회원</label><select id="payMember"></select></div><div class="field"><label>결제일</label><input id="payDate" type="date"></div><div class="field"><label>결제 금액(원)</label><input id="payAmount" type="number" min="0" step="10000"></div><div class="field"><label>결제 구분</label><select id="payType"><option>신규 등록</option><option>재등록</option><option>추가 결제</option><option>기타</option></select></div></div><div class="btnrow"><button class="btn primary" onclick="savePayment()">결제 저장</button></div></div>
+<div class="cards"><div class="card"><div class="label">이번 달 매출</div><div class="metric" id="revenueMonth">0원</div></div><div class="card"><div class="label">누적 매출</div><div class="metric" id="revenueTotal">0원</div></div><div class="card"><div class="label">이용 중 회원</div><div class="metric" id="activeMembers">0명</div></div><div class="card"><div class="label">이번 달 재등록</div><div class="metric" id="renewalCount">0건</div></div></div>
+<div class="panel"><h2>월별 매출</h2><div id="revenueChart"></div></div><div class="panel"><h2>최근 결제 내역</h2><div id="paymentList"></div></div></section>
 <section id="settings" class="hidden">
 <h1>데이터 백업 / 설정</h1><div class="sub">WithAi 클라우드 저장소와 계정 권한을 관리합니다. 백업 파일도 별도로 보관하세요.</div>
 <div class="grid2">
