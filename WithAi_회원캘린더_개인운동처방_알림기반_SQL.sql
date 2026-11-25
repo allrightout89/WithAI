@@ -20,6 +20,7 @@ create table if not exists public.withai_app_personal_workouts (
   id uuid primary key default gen_random_uuid(),
   app_member_id text not null references public.withai_app_member_assignments(app_member_id) on delete cascade,
   scheduled_date date not null,
+  scheduled_time time,
   title text not null default '개인 운동 프로그램',
   focus text,
   exercises jsonb not null default '[]'::jsonb,
@@ -30,6 +31,43 @@ create table if not exists public.withai_app_personal_workouts (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.withai_app_personal_workouts add column if not exists scheduled_time time;
+
+create table if not exists public.withai_app_body_measurements (
+  id uuid primary key default gen_random_uuid(),
+  app_member_id text not null,
+  measured_on date not null,
+  weight_kg numeric(6,2),
+  body_fat_percent numeric(5,2),
+  muscle_kg numeric(6,2),
+  waist_cm numeric(6,2),
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.withai_app_body_measurements enable row level security;
+
+drop policy if exists withai_app_body_measurements_staff_all on public.withai_app_body_measurements;
+create policy withai_app_body_measurements_staff_all on public.withai_app_body_measurements
+for all to authenticated
+using (
+  public.current_app_role() = 'admin'
+  or exists (select 1 from public.withai_app_member_assignments a
+    where a.app_member_id = withai_app_body_measurements.app_member_id and a.trainer_user_id = auth.uid())
+)
+with check (
+  (created_by is null or created_by = auth.uid())
+  and (
+    public.current_app_role() = 'admin'
+    or exists (select 1 from public.withai_app_member_assignments a
+      where a.app_member_id = withai_app_body_measurements.app_member_id and a.trainer_user_id = auth.uid())
+  )
+);
+
+grant select, insert, update, delete on public.withai_app_body_measurements to authenticated;
+create index if not exists withai_app_body_measurements_member_date_idx
+  on public.withai_app_body_measurements(app_member_id, measured_on desc);
 
 alter table public.withai_app_appointments enable row level security;
 alter table public.withai_app_personal_workouts enable row level security;
@@ -86,6 +124,7 @@ declare
   v_app_member_id text;
   v_appointments jsonb;
   v_workouts jsonb;
+  v_measurements jsonb;
 begin
   if p_token is null or length(trim(p_token)) < 10 then
     return jsonb_build_object('ok', false, 'message', '회원 로그인 정보가 유효하지 않습니다.');
@@ -110,7 +149,7 @@ begin
   where a.app_member_id = v_app_member_id and a.status <> 'cancelled';
 
   select coalesce(jsonb_agg(jsonb_build_object(
-    'id', w.id, 'scheduled_date', w.scheduled_date, 'title', w.title,
+    'id', w.id, 'scheduled_date', w.scheduled_date, 'scheduled_time', w.scheduled_time, 'title', w.title,
     'focus', w.focus, 'exercises', w.exercises, 'coach_note', w.coach_note,
     'status', w.status
   ) order by w.scheduled_date desc), '[]'::jsonb)
@@ -118,7 +157,15 @@ begin
   from public.withai_app_personal_workouts w
   where w.app_member_id = v_app_member_id and w.status <> 'cancelled';
 
-  return jsonb_build_object('ok', true, 'appointments', v_appointments, 'personal_workouts', v_workouts);
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'measured_on', m.measured_on, 'weight_kg', m.weight_kg,
+    'body_fat_percent', m.body_fat_percent, 'muscle_kg', m.muscle_kg, 'waist_cm', m.waist_cm
+  ) order by m.measured_on), '[]'::jsonb)
+  into v_measurements
+  from public.withai_app_body_measurements m
+  where m.app_member_id = v_app_member_id;
+
+  return jsonb_build_object('ok', true, 'appointments', v_appointments, 'personal_workouts', v_workouts, 'measurements', v_measurements);
 end;
 $$;
 
