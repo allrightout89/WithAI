@@ -2132,6 +2132,7 @@ function selectMemberHomeCalendarDate(date,scroll=true,eventType=null,eventId=nu
  let events=memberHomeDayEvents(date);
  if(eventType)events=events.filter(e=>e.type===eventType&&String(e.id||'')===String(eventId||''));
  const host=$('memberHomeCalendarDetails');if(!host)return;
+ host.classList.remove('hidden');
  let out='<div class="calendar-detail-heading"><b>'+safeText(date)+' · 선택한 날짜</b><span class="member-date">운동은 위쪽 · 식단은 아래쪽</span></div><div class="member-calendar-entry-card workout" role="button" tabindex="0" onclick="openCalendarWorkoutEditor(\''+date+'\')"><div class="member-calendar-entry-title"><span class="member-calendar-entry-icon">💪</span><div><b>운동</b><small>PT 레슨 · 처방 운동 · 자유 운동 기록</small></div><span class="member-calendar-entry-arrow">열기 →</span></div><div class="member-calendar-exercise-content">';
  const achievement=memberDayAchievement(date),rewardTags=[];
  if(achievement.exercise)rewardTags.push('<span>💪 운동 실천 완료</span>');
