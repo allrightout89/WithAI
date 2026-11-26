@@ -583,7 +583,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
   </div>
   <div class="diet-input-preview"><div class="diet-panel-head" style="margin-bottom:9px"><b style="font-size:12px">섭취량 기준 예상 영양정보</b><span class="tiny" id="dietPreviewGrams">100g 기준</span></div><div class="diet-preview-grid" id="dietPreview"><div>열량<b>0 kcal</b></div><div>탄수화물<b>0 g</b></div><div>단백질<b>0 g</b></div><div>지방<b>0 g</b></div></div></div>
   <p class="tiny" style="margin:10px 0 0">간편 음식 목록은 일반적인 참고값입니다. 제품·조리법·부위에 따라 차이가 있으므로 포장지 영양정보를 우선 사용하세요.</p>
-  <div class="btnrow"><button class="diet-btn" onclick="saveMeal()">＋ 식단 기록 추가</button><button class="diet-btn secondary" onclick="clearMealForm()">초기화</button></div>
+  <div class="btnrow"><button id="mealSaveButton" class="diet-btn" onclick="saveMeal()">＋ 식단 기록 추가</button><button class="diet-btn secondary" onclick="clearMealForm()">초기화</button></div>
  </div>
  <div class="diet-panel">
   <div class="diet-panel-head"><div><div class="diet-kicker">02 · DAILY INSIGHT</div><h2>하루 섭취 현황</h2></div><span class="tag amber">목표 대비</span></div>
@@ -1210,13 +1210,20 @@ function updateDietPreview(){
 }
 function syncDietMember(){let v=document.getElementById('dMember').value;document.getElementById('dViewMember').value=v;renderDiet()}
 function syncDietDate(){let v=document.getElementById('dDate').value;document.getElementById('dViewDate').value=v;renderDiet()}
-function clearMealForm(){['dFood','dKcal','dCarbs','dProtein','dFat','dNote'].forEach(x=>document.getElementById(x).value='');document.getElementById('dGrams').value=100;updateDietPreview()}
+let editingMealId=null;
+function clearMealForm(){['dFood','dKcal','dCarbs','dProtein','dFat','dNote'].forEach(x=>document.getElementById(x).value='');document.getElementById('dGrams').value=100;editingMealId=null;let b=document.getElementById('mealSaveButton');if(b)b.textContent='＋ 식단 기록 추가';updateDietPreview()}
+function editMeal(id){
+ let item=(db.meals||[]).find(x=>String(x.id)===String(id));if(!item){msg('수정할 식단 기록을 찾을 수 없습니다.');return}
+ editingMealId=item.id;document.getElementById('dMember').value=item.memberId;document.getElementById('dViewMember').value=item.memberId;document.getElementById('dDate').value=item.date||'';document.getElementById('dViewDate').value=item.date||'';document.getElementById('dMeal').value=item.meal||'아침';document.getElementById('dFood').value=item.food||'';document.getElementById('dGrams').value=Number(item.grams)||100;
+ let scale=(Number(item.grams)||100)/100;document.getElementById('dKcal').value=(Number(item.kcal)||0)/scale;document.getElementById('dCarbs').value=(Number(item.carbs)||0)/scale;document.getElementById('dProtein').value=(Number(item.protein)||0)/scale;document.getElementById('dFat').value=(Number(item.fat)||0)/scale;document.getElementById('dNote').value=item.note||'';
+ let b=document.getElementById('mealSaveButton');if(b)b.textContent='✓ 수정 내용 저장';updateDietPreview();document.getElementById('dFood').focus();msg('기록을 불러왔습니다. 내용을 수정한 뒤 저장해 주세요.');
+}
 function saveMeal(){
  let mid=document.getElementById('dMember').value,food=document.getElementById('dFood').value.trim(),grams=Number(document.getElementById('dGrams').value);
  if(!mid){msg('회원을 먼저 선택해 주세요.');return}
  if(!food||!grams||grams<=0){msg('음식명과 올바른 섭취량을 입력해 주세요.');return}
- let scale=grams/100,item={id:'meal'+Date.now(),memberId:mid,date:document.getElementById('dDate').value||new Date().toISOString().slice(0,10),meal:document.getElementById('dMeal').value,food,grams,kcal:Number(document.getElementById('dKcal').value||0)*scale,carbs:Number(document.getElementById('dCarbs').value||0)*scale,protein:Number(document.getElementById('dProtein').value||0)*scale,fat:Number(document.getElementById('dFat').value||0)*scale,note:document.getElementById('dNote').value};
- db.meals=db.meals||[];db.meals.push(item);document.getElementById('dViewMember').value=mid;document.getElementById('dViewDate').value=item.date;persist();clearMealForm();msg('식단 기록을 저장했습니다.')
+ let scale=grams/100,item={id:editingMealId||'meal'+Date.now(),memberId:mid,date:document.getElementById('dDate').value||new Date().toISOString().slice(0,10),meal:document.getElementById('dMeal').value,food,grams,kcal:Number(document.getElementById('dKcal').value||0)*scale,carbs:Number(document.getElementById('dCarbs').value||0)*scale,protein:Number(document.getElementById('dProtein').value||0)*scale,fat:Number(document.getElementById('dFat').value||0)*scale,note:document.getElementById('dNote').value};
+ db.meals=db.meals||[];let wasEditing=!!editingMealId;if(wasEditing){let index=db.meals.findIndex(x=>String(x.id)===String(editingMealId));if(index<0){msg('수정할 기록을 찾을 수 없습니다. 다시 선택해 주세요.');clearMealForm();return}db.meals[index]=item}else db.meals.push(item);document.getElementById('dViewMember').value=mid;document.getElementById('dViewDate').value=item.date;document.getElementById('dMember').value=mid;document.getElementById('dDate').value=item.date;persist();clearMealForm();renderDiet();msg(wasEditing?'식단 기록을 수정했습니다.':'식단 기록을 저장했습니다.')
 }
 function progressRow(label,val,target,unit){
  let pct=target?Math.min(100,Math.round(val/target*100)):0,delta=target-Math.round(val),status=!target?'목표 미설정':delta>=0?'남은 '+delta+unit:'초과 '+Math.abs(delta)+unit;
@@ -1232,10 +1239,10 @@ function renderDiet(){
  document.getElementById('dietHeroKcal').innerHTML=Math.round(kcal)+' <small>kcal 섭취 · 목표 '+(t.kcal?t.kcal+' kcal':'미설정')+'</small>';
  box.innerHTML='<div class="diet-summary-grid"><div class="diet-stat"><div class="name">오늘의 영양 목표 진행률</div><strong>'+kcalPct+'<small style="font-size:11px">%</small></strong><div class="diet-progress"><span style="width:'+kcalPct+'%"></span></div><small>'+kcalStatus+' · '+Math.round(kcal).toLocaleString()+' / '+(t.kcal?t.kcal.toLocaleString():'-')+' kcal</small></div><div class="diet-stat"><div class="name">단백질 섭취</div><strong>'+Math.round(protein)+'g</strong><small>목표 '+(t.protein||'-')+'g</small></div><div class="diet-stat"><div class="name">탄수화물 섭취</div><strong>'+Math.round(carbs)+'g</strong><small>목표 '+(t.carbs||'-')+'g</small></div></div>'+progressRow('단백질',protein,t.protein,'g')+progressRow('탄수화물',carbs,t.carbs,'g')+progressRow('지방',fat,t.fat,'g');
  document.getElementById('dietTargetNote').textContent=t.bmr?'기초대사량 '+t.bmr+' kcal × 활동지수 '+t.activity+' ('+activityLabel(t.activity)+') → 활동소비열량 약 '+Math.max(0,t.tdee-t.bmr)+' kcal · 하루 총소비열량 약 '+t.tdee+' kcal. 기초대사량은 Mifflin-St Jeor 공식으로 추정합니다. '+(t.goal==='체중 감량'?'감량 목표 섭취량은 총소비열량에서 약 15% 낮춘 값입니다.':t.goal==='체중 증가'?'증가 목표 섭취량은 총소비열량보다 약 5% 높게 설정한 참고값입니다.':'유지 목표는 총소비열량을 기준으로 합니다.')+' · 개인차에 따라 조정하세요.':'목표 계산을 위해 회원 정보에서 성별·나이·키·체중과 활동지수를 선택해 주세요. 직접 입력한 하루 열량·단백질 목표가 있으면 자동 계산보다 우선 적용됩니다.';
- let order=['아침','점심','저녁','간식'],groups=order.map(meal=>{let a=list.filter(x=>x.meal===meal);if(!a.length)return '';let c=a.reduce((s,x)=>s+(Number(x.kcal)||0),0);return '<div class="meal-group"><div class="meal-group-head"><b>'+meal+'</b><span>'+a.length+'개 음식 · '+Math.round(c)+' kcal</span></div>'+a.map(x=>'<div class="meal-item"><div><strong>'+esc(x.food)+'</strong><small>'+x.grams+'g'+(x.note?' · '+esc(x.note):'')+' · 탄 '+Number(x.carbs||0).toFixed(1)+'g / 단 '+Number(x.protein||0).toFixed(1)+'g / 지 '+Number(x.fat||0).toFixed(1)+'g</small></div><div class="meal-cal">'+Math.round(x.kcal)+' kcal <button class="btn danger" style="margin-left:6px;padding:5px 7px" onclick="deleteMeal(&quot;'+x.id+'&quot;)">삭제</button></div></div>').join('')+'</div>'}).join('');
+ let order=['아침','점심','저녁','간식'],groups=order.map(meal=>{let a=list.filter(x=>x.meal===meal);if(!a.length)return '';let c=a.reduce((s,x)=>s+(Number(x.kcal)||0),0);return '<div class="meal-group"><div class="meal-group-head"><b>'+meal+'</b><span>'+a.length+'개 음식 · '+Math.round(c)+' kcal</span></div>'+a.map(x=>'<div class="meal-item"><div><strong>'+esc(x.food)+'</strong><small>'+x.grams+'g'+(x.note?' · '+esc(x.note):'')+' · 탄 '+Number(x.carbs||0).toFixed(1)+'g / 단 '+Number(x.protein||0).toFixed(1)+'g / 지 '+Number(x.fat||0).toFixed(1)+'g</small></div><div class="meal-cal">'+Math.round(x.kcal)+' kcal <button class="btn" style="margin-left:6px;padding:5px 7px" onclick="editMeal(&quot;'+x.id+'&quot;)">수정</button><button class="btn danger" style="margin-left:5px;padding:5px 7px" onclick="deleteMeal(&quot;'+x.id+'&quot;)">삭제</button></div></div>').join('')+'</div>'}).join('');
  document.getElementById('dietRecords').innerHTML=groups||'<div class="diet-empty">아직 기록이 없습니다.<br>왼쪽에서 회원과 음식을 선택해 첫 식단을 기록해 보세요.</div>';
 }
-function deleteMeal(id){if(!confirm('이 식단 기록을 삭제할까요?'))return;db.meals=(db.meals||[]).filter(x=>x.id!==id);persist();msg('식단 기록을 삭제했습니다.')}
+function deleteMeal(id){if(!confirm('이 식단 기록을 삭제할까요?'))return;db.meals=(db.meals||[]).filter(x=>String(x.id)!==String(id));if(String(editingMealId)===String(id))clearMealForm();persist();renderDiet();msg('식단 기록을 삭제했습니다.')}
 
 // 한국 가정식·외식 메뉴 확장: 아래 값은 조리법과 제품에 따라 달라지는 100g당 참고 추정치입니다.
 DIET_FOODS.push(
