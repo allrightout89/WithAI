@@ -375,6 +375,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
    <div class="member-section-heading"><div><h2>My Training Calendar</h2><p>날짜를 선택하면 레슨일지와 개인운동 훈련일지를 확인할 수 있어요.</p></div><span class="member-date" id="memberTodayLabel"></span></div>
    <section id="memberDailyMessage" class="member-daily-message" aria-live="polite"><span>✦</span><div><small id="memberMessageKicker">WITHAI DAILY CHEER</small><h2 id="memberMessageTitle">오늘도 나를 위한 좋은 선택을 시작해요.</h2><p id="memberMessageText">작은 습관이 모여 건강한 변화를 만듭니다.</p></div><time id="memberMessageTime"></time></section>
    <div id="memberSummary" class="member-overview"></div>
+   <div id="memberMembershipCard" class="member-panel" style="margin:14px 0"></div>
    <div class="member-panel member-home-calendar-panel">
     <div class="calendar-toolbar"><button class="btn" type="button" onclick="shiftMemberHomeCalendar(-1)">이전 달</button><b id="memberHomeCalendarMonth"></b><button class="btn" type="button" onclick="shiftMemberHomeCalendar(1)">다음 달</button></div>
     <div class="member-calendar-legend"><span><i class="lesson-dot"></i> PT 레슨</span><span><i class="personal-dot"></i> 개인운동</span><span><i class="consult-dot"></i> Takeat 섭취 칼로리</span></div>
@@ -1379,6 +1380,30 @@ let memberMessageTimer=null,memberLastMessageKey='';
 function updateMemberWellnessMessage(){const root=$('memberDailyMessage');if(!root||$('memberPortal')?.style.display==='none')return;const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),v=t=>p.find(x=>x.type===t)?.value||'00',y=+v('year'),m=+v('month'),d=+v('day'),hour=+v('hour'),key=v('year')+v('month')+v('day')+'-'+hour;if(key===memberLastMessageKey)return;memberLastMessageKey=key;const group=hour>=5&&hour<12?'morning':hour>=12&&hour<18?'midday':hour>=18&&hour<23?'evening':'night',list=MEMBER_WELLNESS_MESSAGES[group],day=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(y,0,1))/86400000),entry=list[(day*13+hour)%list.length],labels={morning:['아침의 시작','GOOD MORNING'],midday:['오후의 리듬','MIDDAY BOOST'],evening:['퇴근 후 응원','EVENING MOTIVATION'],night:['회복과 휴식','NIGHT RECOVERY']};$('memberMessageTitle').textContent=entry[0];$('memberMessageText').textContent=entry[1];$('memberMessageKicker').textContent='WITHAI · '+labels[group][1];$('memberMessageTime').textContent=labels[group][0]+' · '+String(hour).padStart(2,'0')+':00'}
 function startMemberWellnessMessageClock(){updateMemberWellnessMessage();if(memberMessageTimer)clearInterval(memberMessageTimer);memberMessageTimer=setInterval(updateMemberWellnessMessage,30000)}
 
+function renderMemberMembership(){
+ const root=$('memberMembershipCard');if(!root)return;
+ const payload=memberPortalPayload||{},m=payload.member||{},membership=payload.membership||m.membership||m;
+ const totalRaw=membership.package??membership.packageCount??membership.totalSessions??membership.total_sessions;
+ const remainingRaw=membership.remainingSessions??membership.remaining_sessions??membership.remaining??membership.sessionsRemaining;
+ const total=totalRaw==null?null:Number(totalRaw),remaining=remainingRaw==null?null:Number(remainingRaw);
+ const validTotal=Number.isFinite(total)&&total>=0,validRemaining=Number.isFinite(remaining)&&remaining>=0;
+ const used=validTotal&&validRemaining?Math.max(0,total-remaining):null;
+ const start=membership.packageStartDate||membership.package_start_date||membership.startDate||membership.start_date||'';
+ const end=membership.packageEndDate||membership.package_end_date||membership.expiryDate||membership.expiry_date||'';
+ const history=Array.isArray(payload.membershipHistory)?payload.membershipHistory:(Array.isArray(membership.history)?membership.history:[]);
+ const pct=validTotal&&validRemaining&&total>0?Math.max(0,Math.min(100,Math.round(remaining/total*100))):0;
+ const dateText=v=>v?safeText(String(v).slice(0,10).replace(/-/g,'.')):'미등록';
+ root.innerHTML='<div class="member-panel-title"><div><span class="takeat-kicker">MY MEMBERSHIP</span><h2>나의 회원권</h2><p>현재 이용 중인 PT 회원권과 잔여 레슨을 확인하세요.</p></div><span class="member-edit-tag">조회 전용</span></div>'+
+ '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0">'+
+ '<div style="background:#f4f7f8;border-radius:14px;padding:16px"><div class="tiny">잔여 레슨</div><strong style="display:block;font-size:30px;line-height:1.3;color:#16845b">'+(validRemaining?remaining.toLocaleString('ko-KR')+'회':'확인 중')+'</strong><small class="tiny">'+(validTotal?'총 '+total.toLocaleString('ko-KR')+'회 등록':'회원권 횟수 정보 미연동')+'</small></div>'+
+ '<div style="background:#f4f7f8;border-radius:14px;padding:16px"><div class="tiny">사용한 레슨</div><strong style="display:block;font-size:30px;line-height:1.3">'+(used==null?'—':used.toLocaleString('ko-KR')+'회')+'</strong><small class="tiny">'+(used==null?'사용 횟수 확인 불가':'등록 횟수 기준')+'</small></div></div>'+
+ '<div style="height:9px;background:#e7ecee;border-radius:20px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#269b70;border-radius:20px"></div></div>'+
+ '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px">'+
+ '<div><small class="tiny">회원권 시작일</small><b style="display:block;margin-top:4px">'+dateText(start)+'</b></div>'+
+ '<div><small class="tiny">이용 만료일</small><b style="display:block;margin-top:4px">'+dateText(end)+'</b></div></div>'+
+ (history.length?'<div style="margin-top:18px"><b>회원권 이용 내역</b>'+history.slice().sort((a,b)=>String(b.date||b.created_at||'').localeCompare(String(a.date||a.created_at||''))).slice(0,10).map(x=>'<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #edf0f3"><span>'+safeText(x.date||x.created_at||'-')+' · '+safeText(x.description||x.type||'회원권 변동')+'</span><b>'+safeText(x.change??x.sessions??x.count??'')+(x.change!=null||x.sessions!=null||x.count!=null?'회':'')+'</b></div>').join('')+'</div>':'')+
+ ((!validRemaining||!end)?'<p class="tiny" style="margin-top:14px;color:#8a5a20">회원권 정보가 아직 모두 연결되지 않았습니다. 잔여 횟수와 만료일은 센터 데이터 연동 후 정확하게 표시됩니다.</p>':'');
+}
 function renderMemberPortal(payload){
  memberPortalPayload=payload;memberPortalToken=payload.token||memberPortalToken;
  const m=payload.member||{},sessions=Array.isArray(payload.sessions)?payload.sessions:[],meals=Array.isArray(payload.meals)?payload.meals:[],personal=Array.isArray(payload.memberExercises)?payload.memberExercises:[];
@@ -1387,6 +1412,7 @@ function renderMemberPortal(payload){
  $('memberSelfSex').value=m.sex||'female';$('memberSelfAge').value=m.age||'';$('memberSelfHeight').value=m.height||'';$('memberSelfWeight').value=m.weight||'';$('memberSelfGoal').value=m.goal||'근력 향상';$('memberSelfActivity').value=String(m.activityFactor||1.375);
  $('memberExerciseDate').value=memberLocalDate();$('memberMealDate').value=memberLocalDate();renderMemberExerciseGuide();renderMemberFoodPicker();renderMemberMealSelected();
  $('memberTodayLabel').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});$('memberSummary').innerHTML='<b>'+safeText(m.name||'회원')+'님, 오늘도 건강한 하루를 시작해요.</b><div class="tiny" style="margin-top:7px">운동 목표 '+safeText(m.goal||'미설정')+' · 담당 트레이너 '+safeText(m.coach||'미지정')+'</div><div class="member-statline"><span>등록 회차<strong>'+safeText(m.package??'-')+'회</strong></span><span>누적 레슨<strong>'+sessions.length+'회</strong></span><span>개인 운동 기록<strong>'+personal.length+'건</strong></span></div>';
+ renderMemberMembership();
  $('memberSelfTarget').textContent=memberNutritionSummary(m);
  const sortedSessions=sessions.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
  renderMemberSessionHistory(sessions);
