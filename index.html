@@ -1489,7 +1489,7 @@ let selectedMemberFoods=new Map();
  let selectedMemberCustomFoods=new Map();
 function renderMemberMealHistory(date){
  const root=$('memberMealHistory');if(!root)return;
- const meals=(memberPortalPayload?.meals||[]),dayMeals=meals.filter(x=>x.date===date);
+ const meals=memberAllMealRows(),dayMeals=meals.filter(x=>x.date===String(date||'').slice(0,10));
  const m=memberPortalPayload?.member||{},targets=nutritionTargets(m);
  const sum=k=>dayMeals.reduce((a,x)=>a+(Number(x[k])||0),0);
  const recentMeals=meals.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,20);
@@ -2023,7 +2023,26 @@ window.withAiPersistAppointment=async(row)=>{
 let memberHomeCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let memberHomeCalendarSelected=memberLocalDate();
 let memberHomeTakeatOpen=false;
-function memberHomeMealRows(date){return (memberPortalPayload?.meals||[]).filter(x=>x.date===date)}
+function memberMealDateKey(x){
+ const raw=x?.date||x?.meal_date||x?.mealDate||x?.created_at||x?.createdAt||'';
+ return String(raw).slice(0,10);
+}
+function memberAllMealRows(){
+ const source=Array.isArray(memberPortalPayload?.meals)?memberPortalPayload.meals:
+  (Array.isArray(memberPortalPayload?.member?.meals)?memberPortalPayload.member.meals:[]);
+ return source.map(x=>({...x,
+  id:x.id??x.meal_id??x.mealId??'',
+  date:memberMealDateKey(x),
+  meal:x.meal||x.meal_type||x.mealType||'간식',
+  food:x.food||x.food_name||x.foodName||x.name||'음식',
+  grams:x.grams??x.amount_g??x.amountG??x.amount??100,
+  kcal:x.kcal??x.calories??0,
+  carbs:x.carbs??x.carbohydrates??0,
+  protein:x.protein??0,
+  fat:x.fat??0
+ }));
+}
+function memberHomeMealRows(date){return memberAllMealRows().filter(x=>x.date===String(date||'').slice(0,10))}
 function memberHomeDayEvents(date){
  const appointments=(memberCalendarData?.appointments||[]).filter(a=>(a.starts_at||'').slice(0,10)===date&&a.event_type!=='consultation').map(a=>({date,time:(a.starts_at||'').slice(11,16),type:a.event_type==='personal'?'personal':'lesson',title:a.title||(a.event_type==='personal'?'개인운동':'PT 레슨'),id:a.id,data:a}));
  const plans=(memberCalendarData?.personal_workouts||[]).filter(p=>p.scheduled_date===date).map(p=>({date,time:p.scheduled_time||'',type:'personal',title:p.title||'개인운동',id:p.id,data:p}));
@@ -2180,7 +2199,7 @@ function renderMemberTakeat(){
  if(list)list.innerHTML=meals.length?meals.map(x=>'<div class="takeat-meal-item"><span><b>'+safeText(x.meal||'식사')+'</b> · '+safeText(x.food||'음식')+' <small>'+safeText(x.grams||'')+'g</small></span><span class="takeat-meal-actions"><b>'+Math.round(Number(x.kcal)||0)+' kcal</b><button type="button" class="meal-action" onclick="event.stopPropagation();editMemberMeal(\''+safeText(x.id||'')+'\')">수정</button><button type="button" class="meal-action danger" onclick="event.stopPropagation();deleteMemberMeal(\''+safeText(x.id||'')+'\')">기록 취소</button></span></div>').join(''):'<div class="empty">선택한 날짜에 기록된 식단이 없습니다.</div>';
 }
 async function editMemberMeal(id){
- const x=(memberPortalPayload?.meals||[]).find(v=>String(v.id||'')===String(id));if(!x)return alert('수정할 식단 기록을 찾을 수 없습니다.');
+ const x=memberAllMealRows().find(v=>String(v.id||'')===String(id));if(!x)return alert('수정할 식단 기록을 찾을 수 없습니다.');
  const food=prompt('음식명',x.food||'');if(food===null)return;
  const grams=prompt('섭취량(g)',String(x.grams??100));if(grams===null)return;
  const kcal=prompt('열량(kcal)',String(x.kcal??0));if(kcal===null)return;
@@ -2193,7 +2212,7 @@ async function editMemberMeal(id){
  }catch(e){alert('식단 수정 실패: '+(e.message||e));}
 }
 async function deleteMemberMeal(id){
- const x=(memberPortalPayload?.meals||[]).find(v=>String(v.id||'')===String(id));if(!x)return alert('삭제할 식단 기록을 찾을 수 없습니다.');
+ const x=memberAllMealRows().find(v=>String(v.id||'')===String(id));if(!x)return alert('삭제할 식단 기록을 찾을 수 없습니다.');
  if(!confirm((x.food||'음식')+' 기록을 취소할까요? 취소하면 해당 음식 기록만 목록에서 제거됩니다.'))return;
  try{await memberPortalRpc('withai_member_delete_meal',{p_meal_id:String(id)});await reloadMemberPortal();renderMemberHomeCalendar();renderMemberMealHistory(memberHomeCalendarSelected||x.date);alert('식단 기록을 취소했습니다.');}
  catch(e){alert('식단 삭제 실패: '+(e.message||e));}
