@@ -1585,6 +1585,9 @@ $('loginBtn').onclick=async()=>{
    if(!data||data.ok!==true)throw new Error(data?.message||'회원 정보를 확인하지 못했습니다.');
    memberPortalToken=data.token||null;
    renderMemberPortal(data);
+   // Login RPC may return only member identity and an empty meals array.
+   // Immediately hydrate the full portal snapshot so existing meals and records appear.
+   try{await reloadMemberPortal();}catch(loadError){console.warn('회원 포털 상세 데이터 불러오기:',loadError?.message||loadError);}
   }
  }catch(e){authMsg((authMode==='signup'?'가입 신청 실패: ':authMode==='trainer'?'트레이너 로그인 실패: ':authMode==='admin'?'관리자 로그인 실패: ':'회원 로그인 실패: ')+(e?.message||String(e)));}
  finally{$('loginBtn').disabled=false;}
