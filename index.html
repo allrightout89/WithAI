@@ -1583,15 +1583,7 @@ async function saveMemberMeal(){
   memberHomeCalendarSelected=date;$('memberMealDate').value=date;
   try{await reloadMemberPortal();}catch(loadError){console.warn('저장한 식단 다시 불러오기 실패:',loadError?.message||loadError);}
   memberHomeCalendarSelected=date;$('memberMealDate').value=date;
-  const current=memberAllMealRows(),merged=current.slice();
-  for(let i=0;i<savedEntries.length;i++){
-   const entry=savedEntries[i];
-   const same=(x)=>x.date===date&&x.food===entry.food&&String(x.meal||'')===String(entry.meal||'')&&Number(x.grams)===Number(entry.grams);
-   const already=merged.filter(same).length;
-   const required=savedEntries.slice(0,i+1).filter(same).length;
-   if(already<required)merged.push(entry);
-  }
-  if(merged.length>current.length){memberPortalPayload=memberPortalPayload||{};memberPortalPayload.meals=merged;}
+  memberSavedMealOverlay=memberSavedMealOverlay.concat(savedEntries);
   memberHomeCalendarSelected=date;
   const mealForm=$('memberCalendarTakeatFormHost');if(mealForm)mealForm.classList.add('hidden');
   const workoutForm=$('memberCalendarWorkoutFormHost');if(workoutForm)workoutForm.classList.add('hidden');
@@ -2079,6 +2071,7 @@ function memberMealDateKey(x){
  const raw=x?.date||x?.meal_date||x?.mealDate||x?.created_at||x?.createdAt||'';
  return String(raw).slice(0,10);
 }
+let memberSavedMealOverlay=[];
 function memberAllMealRows(){
  const candidates=[
   memberPortalPayload?.meals,
@@ -2091,10 +2084,8 @@ function memberAllMealRows(){
   memberPortalPayload?.portal?.meals,
   memberPortalPayload?.memberPortal?.meals
  ];
- // Ignore an empty top-level array when a populated meal list exists in the
- // hydrated portal response. Fall back to an empty array only when all are empty.
  const source=candidates.find(x=>Array.isArray(x)&&x.length>0)||candidates.find(Array.isArray)||[];
- return source.map(x=>({...x,
+ const normalize=x=>({...x,
   id:x.id??x.meal_id??x.mealId??'',
   date:memberMealDateKey(x),
   meal:x.meal||x.meal_type||x.mealType||'간식',
@@ -2104,7 +2095,14 @@ function memberAllMealRows(){
   carbs:x.carbs??x.carbohydrates??0,
   protein:x.protein??0,
   fat:x.fat??0
- }));
+ });
+ const rows=source.map(normalize);
+ for(const pending of memberSavedMealOverlay){
+  const row=normalize(pending);
+  const exists=rows.some(x=>(row.id&&String(x.id)===String(row.id))||(!row.id&&x.date===row.date&&x.food===row.food&&x.meal===row.meal&&Number(x.grams)===Number(row.grams)));
+  if(!exists)rows.push(row);
+ }
+ return rows;
 }
 function memberHomeMealRows(date){return memberAllMealRows().filter(x=>x.date===String(date||'').slice(0,10))}
 function memberHomeDayEvents(date){
