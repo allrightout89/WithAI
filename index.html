@@ -357,7 +357,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
   <div id="authMessage" class="auth-message">이메일 인증이나 관리자 승인 없이 바로 이용할 수 있습니다.</div>
  </div>
 </section>
-<section id="memberPortal" class="member-app" style="display:none">
+<style>.member-daily-message{display:flex;align-items:center;gap:14px;padding:17px;margin:0 0 18px;border:1px solid #e8e6d9;border-radius:16px;background:linear-gradient(115deg,#fffdf1,#f7f8f3)}.member-daily-message>span{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:#273944;color:#f0d84b;font-size:22px}.member-daily-message>div{flex:1;min-width:0}.member-daily-message small{font-size:9px;font-weight:900;letter-spacing:1px;color:#8c7a27}.member-daily-message h2{font-size:16px;margin:5px 0!important;color:#24333c}.member-daily-message p{font-size:12px;margin:0;color:#68747b;line-height:1.6}.member-daily-message time{font-size:10px;color:#7b8588;white-space:nowrap}@media(max-width:600px){.member-daily-message{align-items:flex-start;padding:14px}.member-daily-message time{display:none}}</style><section id="memberPortal" class="member-app" style="display:none">
  <div class="member-topbar"><div class="member-brand">WithAi <small>MY TRAINING SPACE</small></div><button class="btn" id="memberLogoutBtn" type="button">로그아웃</button></div>
  <main class="member-main">
   <div class="member-greeting"><div><div class="member-kicker">MY DASHBOARD</div><h1 id="memberWelcome">나의 운동 기록</h1><p>오늘의 운동과 식단을 기록하고, 나의 변화를 확인하세요.</p></div><div class="member-avatar">W</div></div>
@@ -373,7 +373,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
   </nav>
   <section id="memberView-home" class="member-view">
    <div class="member-section-heading"><div><h2>My Training Calendar</h2><p>날짜를 선택하면 레슨일지와 개인운동 훈련일지를 확인할 수 있어요.</p></div><span class="member-date" id="memberTodayLabel"></span></div>
-   <div id="memberSummary" class="member-overview"></div>
+   <div id="memberSummary" class="member-overview"></div><section id="memberDailyMessage" class="member-daily-message" aria-live="polite"><span>✦</span><div><small id="memberMessageKicker">WITHAI DAILY CHEER</small><h2 id="memberMessageTitle">오늘도 나를 위한 좋은 선택을 시작해요.</h2><p id="memberMessageText">작은 습관이 모여 건강한 변화를 만듭니다.</p></div><time id="memberMessageTime"></time></section>
    <div class="member-panel member-home-calendar-panel">
     <div class="calendar-toolbar"><button class="btn" type="button" onclick="shiftMemberHomeCalendar(-1)">이전 달</button><b id="memberHomeCalendarMonth"></b><button class="btn" type="button" onclick="shiftMemberHomeCalendar(1)">다음 달</button></div>
     <div class="member-calendar-legend"><span><i class="lesson-dot"></i> PT 레슨</span><span><i class="personal-dot"></i> 개인운동</span><span><i class="consult-dot"></i> Takeat 섭취 칼로리</span></div>
@@ -1336,6 +1336,46 @@ async function loadMemberTrainingSessionsFromCloud(){
   const lessonCount=$('memberSummary')?.querySelector('.member-statline span:nth-child(2) strong');if(lessonCount)lessonCount.textContent=memberPortalPayload.sessions.length+'회';
  }catch(e){console.warn('트레이너 레슨 기록 추가 조회:',e.message||e);}
 }
+const MEMBER_WELLNESS_DATA=`morning
+좋은 아침이에요! 오늘은 어제보다 한 걸음 더|물 한 컵과 가벼운 기지개로 몸을 깨워보세요.
+오늘의 첫 번째 약속은 나 자신과 해요|아침 식사에 단백질과 채소를 곁들여 든든하게 출발해요.
+몸을 깨우면 하루의 리듬도 깨어나요|햇빛을 쬐며 3분만 움직여보세요.
+활기찬 하루는 작은 습관에서 시작돼요|물을 마시고 어깨와 고관절을 부드럽게 풀어주세요.
+오늘의 컨디션을 먼저 살펴봐요|몸 상태에 맞는 운동 강도를 선택해요.
+아침부터 나를 챙기는 사람, 멋져요|달걀·두부·요거트 같은 단백질 식품을 더해보세요.
+어제의 아쉬움은 내려놓고 새롭게 출발해요|운동을 쉬었어도 괜찮아요. 오늘 다시 시작하면 충분해요.
+오늘도 나와의 약속을 지켜볼까요?|반복할 수 있는 작은 습관 하나를 선택해요.
+midday
+오전도 수고 많았어요. 잠깐 숨을 고를까요?|자리에서 일어나 2~3분 걸으며 어깨와 허리를 풀어주세요.
+점심은 에너지를 채우는 시간이에요|밥·단백질 반찬·채소를 골고루 담아봐요.
+물을 마시는 것도 훌륭한 건강 습관이에요|틈틈이 수분을 보충해보세요.
+오후의 나를 위해 지금 잠깐 움직여요|식사 후 5~10분 산책은 좋은 선택이에요.
+오래 앉아 있었다면 몸을 한번 펴주세요|가슴을 열고 등을 부드럽게 움직여주세요.
+완벽한 식단보다 지속 가능한 식단|좋아하는 음식도 양과 균형을 생각하며 즐겨요.
+오후에도 나를 돌보는 선택을 이어가요|간식은 과일이나 요거트도 좋은 선택이에요.
+지금의 작은 움직임을 칭찬해요|계단 한 층, 가까운 거리는 걷기를 선택해봐요.
+evening
+퇴근하느라 정말 수고 많았어요|오늘 운동은 10분 걷기부터 시작해도 충분합니다.
+소파에 앉기 전, 운동화부터 신어볼까요?|밖으로 나가 가볍게 움직이면 시작이 쉬워져요.
+오늘의 피로를 살펴보고 운동을 선택해요|기운이 없다면 스트레칭이나 산책으로 바꿔도 괜찮아요.
+운동하러 가는 발걸음이 가장 어려워요|헬스장에 도착하는 것만 목표로 해도 멋진 실천입니다.
+지친 날에는 회복도 훈련의 일부예요|몸이 무겁다면 가벼운 움직임과 휴식을 선택해요.
+오늘은 나와 경쟁하지 않는 운동을 해봐요|무거운 무게보다 편안하고 정확한 동작이 우선입니다.
+피곤한 날에도 선택지는 여러 가지예요|근력운동 대신 걷기, 자전거, 스트레칭을 골라봐요.
+운동할 마음이 생기지 않아도 괜찮아요|운동복으로 갈아입고 5분 움직이는 작은 시작을 응원해요.
+night
+오늘 하루도 정말 수고 많았어요|늦은 시간에는 무리한 운동보다 편안한 휴식으로 마무리해요.
+회복하는 시간도 건강을 만드는 시간|잠들기 전 화면을 줄이고 수면 환경을 만들어보세요.
+내일을 위한 가장 좋은 준비는 충분한 잠|일정한 시간에 잠자리에 들도록 몸과 마음을 쉬게 해요.
+오늘 못 한 운동은 내일 다시 이어가면 돼요|늦은 시간의 무리한 운동보다 수면과 회복을 선택해요.
+몸이 쉬어야 내일 다시 움직일 수 있어요|가벼운 스트레칭 후 편안하게 하루를 마무리해요.
+수면도 운동만큼 중요한 건강 습관|잠들기 전 카페인과 과식은 피하고 루틴을 만들어봐요.
+쉬는 날도 계획의 일부입니다|피로가 쌓였다면 회복을 우선해도 좋습니다.
+편안한 밤이 건강한 내일을 만듭니다|잠들기 전 천천히 호흡하고 긴장을 풀어주세요.`,MEMBER_WELLNESS_MESSAGES={};let memberWellnessGroup='';for(const line of MEMBER_WELLNESS_DATA.split('\n')){if(['morning','midday','evening','night'].includes(line)){memberWellnessGroup=line;MEMBER_WELLNESS_MESSAGES[line]=[]}else if(line.includes('|'))MEMBER_WELLNESS_MESSAGES[memberWellnessGroup].push(line.split('|'))}
+let memberMessageTimer=null,memberLastMessageKey='';
+function updateMemberWellnessMessage(){const root=$('memberDailyMessage');if(!root||$('memberPortal')?.style.display==='none')return;const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),v=t=>p.find(x=>x.type===t)?.value||'00',y=+v('year'),m=+v('month'),d=+v('day'),hour=+v('hour'),key=v('year')+v('month')+v('day')+'-'+hour;if(key===memberLastMessageKey)return;memberLastMessageKey=key;const group=hour>=5&&hour<12?'morning':hour>=12&&hour<18?'midday':hour>=18&&hour<23?'evening':'night',list=MEMBER_WELLNESS_MESSAGES[group],day=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(y,0,1))/86400000),entry=list[(day*24+hour)%list.length],labels={morning:['아침의 시작','GOOD MORNING'],midday:['오후의 리듬','MIDDAY BOOST'],evening:['퇴근 후 응원','EVENING MOTIVATION'],night:['회복과 휴식','NIGHT RECOVERY']};$('memberMessageTitle').textContent=entry[0];$('memberMessageText').textContent=entry[1];$('memberMessageKicker').textContent='WITHAI · '+labels[group][1];$('memberMessageTime').textContent=labels[group][0]+' · '+String(hour).padStart(2,'0')+':00'}
+function startMemberWellnessMessageClock(){updateMemberWellnessMessage();if(memberMessageTimer)clearInterval(memberMessageTimer);memberMessageTimer=setInterval(updateMemberWellnessMessage,30000)}
+
 function renderMemberPortal(payload){
  memberPortalPayload=payload;memberPortalToken=payload.token||memberPortalToken;
  const m=payload.member||{},sessions=Array.isArray(payload.sessions)?payload.sessions:[],meals=Array.isArray(payload.meals)?payload.meals:[],personal=Array.isArray(payload.memberExercises)?payload.memberExercises:[];
@@ -1354,7 +1394,7 @@ function renderMemberPortal(payload){
  const foodSelect=$('memberMealFood');if(foodSelect&&!foodSelect.options.length){foodSelect.innerHTML=DIET_FOODS.map((f,i)=>'<option value="'+i+'">'+safeText(f.name)+'</option>').join('');}
  const homeNutrition=$('memberHomeNutrition');if(homeNutrition){const hk=Math.round(sum('kcal')),goal=targets.kcal||0,pct=goal?Math.min(100,Math.round(hk/goal*100)):0;homeNutrition.innerHTML='<div class="diet-summary-grid"><div class="diet-stat"><div class="name">섭취 열량</div><strong>'+hk.toLocaleString()+' kcal</strong><small>목표 '+(goal?goal.toLocaleString()+' kcal':'신체정보 입력 필요')+'</small><div class="diet-progress"><span style="width:'+pct+'%"></span></div></div><div class="diet-stat"><div class="name">단백질</div><strong>'+Math.round(sum('protein'))+'g</strong><small>목표 '+(targets.protein||'-')+'g</small></div><div class="diet-stat"><div class="name">탄수화물 / 지방</div><strong>'+Math.round(sum('carbs'))+' / '+Math.round(sum('fat'))+'g</strong><small>오늘 기록 기준</small></div></div>';}
  const homeLesson=$('memberHomeLesson');if(homeLesson){const latest=sortedSessions[0];homeLesson.innerHTML=latest?'<b>'+safeText(latest.date||'')+' · '+safeText(latest.part||'전신')+' · '+safeText(latest.no||'')+'회차</b><p class="tiny" style="margin-top:7px">'+safeText(latest.note||latest.good||'트레이너가 공유한 레슨 기록이 있습니다.')+'</p>':'<div class="empty">아직 공유된 레슨 일지가 없습니다.</div>'; }
- switchMemberTab('home');previewMemberMeal();
+ startMemberWellnessMessageClock();switchMemberTab('home');previewMemberMeal();
 }
 function switchMemberTab(tab){if((tab==='calendar'||tab==='progress')&&memberPortalToken)loadMemberCalendar();document.querySelectorAll('.member-tabs [data-member-tab]').forEach(b=>b.classList.toggle('active',b.dataset.memberTab===tab));document.querySelectorAll('.member-view').forEach(v=>v.classList.toggle('hidden',v.id!=='memberView-'+tab));window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('.member-tabs [data-member-tab]').forEach(b=>b.addEventListener('click',()=>switchMemberTab(b.dataset.memberTab)));
