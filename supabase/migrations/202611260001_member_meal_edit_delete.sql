@@ -56,7 +56,7 @@ begin
   if v_meal not in ('아침', '점심', '저녁', '간식') then
     return jsonb_build_object('ok', false, 'message', '식사 구분을 확인해 주세요.');
   end if;
-  if v_date !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}    return jsonb_build_object('ok', false, 'message', '식사 날짜를 확인해 주세요.');
+  if v_date !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' then
   end if;
 
   select data into v_data
