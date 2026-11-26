@@ -2176,7 +2176,7 @@ async function deleteMemberMeal(id){
 function openTakeatFoodEditor(){
  const date=memberHomeCalendarSelected||$('memberMealDate')?.value||memberLocalDate();
  $('memberMealDate').value=date;
- switchMemberTab('home');
+ switchMemberTab('nutrition');
  renderMemberMealHistory(date);
  $('memberMealSearch').value='';
  selectedMemberFoods.clear();selectedMemberCustomFoods.clear();
