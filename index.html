@@ -335,6 +335,10 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
 
 </style><style>
 /* Calendar-first member portal refresh */
+.calendar-detail-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.calendar-action-row{display:flex;gap:7px;flex-wrap:wrap}
+.calendar-action-row .meal-action{padding:8px 11px;background:#f7f9fb}
+
 .member-app{background:#f5f7fa;color:#18212b}
 .member-topbar{background:#fff;border-bottom:1px solid #e9edf2;padding:14px max(20px,calc((100vw - 1120px)/2))}
 .member-brand{font-size:19px;letter-spacing:.08em;font-weight:900;color:#17212b}
@@ -408,7 +412,7 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
     <div class="takeat-heading"><div><span class="takeat-kicker">TAKEAT · TAKE + EAT</span><h2>선택한 날짜의 식단</h2><p>캘린더에서 날짜를 선택하면 해당 날짜의 식단 현황이 표시됩니다.</p></div><span class="takeat-mark">T</span></div>
     <div id="memberTakeatSummary"></div>
     <div id="memberTakeatMeals" class="takeat-meal-list"></div>
-    <div class="takeat-foot"><button class="btn primary" type="button" onclick="openTakeatFoodEditor()">같은 식단관리 화면에서 음식 검색·입력하기 →</button></div>
+    <div class="takeat-foot"><button class="btn primary" type="button" onclick="openTakeatFoodEditor()">선택한 날짜에 음식 추가하기 →</button></div>
    </div>
    <div class="member-shortcuts member-home-shortcuts">
     <button type="button" class="member-shortcut" onclick="switchMemberTab('progress')"><span class="shortcut-icon">↗</span><b>신체 변화 보기</b><small>체중·체성분·운동 성과</small><i>→</i></button>
@@ -2087,7 +2091,7 @@ function selectMemberHomeCalendarDate(date,scroll=true,eventType=null,eventId=nu
  let events=memberHomeDayEvents(date);
  if(eventType)events=events.filter(e=>e.type===eventType&&String(e.id||'')===String(eventId||''));
  const host=$('memberHomeCalendarDetails');if(!host)return;
- let out='<div class="calendar-detail-heading"><b>'+safeText(date)+' · 운동 일정</b></div>';
+ let out='<div class="calendar-detail-heading"><b>'+safeText(date)+' · 오늘의 기록</b><span class="calendar-action-row"><button type="button" class="meal-action" onclick="openCalendarWorkoutEditor(\''+date+'\')">운동 기록 추가</button><button type="button" class="meal-action" onclick="openCalendarMealEditor(\''+date+'\')">식단 기록 추가</button></span></div>';
  const achievement=memberDayAchievement(date),rewardTags=[];
  if(achievement.exercise)rewardTags.push('<span>💪 운동 실천 완료</span>');
  if(achievement.recorded)rewardTags.push('<span class="nutrition">📝 식단 기록 완료</span>');
@@ -2115,6 +2119,15 @@ function selectMemberHomeCalendarDate(date,scroll=true,eventType=null,eventId=nu
  const mealDate=$('memberMealDate');if(mealDate)mealDate.value=date;
  renderMemberTakeat();
  const grid=$('memberHomeCalendarGrid');if(grid){grid.querySelectorAll('.home-calendar-day').forEach(cell=>cell.classList.remove('is-selected'));const cells=[...grid.querySelectorAll('.home-calendar-day')];const idx=Math.round((new Date(date+'T12:00:00')-new Date(new Date(memberHomeCalendarMonth.getFullYear(),memberHomeCalendarMonth.getMonth(),1).getFullYear(),new Date(memberHomeCalendarMonth.getFullYear(),memberHomeCalendarMonth.getMonth(),1).getMonth(),1))/86400000);const firstDay=new Date(memberHomeCalendarMonth.getFullYear(),memberHomeCalendarMonth.getMonth(),1).getDay();const cell=cells[firstDay+new Date(date+'T12:00:00').getDate()-1];if(cell)cell.classList.add('is-selected');}
+}
+function openCalendarWorkoutEditor(date){
+ memberHomeCalendarSelected=date;const d=$('memberExerciseDate');if(d)d.value=date;
+ switchMemberTab('exercise');
+}
+function openCalendarMealEditor(date){
+ memberHomeCalendarSelected=date;const d=$('memberMealDate');if(d)d.value=date;
+ switchMemberTab('nutrition');
+ renderMemberMealHistory(date);
 }
 function openMemberHomeTakeat(date){
  memberHomeCalendarSelected=date;
