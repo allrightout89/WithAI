@@ -333,7 +333,32 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
 @media(max-width:900px){.shell{grid-template-columns:1fr}.shell>aside{padding:8px}.shell>main{padding:20px 16px}.member-main{padding:24px 16px 90px}}
 @media(max-width:600px){h1{font-size:24px}.card,.panel{padding:15px;border-radius:15px}.member-greeting h1{font-size:24px}.member-tabs{gap:3px}.member-tabs button{padding:10px 7px;font-size:10px}.auth-card{padding:25px 20px}}
 
-</style></head>
+</style><style>
+/* Calendar-first member portal refresh */
+.member-app{background:#f5f7fa;color:#18212b}
+.member-topbar{background:#fff;border-bottom:1px solid #e9edf2;padding:14px max(20px,calc((100vw - 1120px)/2))}
+.member-brand{font-size:19px;letter-spacing:.08em;font-weight:900;color:#17212b}
+.member-brand small{color:#8a95a3;font-size:9px;letter-spacing:.16em}
+.member-main{max-width:1120px;padding:28px 22px 56px}
+.member-greeting{align-items:center;margin-bottom:18px}
+.member-kicker{letter-spacing:.16em;color:#8793a1;font-size:10px;font-weight:800}
+.member-greeting h1{font-size:clamp(25px,3vw,34px);letter-spacing:-.04em;margin:5px 0}
+.member-tabs{top:6px;border-radius:13px;padding:5px;gap:5px;box-shadow:0 8px 24px rgba(22,34,48,.06)}
+.member-tabs button{padding:12px 10px;font-size:12px}
+.member-tabs button.active{background:#1c2937}
+.member-daily-message{border:0;border-radius:18px;background:linear-gradient(115deg,#172535,#30465b);box-shadow:0 12px 28px rgba(21,36,53,.12);padding:22px 24px;margin:0 0 15px}
+.member-overview{border-radius:16px;margin:0 0 15px}
+.member-home-calendar-panel{border:1px solid #e7ebf0;border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(22,34,48,.035)}
+.calendar-toolbar b{font-size:20px;letter-spacing:-.03em}
+.withai-calendar-grid{gap:7px}
+.home-calendar-day{border-radius:12px;min-height:68px}
+.member-panel{border-radius:16px;box-shadow:0 5px 18px rgba(22,34,48,.025)}
+.takeat-meal-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.meal-action{border:1px solid #dce2e9;background:#fff;border-radius:8px;padding:5px 9px;font-size:11px;font-weight:800;cursor:pointer;color:#344254}
+.meal-action.danger{color:#a33b3b;border-color:#f0d7d7}
+@media(max-width:640px){.member-main{padding:20px 13px 40px}.member-tabs{overflow-x:auto}.member-tabs button{flex:0 0 auto;padding:11px 12px}.member-home-calendar-panel{padding:14px}.member-daily-message{padding:18px}.home-calendar-day{min-height:56px}}
+</style>
+</head>
 <body>
 <header><div class="brand">WithAi <small>FITNESS MANAGEMENT SYSTEM · 내 몸 공작소</small></div><div class="topright"><span class="badge">CENTER WORKSPACE</span><span id="userLabel" style="font-size:12px;color:#cbd5e1">로그인 필요</span><button class="btn" id="logoutBtn" type="button" style="display:none">로그아웃</button></div></header>
 <section id="authGate" class="auth-wrap">
@@ -358,21 +383,18 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
  </div>
 </section>
 <style>.member-daily-message{position:relative;display:flex;align-items:center;gap:20px;padding:25px 26px;margin:0 0 24px;border:2px solid #e0c94f;border-left:8px solid #d2ae12;border-radius:20px;background:linear-gradient(120deg,#fff5c2 0%,#fffdf4 48%,#f1f8f4 100%);box-shadow:0 8px 22px rgba(35,51,60,.13);overflow:hidden}.member-daily-message:after{content:'오늘의 건강 습관';position:absolute;right:18px;bottom:9px;font-size:10px;font-weight:800;letter-spacing:.5px;color:rgba(91,83,35,.42)}.member-daily-message>span{display:grid;place-items:center;flex:0 0 60px;height:60px;border-radius:18px;background:#243944;color:#ffe45c;font-size:34px;box-shadow:0 4px 10px rgba(36,57,68,.18)}.member-daily-message>div{flex:1;min-width:0;padding-right:8px}.member-daily-message small{display:block;font-size:12px;font-weight:900;letter-spacing:1.3px;color:#806400}.member-daily-message h2{font-size:25px;line-height:1.38;margin:8px 0 7px!important;color:#1d303a;font-weight:900;word-break:keep-all}.member-daily-message p{font-size:16px;font-weight:650;margin:0;color:#43545b;line-height:1.75;word-break:keep-all}.member-daily-message time{font-size:12px;color:#596a68;white-space:nowrap;font-weight:800;align-self:flex-start}.member-daily-message:focus-within{outline:3px solid rgba(210,174,18,.25)}@media(max-width:700px){.member-daily-message{align-items:flex-start;padding:20px 17px 25px;gap:13px;border-left-width:6px;border-radius:17px;margin-bottom:18px}.member-daily-message:after{right:13px;bottom:7px;font-size:9px}.member-daily-message>span{flex-basis:46px;height:46px;border-radius:14px;font-size:26px}.member-daily-message>div{padding-right:0}.member-daily-message small{font-size:10px;letter-spacing:.9px}.member-daily-message h2{font-size:20px;line-height:1.45;margin:6px 0!important}.member-daily-message p{font-size:14px;line-height:1.65;padding-right:3px}.member-daily-message time{display:none}}@media(max-width:380px){.member-daily-message{padding:17px 13px 24px;gap:10px}.member-daily-message>span{flex-basis:40px;height:40px;font-size:23px}.member-daily-message h2{font-size:18px}.member-daily-message p{font-size:13px}}</style><section id="memberPortal" class="member-app" style="display:none">
- <div class="member-topbar"><div class="member-brand">WithAi <small>MY TRAINING SPACE</small></div><button class="btn" id="memberLogoutBtn" type="button">로그아웃</button></div>
+ <div class="member-topbar"><div class="member-brand">MOVELOG <small>MY TRAINING SPACE</small></div><button class="btn" id="memberLogoutBtn" type="button">로그아웃</button></div>
  <main class="member-main">
   <div class="member-greeting"><div><div class="member-kicker">MY DASHBOARD</div><h1 id="memberWelcome">나의 운동 기록</h1><p>오늘의 운동과 식단을 기록하고, 나의 변화를 확인하세요.</p></div><div class="member-avatar">W</div></div>
   <nav class="member-tabs" aria-label="회원 메뉴">
-   <button type="button" class="active" data-member-tab="home"><span>⌂</span>홈</button>
-   <button type="button" data-member-tab="progress"><span>⌁</span>변화</button>
-   <button type="button" data-member-tab="exercise"><span>↗</span>운동 기록</button>
-   <button type="button" data-member-tab="nutrition"><span>◉</span>식단 관리</button>
-   <button type="button" data-member-tab="lessons"><span>▤</span>레슨 일지</button>
-   
+   <button type="button" class="active" data-member-tab="home"><span>▦</span>캘린더</button>
+   <button type="button" data-member-tab="progress"><span>⌁</span>신체 변화</button>
+   <button type="button" data-member-tab="lessons"><span>▤</span>전체 레슨 일지</button>
    <button type="button" data-member-tab="profile"><span>♙</span>내 정보</button>
   </nav>
   <section id="memberView-home" class="member-view">
    <div class="member-section-heading"><div><h2>My Training Calendar</h2><p>날짜를 선택하면 레슨일지와 개인운동 훈련일지를 확인할 수 있어요.</p></div><span class="member-date" id="memberTodayLabel"></span></div>
-   <section id="memberDailyMessage" class="member-daily-message" aria-live="polite"><span>✦</span><div><small id="memberMessageKicker">WITHAI DAILY CHEER</small><h2 id="memberMessageTitle">오늘도 나를 위한 좋은 선택을 시작해요.</h2><p id="memberMessageText">작은 습관이 모여 건강한 변화를 만듭니다.</p></div><time id="memberMessageTime"></time></section>
+   <section id="memberDailyMessage" class="member-daily-message" aria-live="polite"><span>✦</span><div><small id="memberMessageKicker">MOVELOG DAILY CHEER</small><h2 id="memberMessageTitle">오늘도 나를 위한 좋은 선택을 시작해요.</h2><p id="memberMessageText">작은 습관이 모여 건강한 변화를 만듭니다.</p></div><time id="memberMessageTime"></time></section>
    <div id="memberSummary" class="member-overview"></div>
    <div id="memberMembershipCard" class="member-panel" style="margin:14px 0"></div>
    <div class="member-panel member-home-calendar-panel">
@@ -2101,12 +2123,12 @@ function openMemberHomeTakeat(date){
  if(selected.getMonth()!==memberHomeCalendarMonth.getMonth()||selected.getFullYear()!==memberHomeCalendarMonth.getFullYear())memberHomeCalendarMonth=new Date(selected.getFullYear(),selected.getMonth(),1);
  renderMemberHomeCalendar();
  const mealDate=$('memberMealDate');if(mealDate)mealDate.value=date;
- switchMemberTab('nutrition');
+ switchMemberTab('home');
  renderMemberMealHistory(date);
  const search=$('memberMealSearch');if(search)search.value='';
  selectedMemberFoods.clear();selectedMemberCustomFoods.clear();
  renderMemberFoodPicker();renderMemberMealSelected();previewMemberMeal();
- const heading=$('memberView-nutrition');if(heading)heading.scrollIntoView({behavior:'smooth',block:'start'});
+ const heading=$('memberHomeCalendarDetails');if(heading)heading.scrollIntoView({behavior:'smooth',block:'center'});
 }
 function renderMemberTakeat(){
  const date=memberHomeCalendarSelected||memberLocalDate(),meals=memberHomeMealRows(date),m=memberPortalPayload?.member||{},target=nutritionTargets(m).kcal||0;
@@ -2117,12 +2139,31 @@ function renderMemberTakeat(){
   summary.innerHTML='<div class="takeat-summary"><div><div class="takeat-kcal-big">'+total.toLocaleString()+' <small>/ '+(target?target.toLocaleString():'-')+' kcal</small></div><div class="takeat-progress-track"><div class="takeat-progress-fill" style="width:'+Math.min(100,pct)+'%"></div></div><div class="takeat-target-line"><span>실제 섭취 '+total.toLocaleString()+' kcal</span><span>목표 '+(target?target.toLocaleString():'미설정')+' kcal</span></div></div><div class="takeat-delta '+(!target?'neutral':diff>0?'over':'under')+'">'+deltaText+'</div></div>';
  }
  const list=$('memberTakeatMeals');
- if(list)list.innerHTML=meals.length?meals.map(x=>'<div class="takeat-meal-item"><span><b>'+safeText(x.meal||'식사')+'</b> · '+safeText(x.food||'음식')+' <small>'+safeText(x.grams||'')+'g</small></span><b>'+Math.round(Number(x.kcal)||0)+' kcal</b></div>').join(''):'<div class="empty">선택한 날짜에 등록된 식단이 없습니다. 식단관리 화면에서 음식을 기록해 보세요.</div>';
+ if(list)list.innerHTML=meals.length?meals.map(x=>'<div class="takeat-meal-item"><span><b>'+safeText(x.meal||'식사')+'</b> · '+safeText(x.food||'음식')+' <small>'+safeText(x.grams||'')+'g</small></span><span class="takeat-meal-actions"><b>'+Math.round(Number(x.kcal)||0)+' kcal</b><button type="button" class="meal-action" onclick="editMemberMeal(\''+safeText(x.id||'')+'\')">수정</button><button type="button" class="meal-action danger" onclick="deleteMemberMeal(\''+safeText(x.id||'')+'\')">삭제</button></span></div>').join(''):'<div class="empty">선택한 날짜에 등록된 식단이 없습니다. 아래 식단 기록 버튼으로 추가해 보세요.</div>';
+}
+async function editMemberMeal(id){
+ const x=(memberPortalPayload?.meals||[]).find(v=>String(v.id||'')===String(id));if(!x)return alert('수정할 식단 기록을 찾을 수 없습니다.');
+ const food=prompt('음식명',x.food||'');if(food===null)return;
+ const grams=prompt('섭취량(g)',String(x.grams??100));if(grams===null)return;
+ const kcal=prompt('열량(kcal)',String(x.kcal??0));if(kcal===null)return;
+ const carbs=prompt('탄수화물(g)',String(x.carbs??0));if(carbs===null)return;
+ const protein=prompt('단백질(g)',String(x.protein??0));if(protein===null)return;
+ const fat=prompt('지방(g)',String(x.fat??0));if(fat===null)return;
+ const note=prompt('메모',x.note||'');if(note===null)return;
+ try{await memberPortalRpc('withai_member_update_meal',{p_meal_id:String(id),p_entry:{date:x.date,meal:x.meal,food:food.trim(),grams:Number(grams),kcal:Number(kcal),carbs:Number(carbs),protein:Number(protein),fat:Number(fat),note}});
+ await reloadMemberPortal();renderMemberHomeCalendar();renderMemberMealHistory(memberHomeCalendarSelected||x.date);alert('식단 기록을 수정했습니다.');
+ }catch(e){alert('식단 수정 실패: '+(e.message||e));}
+}
+async function deleteMemberMeal(id){
+ const x=(memberPortalPayload?.meals||[]).find(v=>String(v.id||'')===String(id));if(!x)return alert('삭제할 식단 기록을 찾을 수 없습니다.');
+ if(!confirm((x.food||'음식')+' 기록을 삭제할까요?'))return;
+ try{await memberPortalRpc('withai_member_delete_meal',{p_meal_id:String(id)});await reloadMemberPortal();renderMemberHomeCalendar();renderMemberMealHistory(memberHomeCalendarSelected||x.date);alert('식단 기록을 삭제했습니다.');}
+ catch(e){alert('식단 삭제 실패: '+(e.message||e));}
 }
 function openTakeatFoodEditor(){
  const date=memberHomeCalendarSelected||$('memberMealDate')?.value||memberLocalDate();
  $('memberMealDate').value=date;
- switchMemberTab('nutrition');
+ switchMemberTab('home');
  renderMemberMealHistory(date);
  $('memberMealSearch').value='';
  selectedMemberFoods.clear();selectedMemberCustomFoods.clear();
