@@ -2091,7 +2091,9 @@ function memberAllMealRows(){
   memberPortalPayload?.portal?.meals,
   memberPortalPayload?.memberPortal?.meals
  ];
- const source=candidates.find(Array.isArray)||[];
+ // Ignore an empty top-level array when a populated meal list exists in the
+ // hydrated portal response. Fall back to an empty array only when all are empty.
+ const source=candidates.find(x=>Array.isArray(x)&&x.length>0)||candidates.find(Array.isArray)||[];
  return source.map(x=>({...x,
   id:x.id??x.meal_id??x.mealId??'',
   date:memberMealDateKey(x),
@@ -2259,7 +2261,7 @@ function renderMemberTakeat(){
   summary.innerHTML='<div class="takeat-summary"><div><div class="takeat-kcal-big">'+total.toLocaleString()+' <small>/ '+(target?target.toLocaleString():'-')+' kcal</small></div><div class="takeat-progress-track"><div class="takeat-progress-fill" style="width:'+Math.min(100,pct)+'%"></div></div><div class="takeat-target-line"><span>실제 섭취 '+total.toLocaleString()+' kcal</span><span>목표 '+(target?target.toLocaleString():'미설정')+' kcal</span></div></div><div class="takeat-delta '+(!target?'neutral':diff>0?'over':'under')+'">'+deltaText+'</div></div>';
  }
  const list=$('memberTakeatMeals');
- if(list)list.innerHTML=meals.length?meals.map(x=>'<div class="takeat-meal-item"><span><b>'+safeText(x.meal||'식사')+'</b> · '+safeText(x.food||'음식')+' <small>'+safeText(x.grams||'')+'g</small></span><span class="takeat-meal-actions"><b>'+Math.round(Number(x.kcal)||0)+' kcal</b><button type="button" class="meal-action" onclick="event.stopPropagation();editMemberMeal(\''+safeText(x.id||'')+'\')">수정</button><button type="button" class="meal-action danger" onclick="event.stopPropagation();deleteMemberMeal(\''+safeText(x.id||'')+'\')">기록 취소</button></span></div>').join(''):'<div class="empty">선택한 날짜에 기록된 식단이 없습니다.</div>';
+ if(list)list.innerHTML=meals.length?meals.map(x=>'<div class="takeat-meal-item"><span><b>'+safeText(x.meal||'식사')+'</b> · '+safeText(x.food||'음식')+' <small>'+safeText(x.grams||'')+'g</small></span><span class="takeat-meal-actions"><b>'+Math.round(Number(x.kcal)||0)+' kcal</b>'+(x.id?'<button type="button" class="meal-action" onclick="event.stopPropagation();editMemberMeal(\''+safeText(x.id)+'\')">수정</button><button type="button" class="meal-action danger" onclick="event.stopPropagation();deleteMemberMeal(\''+safeText(x.id)+'\')">기록 취소</button>':'<small>수정·삭제 식별 정보 없음</small>')+'</span></div>').join(''):'<div class="empty">선택한 날짜에 기록된 식단이 없습니다.</div>';
 }
 async function editMemberMeal(id){
  const x=memberAllMealRows().find(v=>String(v.id||'')===String(id));if(!x)return alert('수정할 식단 기록을 찾을 수 없습니다.');
