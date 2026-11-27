@@ -89,6 +89,16 @@ textarea{min-height:76px;resize:vertical}.field label{display:block;font-size:12
 .member-food-option input{accent-color:#2563eb}.member-meal-selected{display:grid;gap:8px}.member-meal-row{display:grid;grid-template-columns:minmax(0,1fr) 95px auto;align-items:center;gap:8px;padding:9px;border:1px solid var(--line,#e5e7eb);border-radius:10px}.member-meal-row input{width:100%;min-width:0}.member-meal-remove{border:0;background:#fee2e2;color:#991b1b;border-radius:8px;padding:7px 9px;cursor:pointer}
 
 .exercise-guide-detail{white-space:pre-line;line-height:1.65}
+.member-exercise-categories{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:8px 0}
+.member-exercise-category{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:9px 4px;font-size:12px;font-weight:750;cursor:pointer}
+.member-exercise-category.active{background:#17212b;color:#fff;border-color:#17212b}
+.member-exercise-library{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:280px;overflow:auto;margin:9px 0;padding:2px}
+.member-exercise-option{display:flex;flex-direction:column;gap:4px;text-align:left;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;min-width:0}
+.member-exercise-option b{font-size:12px;color:var(--ink)}
+.member-exercise-option span{font-size:10px;line-height:1.45;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.member-exercise-option:hover{border-color:#b8a21b;background:#fffdf3}
+@media(max-width:600px){.member-exercise-categories{grid-template-columns:repeat(3,minmax(0,1fr))}.member-exercise-library{grid-template-columns:1fr;max-height:320px}}
+
 
 
 /* WithAi visual refinement: clearer hierarchy, calmer surfaces, accessible controls */
@@ -494,7 +504,7 @@ button,a,[role="button"],input,select,textarea{touch-action:manipulation}
    <div class="member-section-heading"><div><h2>운동 기록</h2><p>PT 레슨 외에 혼자 운동한 내용도 기록할 수 있습니다.</p></div></div>
    <div class="member-panel"><h2>오늘의 개인 운동 입력</h2><div class="formgrid">
     <div class="field"><label>운동 날짜</label><input id="memberExerciseDate" type="date"></div><div class="field"><label>운동 부위</label><select id="memberExercisePart"><option>전신</option><option>하체</option><option>등</option><option>가슴</option><option>어깨</option><option>팔</option><option>코어</option><option>유산소</option><option>스트레칭</option></select></div>
-    <div class="field full"><label>운동 종목</label><input id="memberExerciseName" list="memberExerciseOptions" placeholder="운동명을 검색하거나 선택하세요"><datalist id="memberExerciseOptions"></datalist><div id="memberExerciseGuide" class="exercise-guide" aria-live="polite"><b>운동 설명</b><p>운동 종목을 선택하면 주요 목적과 수행 방법을 안내합니다.</p></div></div>
+    <div class="field full"><label>웨이트 트레이닝 운동 선택</label><div class="member-exercise-categories" id="memberExerciseCategories"><button type="button" class="member-exercise-category active" data-part="하체" onclick="renderMemberExerciseLibrary('하체')">하체</button><button type="button" class="member-exercise-category" data-part="등" onclick="renderMemberExerciseLibrary('등')">등</button><button type="button" class="member-exercise-category" data-part="가슴" onclick="renderMemberExerciseLibrary('가슴')">가슴</button><button type="button" class="member-exercise-category" data-part="어깨" onclick="renderMemberExerciseLibrary('어깨')">어깨</button><button type="button" class="member-exercise-category" data-part="팔" onclick="renderMemberExerciseLibrary('팔')">팔</button><button type="button" class="member-exercise-category" data-part="복근" onclick="renderMemberExerciseLibrary('복근')">복근</button></div><input id="memberExerciseSearch" type="search" placeholder="운동명 검색 (예: 스쿼트, 레그 프레스)" oninput="renderMemberExerciseLibrary()"><div id="memberExerciseLibrary" class="member-exercise-library" aria-live="polite"></div><label style="margin-top:12px">선택한 운동</label><input id="memberExerciseName" list="memberExerciseOptions" placeholder="위 목록에서 운동을 선택하세요"><datalist id="memberExerciseOptions"></datalist><div id="memberExerciseGuide" class="exercise-guide" aria-live="polite"><b>운동 설명</b><p>부위를 선택하고 운동을 누르면 해부학적 목표 근육과 자세·힘의 사용법을 확인할 수 있습니다.</p></div></div>
     <div class="field full"><label>세트별 수행 기록</label><p class="tiny">세트마다 중량과 횟수를 다르게 입력할 수 있습니다.</p><div id="memberExerciseSetRows"></div><div class="btnrow"><button class="btn" type="button" onclick="addMemberExerciseSetRow()">+ 세트 추가</button></div><div id="memberPreviousExerciseRecord" class="exercise-guide" aria-live="polite"><b>직전 운동 기록</b><p>운동 종목을 선택하면 이전 수행 기록이 표시됩니다.</p></div></div>
     <div class="field full"><label>운동 메모 / 컨디션</label><textarea id="memberExerciseNote" placeholder="오늘 운동 느낌, 불편했던 부위 등을 기록하세요."></textarea></div>
    </div><div class="btnrow"><button class="btn primary" type="button" onclick="saveMemberExercise()">운동 기록 저장</button></div></div>
@@ -1377,18 +1387,77 @@ const MEMBER_EXERCISE_GUIDES = [
 ['실내 자전거','유산소','대퇴사두근·둔근·햄스트링·종아리를 반복 사용해 심폐 지구력과 하지 근지구력을 높입니다.','주요 관절: 고관절·무릎·발목의 반복 굽힘·폄. 안장 높이를 조절해 페달이 가장 아래일 때 무릎이 살짝 굽혀지도록 하고 골반을 안장에 안정적으로 둔 채 일정한 리듬으로 밟습니다. 주의: 무릎이 안팎으로 흔들리거나 발끝만으로 페달을 누르지 않게 합니다.'],
 ['스텝밀','유산소','대퇴사두근·대둔근·햄스트링·종아리 근육을 반복 사용해 심폐 및 하지 지구력을 훈련합니다.','주요 관절: 고관절·무릎·발목. 낮은 속도에서 발 전체를 계단에 올리고 몸통을 세운 채 한 계단씩 체중을 이동합니다; 손잡이는 균형 보조로만 가볍게 잡습니다. 주의: 발끝만 걸치거나 손잡이에 체중을 과하게 싣지 말고 피로 시 속도를 낮춥니다.'],
 ];
+
+const MEMBER_EXERCISE_GUIDES_EXTRA = [
+['레그 프레스(발 높이 조절)','하체','대퇴사두근과 대둔근을 중심으로 고관절·무릎 폄 근력을 기릅니다.','세팅·고정: 등과 천골을 등받이에 붙이고 발은 골반~어깨너비, 발바닥 3점을 발판에 둡니다. 힘의 사용: 발 전체로 발판을 밀며 무릎과 고관절을 동시에 폅니다. 근육 작용: 대퇴사두근은 무릎 폄, 대둔근은 고관절 폄에 기여합니다. 주의: 내려갈 때 골반이 말리거나 허리가 뜨기 전까지만 깊이를 확보하고 무릎을 잠그지 않습니다.'],
+['프론트 스쿼트','하체','대퇴사두근의 무릎 폄과 몸통 전면 안정성을 강조하는 스쿼트입니다.','세팅·고정: 바를 전면 어깨에 얹고 팔꿈치를 높여 상완을 지지대처럼 유지합니다. 발바닥 3점과 복압으로 몸통을 고정합니다. 힘의 사용: 무릎과 고관절을 함께 굽혀 수직으로 내려가고 바닥을 밀어 일어섭니다. 근육 작용: 대퇴사두근이 무릎 폄, 둔근이 고관절 폄을 담당합니다. 주의: 팔꿈치가 떨어지거나 몸통이 과하게 숙여지지 않게 합니다.'],
+['핵 스쿼트','하체','대퇴사두근과 대둔근의 무릎·고관절 폄 능력을 머신에서 안정적으로 훈련합니다.','세팅·고정: 등과 골반을 패드에 밀착하고 어깨 패드에 몸을 고정합니다. 발 위치로 무릎 이동 범위를 조절하되 발 전체를 플랫폼에 둡니다. 힘의 사용: 발판을 밀어 무릎과 고관절을 펴고 내려올 때 천천히 저항합니다. 근육 작용: 대퇴사두근이 무릎 폄의 주동근, 둔근이 고관절 폄을 보조합니다. 주의: 골반이 말리거나 무릎이 안쪽으로 무너지지 않게 합니다.'],
+['스미스 머신 스쿼트','하체','대퇴사두근·대둔근을 중심으로 스쿼트 패턴과 하체 근력을 훈련합니다.','세팅·고정: 바를 승모근 위에 안정적으로 놓고 발은 바 경로에 맞춰 배치합니다. 복압과 발바닥 3점으로 몸통·발을 고정합니다. 힘의 사용: 엉덩이와 무릎을 함께 굽혔다가 바닥을 밀며 폅니다. 근육 작용: 대퇴사두근은 무릎 폄, 둔근은 고관절 폄을 수행합니다. 주의: 바 경로에 맞추느라 발뒤꿈치가 뜨거나 허리가 과신전되지 않게 합니다.'],
+['레그 어브덕션 머신','하체','중둔근·소둔근과 대퇴근막장근을 사용해 고관절 벌림과 골반 안정성을 훈련합니다.','세팅·고정: 등과 골반을 등받이에 붙이고 무릎 바깥쪽을 패드에 댑니다. 힘의 사용: 골반이 흔들리지 않게 허벅지를 바깥으로 벌린 뒤 천천히 모읍니다. 근육 작용: 중둔근·소둔근이 고관절 벌림에 기여합니다. 주의: 상체를 젖히거나 반동으로 가동범위를 만들지 않습니다.'],
+['레그 어덕션 머신','하체','장내전근·단내전근·대내전근 등 고관절 내전근을 강화합니다.','세팅·고정: 등과 골반을 등받이에 고정하고 허벅지 안쪽을 패드에 댑니다. 힘의 사용: 양 허벅지를 중앙으로 모으고 원위치에서는 중량이 튀지 않게 버팁니다. 근육 작용: 고관절 내전근군이 허벅지를 몸의 정중선으로 모읍니다. 주의: 골반이 들리거나 허리를 말아 보상하지 않습니다.'],
+['스탠딩 카프 레이즈','하체','비복근을 중심으로 발목 발바닥굽힘 근력을 강화합니다.','세팅·고정: 어깨 패드에 몸을 안정적으로 두고 발 앞부분을 발판에 올립니다. 무릎은 거의 편 상태로 유지합니다. 힘의 사용: 엄지발가락 볼을 포함한 앞발로 바닥을 밀어 뒤꿈치를 올리고 천천히 내립니다. 근육 작용: 비복근과 가자미근이 발목을 발바닥 방향으로 폅니다. 주의: 발목이 안팎으로 기울거나 반동을 쓰지 않습니다.'],
+['시티드 카프 레이즈','하체','무릎 굽힘 자세에서 가자미근을 상대적으로 강조해 발목 저측굴곡을 훈련합니다.','세팅·고정: 무릎 위 패드를 허벅지에 고정하고 발 앞부분을 받침대에 둡니다. 힘의 사용: 앞발로 받침대를 누르며 뒤꿈치를 올리고 끝범위에서 잠시 멈춥니다. 근육 작용: 가자미근이 발목 발바닥굽힘을 담당합니다. 주의: 발목을 튕기지 말고 전체 가동범위를 통제합니다.'],
+['체스트 서포티드 로우','등','광배근·능형근·중부 승모근·후면 삼각근을 몸통 반동 없이 훈련합니다.','세팅·고정: 가슴을 패드에 밀착하고 발을 바닥에 고정합니다. 목은 척추와 중립을 유지합니다. 힘의 사용: 팔꿈치를 뒤·아래 방향으로 당기고 천천히 팔을 뻗습니다. 근육 작용: 광배근은 어깨 폄, 능형근·중부 승모근은 견갑골 후인에 기여합니다. 주의: 가슴을 패드에서 떼거나 어깨를 으쓱하지 않습니다.'],
+['T바 로우','등','광배근·능형근·중부 승모근과 후면 삼각근의 수평 당기기 근력을 강화합니다.','세팅·고정: 발을 플랫폼에 고정하고 고관절을 접어 몸통 각도를 유지합니다. 가슴 지지형이면 흉곽을 패드에 붙입니다. 힘의 사용: 팔꿈치를 몸통 옆으로 당겨 손잡이를 하복부 방향으로 이동시킵니다. 근육 작용: 광배근은 상완을 폄·모음하고 견갑골 주변 근육은 후인·안정화합니다. 주의: 허리 반동으로 중량을 튀기지 않습니다.'],
+['클로즈그립 랫풀다운','등','광배근과 대원근을 중심으로 어깨 폄·모음 및 팔꿈치 굽힘을 훈련합니다.','세팅·고정: 허벅지 패드를 조이고 발을 바닥에 둡니다. 흉곽을 과하게 들지 않고 척추 중립을 유지합니다. 힘의 사용: 팔꿈치를 옆구리·골반 방향으로 내리며 손잡이를 윗가슴 쪽으로 당깁니다. 근육 작용: 광배근이 상완을 몸통 쪽으로 당기고 이두근이 팔꿈치 굽힘을 돕습니다. 주의: 몸을 뒤로 젖혀 당기지 않습니다.'],
+['스트레이트 암 풀다운','등','광배근·대원근의 어깨 폄 기능을 팔꿈치 움직임을 최소화해 훈련합니다.','세팅·고정: 케이블 상단에 바를 연결하고 무릎을 약간 굽혀 고관절을 접습니다. 복압으로 몸통을 고정하고 팔꿈치는 살짝 굽힌 각도를 유지합니다. 힘의 사용: 겨드랑이를 조인다는 느낌으로 손잡이를 허벅지 앞까지 내립니다. 근육 작용: 광배근이 상완을 머리 위 위치에서 몸통 쪽으로 폅니다. 주의: 허리 신전이나 팔꿈치 굽힘으로 동작을 대신하지 않습니다.'],
+['원암 케이블 로우','등','좌우 광배근과 견갑골 주변 근육의 비대칭 조절 및 당기기 근력을 훈련합니다.','세팅·고정: 케이블을 배꼽 높이에 두고 발을 앞뒤로 벌려 골반과 흉곽을 정면에 고정합니다. 힘의 사용: 팔꿈치를 갈비뼈 옆으로 당기되 몸통 회전을 최소화합니다. 근육 작용: 광배근은 어깨 폄, 능형근·승모근은 견갑골 위치 조절에 기여합니다. 주의: 몸통을 비틀어 손잡이를 당기지 않습니다.'],
+['인클라인 덤벨 로우','등','광배근·능형근·중부 승모근을 가슴 지지 자세에서 집중적으로 훈련합니다.','세팅·고정: 벤치를 30~45도로 맞추고 가슴을 패드에 붙이며 발을 바닥에 고정합니다. 힘의 사용: 팔꿈치를 골반 또는 갈비뼈 방향으로 당긴 뒤 천천히 내립니다. 근육 작용: 광배근은 어깨 폄, 견갑골 후인근은 견갑골을 척추 쪽으로 이동시킵니다. 주의: 목을 들거나 어깨를 으쓱하지 않습니다.'],
+['덤벨 풀오버','등','광배근·대원근과 대흉근의 보조 작용을 활용해 어깨 굽힘·폄 가동 조절을 훈련합니다.','세팅·고정: 벤치에 등 상부를 지지하고 갈비뼈를 아래로 정렬하며 복부에 힘을 줍니다. 팔꿈치는 약간 굽힌 채 각도를 유지합니다. 힘의 사용: 덤벨을 머리 뒤로 통제해 내렸다가 겨드랑이를 조이며 가슴 위로 가져옵니다. 근육 작용: 광배근이 어깨 폄에 기여합니다. 주의: 허리가 과하게 꺾이거나 어깨 통증 범위까지 내리지 않습니다.'],
+['시티드 케이블 로우(와이드)','등','중부 승모근·능형근·후면 삼각근과 광배근의 당기기 기능을 훈련합니다.','세팅·고정: 발판에 발을 대고 골반을 중립으로 둡니다. 손잡이를 넓게 잡되 손목은 중립으로 유지합니다. 힘의 사용: 팔꿈치를 바깥쪽으로 벌려 명치 방향으로 당기고 천천히 돌아옵니다. 근육 작용: 견갑골 후인과 어깨 수평벌림이 주요 움직임입니다. 주의: 허리를 젖히거나 어깨를 귀 쪽으로 올리지 않습니다.'],
+['인클라인 벤치 프레스','가슴','대흉근 쇄골부를 중심으로 전면 삼각근과 삼두근을 함께 강화합니다.','세팅·고정: 벤치 각도를 약 20~35도로 설정하고 머리·등·골반을 지지합니다. 발을 바닥에 고정하고 견갑골을 안정화합니다. 힘의 사용: 바를 윗가슴 쪽으로 내리고 팔꿈치가 손목 아래에 오도록 밀어 올립니다. 근육 작용: 대흉근 쇄골부가 어깨 수평모음·굽힘에 기여합니다. 주의: 각도를 과도하게 세워 어깨 전면에 부하가 몰리지 않게 합니다.'],
+['디클라인 체스트 프레스','가슴','대흉근 흉골부·늑골부를 중심으로 수평 밀기 근력을 강화합니다.','세팅·고정: 좌석을 조절해 손잡이가 가슴 아래쪽 높이에 오도록 하고 등·골반을 패드에 고정합니다. 힘의 사용: 손잡이를 앞·약간 위쪽으로 밀고 천천히 팔꿈치를 굽혀 돌아옵니다. 근육 작용: 대흉근이 상완을 수평으로 모으고 삼두근이 팔꿈치를 폅니다. 주의: 어깨가 앞으로 말리거나 팔꿈치가 과도하게 뒤로 가지 않게 합니다.'],
+['덤벨 플라이','가슴','대흉근의 어깨 수평모음 기능을 긴 근육 길이 구간부터 수축 구간까지 훈련합니다.','세팅·고정: 벤치에 머리·등·골반을 지지하고 발을 바닥에 둡니다. 팔꿈치는 약간 굽혀 고정합니다. 힘의 사용: 팔을 큰 원호로 벌려 가슴이 늘어나는 범위까지만 내린 뒤 양팔을 가슴 위로 모읍니다. 근육 작용: 대흉근이 상완을 수평으로 모읍니다. 주의: 팔꿈치를 펴 잠그거나 어깨 앞쪽이 과하게 늘어나는 깊이를 피합니다.'],
+['스미스 머신 벤치 프레스','가슴','대흉근·삼두근·전면 삼각근을 고정된 바 경로에서 훈련합니다.','세팅·고정: 벤치 위치를 조절해 바가 중간 가슴으로 내려오도록 하고 발·머리·등·골반을 지지합니다. 힘의 사용: 바를 가슴 쪽으로 통제해 내린 뒤 발로 바닥을 밀어 몸통을 안정시키며 위로 밉니다. 근육 작용: 대흉근의 수평모음과 삼두근의 팔꿈치 폄이 함께 작용합니다. 주의: 어깨가 들리거나 손목이 뒤로 꺾이지 않게 합니다.'],
+['머신 인클라인 프레스','가슴','대흉근 쇄골부와 삼두근·전면 삼각근의 상향 밀기 기능을 강화합니다.','세팅·고정: 좌석을 조절해 손잡이가 윗가슴 높이에 오도록 하고 등·골반을 패드에 밀착합니다. 힘의 사용: 손잡이를 앞·위 방향으로 밀고 팔꿈치를 천천히 굽혀 돌아옵니다. 근육 작용: 대흉근 쇄골부가 상완을 굽히고 모으는 데 기여합니다. 주의: 허리를 과신전하거나 어깨가 귀 쪽으로 올라가지 않게 합니다.'],
+['케이블 플라이(하이 투 로우)','가슴','대흉근의 수평모음·모음 기능을 아래 방향의 케이블 저항으로 훈련합니다.','세팅·고정: 케이블을 어깨보다 높게 설정하고 한 발을 앞에 두어 골반과 몸통을 고정합니다. 팔꿈치를 부드럽게 굽혀 각도를 유지합니다. 힘의 사용: 손을 아래·앞쪽으로 모아 하복부 앞에서 만납니다. 근육 작용: 대흉근이 상완을 모으고 내리는 데 기여합니다. 주의: 허리를 숙여 당기거나 손목만 꺾지 않습니다.'],
+['아놀드 프레스','어깨','삼각근 전·중부와 삼두근을 사용해 어깨 굽힘·벌림 및 팔꿈치 폄을 훈련합니다.','세팅·고정: 등받이에 등을 지지하고 발을 고정하며 복압을 유지합니다. 덤벨을 가슴 앞, 손바닥이 몸을 향하게 시작합니다. 힘의 사용: 팔을 위로 밀면서 전완과 상완을 자연스럽게 회전시킵니다. 근육 작용: 삼각근이 상완을 들어 올리고 삼두근이 팔꿈치를 폅니다. 주의: 통증 없는 회전 범위에서 실시하고 허리를 젖히지 않습니다.'],
+['머신 레터럴 레이즈','어깨','삼각근 중부의 어깨 벌림 기능을 일정한 저항으로 집중 훈련합니다.','세팅·고정: 좌석을 조절해 패드가 팔꿈치 또는 상완 바깥쪽에 오게 하고 등·골반을 고정합니다. 힘의 사용: 팔꿈치를 옆으로 들어 올려 어깨 높이 전후까지 벌린 뒤 천천히 내립니다. 근육 작용: 삼각근 중부가 상완골 벌림에 기여합니다. 주의: 승모근으로 어깨를 으쓱하거나 몸통을 기울이지 않습니다.'],
+['케이블 레터럴 레이즈','어깨','삼각근 중부에 지속적인 장력을 제공해 어깨 벌림 근력을 강화합니다.','세팅·고정: 케이블을 몸 뒤쪽 낮은 위치에 두고 손잡이를 잡습니다. 반대 손으로 기둥을 잡아 몸통을 고정합니다. 힘의 사용: 팔꿈치를 부드럽게 굽혀 팔을 옆·약간 앞쪽으로 들어 올립니다. 근육 작용: 삼각근 중부가 상완을 벌립니다. 주의: 손목으로 당기거나 몸통 반동을 사용하지 않습니다.'],
+['덤벨 프론트 레이즈','어깨','삼각근 전부를 중심으로 어깨 굽힘 근력을 훈련합니다.','세팅·고정: 발을 골반너비로 두고 복부·둔근에 가볍게 힘을 줘 몸통을 고정합니다. 덤벨은 허벅지 앞에서 시작합니다. 힘의 사용: 팔을 앞쪽으로 들어 어깨 높이 전후까지 올리고 천천히 내립니다. 근육 작용: 삼각근 전부가 상완 굽힘에 기여합니다. 주의: 허리를 젖히거나 반동으로 덤벨을 올리지 않습니다.'],
+['케이블 리어 델트 플라이','어깨','후면 삼각근과 견갑골 주변 근육의 어깨 수평벌림 기능을 훈련합니다.','세팅·고정: 케이블을 어깨 높이에 두고 반대편 손잡이를 교차해 잡습니다. 흉곽·골반을 정면에 고정합니다. 힘의 사용: 팔을 옆·뒤로 벌리고 천천히 시작 위치로 돌아옵니다. 근육 작용: 후면 삼각근이 상완을 수평으로 벌립니다. 주의: 허리 회전이나 어깨 으쓱임으로 범위를 만들지 않습니다.'],
+['덤벨 슈러그','어깨','상부 승모근을 중심으로 견갑골 거상 근력을 강화합니다.','세팅·고정: 양손에 덤벨을 들고 팔을 몸 옆에 길게 둡니다. 목은 중립, 몸통은 수직으로 고정합니다. 힘의 사용: 어깨를 귀 방향으로 수직에 가깝게 들어 올리고 천천히 내립니다. 근육 작용: 상부 승모근과 견갑거근이 견갑골 거상에 기여합니다. 주의: 어깨를 크게 돌리거나 목을 앞으로 내밀지 않습니다.'],
+['인클라인 덤벨 컬','팔','상완이두근을 어깨가 뒤로 위치한 자세에서 훈련해 근육 길이 조절 능력을 높입니다.','세팅·고정: 벤치를 45~60도로 설정하고 등·골반을 지지합니다. 상완을 몸통 뒤쪽에 두되 어깨 앞쪽이 불편하지 않게 합니다. 힘의 사용: 팔꿈치를 굽혀 덤벨을 올리고 2~3초에 걸쳐 내립니다. 근육 작용: 상완이두근과 상완근이 팔꿈치 굽힘을 수행합니다. 주의: 팔꿈치가 앞쪽으로 이동하거나 어깨가 말리지 않게 합니다.'],
+['프리처 컬','팔','상완이두근·상완근의 팔꿈치 굽힘 기능을 지지된 자세에서 훈련합니다.','세팅·고정: 겨드랑이와 상완을 패드에 안정적으로 지지하고 손목을 중립으로 둡니다. 힘의 사용: 팔꿈치를 굽혀 바를 올린 뒤 완전히 잠그지 않는 범위에서 천천히 내립니다. 근육 작용: 이두근·상완근이 팔꿈치 굽힘에 기여합니다. 주의: 바닥 구간에서 팔꿈치를 강하게 잠그거나 반동을 사용하지 않습니다.'],
+['케이블 컬','팔','상완이두근·상완근을 일정한 케이블 장력 아래에서 훈련합니다.','세팅·고정: 케이블 하단 손잡이를 잡고 팔꿈치를 몸통 옆에 고정합니다. 발과 골반은 흔들리지 않게 둡니다. 힘의 사용: 팔꿈치만 굽혀 손잡이를 어깨 쪽으로 올리고 천천히 폅니다. 근육 작용: 이두근과 상완근이 팔꿈치 굽힘을 담당합니다. 주의: 어깨를 앞으로 내밀거나 몸통을 뒤로 젖히지 않습니다.'],
+['덤벨 킥백','팔','상완삼두근의 팔꿈치 폄 기능을 상완을 뒤로 둔 자세에서 훈련합니다.','세팅·고정: 한 손과 무릎을 벤치에 지지하거나 상체를 힌지하고 상완을 몸통 옆에 고정합니다. 힘의 사용: 상완 위치를 유지한 채 팔꿈치를 펴 덤벨을 뒤로 보내고 천천히 굽힙니다. 근육 작용: 삼두근이 팔꿈치 폄을 수행합니다. 주의: 어깨를 흔들거나 허리를 비틀어 중량을 이동하지 않습니다.'],
+['로프 트라이셉스 푸시다운','팔','상완삼두근의 팔꿈치 폄을 케이블 저항으로 훈련합니다.','세팅·고정: 케이블 상단 로프를 잡고 팔꿈치를 갈비뼈 옆에 고정합니다. 어깨는 편안히 내리고 몸통을 세웁니다. 힘의 사용: 팔꿈치를 펴며 로프 끝을 허벅지 바깥쪽으로 벌리고 천천히 돌아옵니다. 근육 작용: 삼두근의 세 갈래가 팔꿈치 폄에 기여합니다. 주의: 팔꿈치가 앞뒤로 움직이거나 상체 반동을 쓰지 않습니다.'],
+['클로즈그립 벤치 프레스','팔','상완삼두근을 중심으로 대흉근과 전면 삼각근을 함께 사용하는 복합 밀기 운동입니다.','세팅·고정: 벤치에 머리·등·골반을 지지하고 발을 바닥에 고정합니다. 손 간격은 어깨너비 안팎으로 하되 손목이 편한 범위를 선택합니다. 힘의 사용: 팔꿈치를 몸통 가까이 내려 바를 가슴 아래쪽으로 내리고 위로 밉니다. 근육 작용: 삼두근이 팔꿈치 폄을 주도합니다. 주의: 손을 지나치게 좁혀 손목을 꺾지 않습니다.'],
+['행잉 니 레이즈','복근','복직근·복사근과 고관절 굽힘근을 사용하며 골반 후방경사 조절을 훈련합니다.','세팅·고정: 철봉을 어깨너비로 잡고 견갑골을 안정화하며 몸통 흔들림을 멈춥니다. 힘의 사용: 무릎을 들어 올릴 때 단순히 허벅지만 들지 말고 골반을 갈비뼈 쪽으로 말아 올립니다. 근육 작용: 복직근이 골반 후방경사와 척추 굽힘을 보조합니다. 주의: 반동으로 다리를 흔들지 않습니다.'],
+['리버스 크런치','복근','복직근을 중심으로 골반 후방경사와 요추 굽힘 조절을 훈련합니다.','세팅·고정: 바로 누워 무릎을 굽히고 팔을 바닥에 둡니다. 갈비뼈를 아래로 정렬해 몸통을 안정화합니다. 힘의 사용: 무릎을 가슴 쪽으로 가져오며 꼬리뼈를 바닥에서 살짝 말아 올리고 천천히 내립니다. 근육 작용: 복직근이 골반을 흉곽 방향으로 당기는 데 기여합니다. 주의: 다리 반동으로 엉덩이를 던지지 않습니다.'],
+['머신 크런치','복근','복직근의 척추 굽힘 기능을 외부 저항으로 점진적으로 강화합니다.','세팅·고정: 좌석과 패드를 조절해 골반이 들리지 않도록 고정합니다. 손잡이는 가볍게 잡고 목을 당기지 않습니다. 힘의 사용: 갈비뼈를 골반 쪽으로 가까이 가져오며 몸통을 굽히고 천천히 펴줍니다. 근육 작용: 복직근이 척추 굽힘 토크를 만듭니다. 주의: 고관절만 접거나 팔로 손잡이를 당기지 않습니다.'],
+['팔로프 프레스','복근','복횡근·내외복사근을 중심으로 몸통 회전 저항과 항회전 안정성을 훈련합니다.','세팅·고정: 케이블을 가슴 높이에 두고 옆으로 서서 양손으로 손잡이를 잡습니다. 발은 골반너비, 무릎은 부드럽게 굽힙니다. 힘의 사용: 손을 앞으로 뻗어도 몸통과 골반이 케이블 쪽으로 돌아가지 않게 버팁니다. 근육 작용: 복사근·복횡근이 회전 모멘트에 저항합니다. 주의: 허리를 비틀거나 골반을 이동하지 않습니다.'],
+['케이블 우드찹','복근','내외복사근과 복횡근을 사용해 몸통 회전·대각선 안정성을 훈련합니다.','세팅·고정: 케이블을 어깨 높이 또는 위쪽에 두고 발을 고정합니다. 골반과 흉곽이 통제된 범위에서 함께 회전하도록 준비합니다. 힘의 사용: 팔만 당기지 말고 복부에 힘을 유지하며 몸통을 대각선 방향으로 회전합니다. 근육 작용: 복사근이 몸통 회전과 굽힘을 조절합니다. 주의: 허리만 비틀거나 무릎이 안쪽으로 무너지지 않게 합니다.'],
+['AB 휠 롤아웃','복근','복직근·복횡근·광배근·둔근이 협응해 척추 과신전을 방지하는 항신전 능력을 훈련합니다.','세팅·고정: 무릎을 패드에 대고 손으로 휠을 잡습니다. 둔근을 조이고 갈비뼈를 골반 위에 정렬합니다. 힘의 사용: 몸통 정렬을 유지하며 휠을 앞으로 보내고 복부로 당겨 돌아옵니다. 근육 작용: 복부 근육이 허리 과신전에 저항합니다. 주의: 허리가 꺾이기 전까지만 전진하고 호흡을 참지 않습니다.']
+];
+
 function getMemberExerciseGuides(){
- const local=MEMBER_EXERCISE_GUIDES.map(x=>({name:x[0],part:x[1],purpose:x[2],howto:x[3]}));
+ const source=[...MEMBER_EXERCISE_GUIDES,...MEMBER_EXERCISE_GUIDES_EXTRA];
+ const local=source.map(x=>({name:x[0],part:x[1],purpose:x[2],howto:x[3]}));
  const remote=memberPortalPayload&&Array.isArray(memberPortalPayload.exerciseGuides)?memberPortalPayload.exerciseGuides:[];
  const merged=new Map(local.map(x=>[String(x.name).toLocaleLowerCase(),x]));
  remote.forEach(x=>{if(x&&x.name){const key=String(x.name).toLocaleLowerCase();const base=merged.get(key)||{};merged.set(key,{...base,...x,name:x.name,part:x.part||base.part||'전신',purpose:x.purpose||base.purpose||'',howto:x.howto||base.howto||''});}});
- return [...merged.values()];
+ return [...merged.values()].filter(x=>['하체','등','가슴','어깨','팔','복근','코어'].includes(x.part)).map(x=>({...x,part:x.part==='코어'?'복근':x.part}));
+}
+let memberExerciseLibraryPart='하체';
+function renderMemberExerciseLibrary(part){
+ if(part)memberExerciseLibraryPart=part;
+ const host=$('memberExerciseLibrary'),search=($('memberExerciseSearch')?.value||'').trim().toLocaleLowerCase(),guides=getMemberExerciseGuides();
+ document.querySelectorAll('.member-exercise-category').forEach(b=>b.classList.toggle('active',b.dataset.part===memberExerciseLibraryPart));
+ const rows=guides.filter(x=>(x.part==='코어'?'복근':x.part)===memberExerciseLibraryPart&&(!search||x.name.toLocaleLowerCase().includes(search)||x.purpose.toLocaleLowerCase().includes(search)));
+ if(host)host.innerHTML=rows.length?rows.map(x=>'<button type="button" class="member-exercise-option" onclick="selectMemberExerciseGuide(\''+safeText(x.name).replace(/'/g,'&#39;')+'\')"><b>'+safeText(x.name)+'</b><span>'+safeText(x.purpose)+'</span></button>').join(''):'<div class="tiny">검색 결과가 없습니다. 다른 운동명으로 검색해 주세요.</div>';
+}
+function selectMemberExerciseGuide(name){
+ const item=getMemberExerciseGuides().find(x=>x.name===name);if(!item)return;
+ $('memberExerciseName').value=item.name;
+ $('memberExercisePart').value=item.part;
+ renderMemberExerciseGuide();renderMemberPreviousExerciseRecord();
 }
 function renderMemberExerciseGuide(){
  const input=document.getElementById('memberExerciseName'),list=document.getElementById('memberExerciseOptions'),box=document.getElementById('memberExerciseGuide');if(!input||!list||!box)return;
- const guides=getMemberExerciseGuides();list.innerHTML=guides.map(x=>`<option value="${safeText(x.name)}"></option>`).join('');
+ const guides=getMemberExerciseGuides();list.innerHTML=guides.map(x=>`<option value="${safeText(x.name)}"></option>`).join('');renderMemberExerciseLibrary();
  const name=input.value.trim().toLocaleLowerCase();const item=guides.find(x=>x.name.toLocaleLowerCase()===name);
- box.innerHTML=item?`<b>${safeText(item.name)} · ${safeText(item.part)}</b><p><strong>목적·주요 사용 근육</strong><br>${safeText(item.purpose)}</p><p class="exercise-guide-detail"><strong>주요 관절·수행 방법</strong><br>${safeText(item.howto)}</p>`:'<b>운동 설명</b><p>'+(name?'등록된 운동 설명이 없습니다. 운동명을 목록에서 선택하거나 관리자에게 설명 등록을 요청해 주세요.':'운동 종목을 선택하면 목적 부위, 주요 관절, 고정 위치, 수행 방법과 주의사항을 안내합니다.')+'</p>';
+ box.innerHTML=item?`<b>${safeText(item.name)} · ${safeText(item.part)}</b><p><strong>1. 운동 목적 · 주요 근육</strong><br>${safeText(item.purpose)}</p><p class="exercise-guide-detail"><strong>2. 세팅 · 신체 고정</strong><br>${safeText((item.howto.match(/세팅·고정: ([\s\S]*?)(?= 힘의 사용:|$)/)||[])[1]||'몸통과 관절을 안정적으로 고정하고 통증 없는 정렬을 유지합니다.')}</p><p class="exercise-guide-detail"><strong>3. 힘의 방향 · 근육과 관절의 움직임</strong><br>${safeText((item.howto.match(/힘의 사용: ([\s\S]*?)(?= 근육 작용:|$)/)||[])[1]||item.howto)}</p><p class="exercise-guide-detail"><strong>4. 목표 근육의 작용</strong><br>${safeText((item.howto.match(/근육 작용: ([\s\S]*?)(?= 주의:|$)/)||[])[1]||'주동근이 해당 관절 움직임을 만들고 보조근과 안정화 근육이 자세를 유지합니다.')}</p><p class="exercise-guide-detail guide-tip"><strong>5. 주의 · 보상 동작</strong><br>${safeText((item.howto.match(/주의: ([\s\S]*)$/)||[])[1]||'통증이 나타나면 중단하고 가동범위와 부하를 조절합니다.')}</p>`:'<b>운동 설명</b><p>'+(name?'등록된 운동 설명이 없습니다. 운동명을 목록에서 선택하거나 관리자에게 설명 등록을 요청해 주세요.':'부위를 선택하고 운동을 누르면 해부학적 목표 근육과 자세·힘의 사용법을 확인할 수 있습니다.')+'</p>';
 }
 function ensureMemberExerciseGuides(){if(!Array.isArray(db.memberExerciseGuides)){db.memberExerciseGuides=MEMBER_EXERCISE_GUIDES.map(x=>({name:x[0],part:x[1],purpose:x[2],howto:x[3]}));}}
 function clearMemberExerciseGuideForm(){['guideName','guidePurpose','guideHowto','guideEditingName'].forEach(id=>$(id).value='');$('guidePart').value='하체';}
