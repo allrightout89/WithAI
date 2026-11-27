@@ -333,6 +333,84 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
 @media(max-width:900px){.shell{grid-template-columns:1fr}.shell>aside{padding:8px}.shell>main{padding:20px 16px}.member-main{padding:24px 16px 90px}}
 @media(max-width:600px){h1{font-size:24px}.card,.panel{padding:15px;border-radius:15px}.member-greeting h1{font-size:24px}.member-tabs{gap:3px}.member-tabs button{padding:10px 7px;font-size:10px}.auth-card{padding:25px 20px}}
 
+
+/* Mobile recovery patch: normalize viewport sizing and keep every workspace touchable */
+html{width:100%;max-width:100%;overflow-x:clip;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+*,*::before,*::after{box-sizing:border-box;min-width:0}
+img,video,canvas,svg{max-width:100%;height:auto}
+button,a,[role="button"],input,select,textarea{touch-action:manipulation}
+@media screen and (max-width:760px){
+  html,body{width:100%;min-width:0;overflow-x:hidden}
+  body{font-size:16px}
+  body>header{width:100%;height:60px;min-height:60px;padding:0 12px;gap:8px}
+  body>header .brand{font-size:16px;line-height:1.1}
+  body>header .brand small{font-size:8px;letter-spacing:.5px}
+  body>header #userLabel{max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  body>header #logoutBtn{padding:8px;font-size:12px}
+  .shell{display:block;width:100%;max-width:100%;min-height:calc(100dvh - 60px)}
+  .shell>aside{position:sticky;top:60px;z-index:15;width:100%;max-width:100%;padding:5px 7px;overflow:hidden}
+  .shell>aside nav{display:flex;flex-wrap:nowrap;gap:5px;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+  .shell>aside nav button{flex:0 0 auto;width:auto;max-width:none;min-height:42px;padding:9px 11px;margin:0;font-size:12px;white-space:nowrap}
+  .shell>main{display:block;width:100%;max-width:100%;min-width:0;margin:0;padding:14px 11px 32px;overflow-x:hidden}
+  main>section,.shell main>section{width:100%;max-width:100%;min-width:0}
+  h1{font-size:22px;line-height:1.25;overflow-wrap:anywhere}
+  h2{font-size:17px}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .grid2,.grid3,.membergrid{grid-template-columns:minmax(0,1fr)}
+  .formgrid,.diet-fields{grid-template-columns:minmax(0,1fr)}
+  .field.full,.diet-fields .field.full{grid-column:auto}
+  .panel,.card{width:100%;max-width:100%;min-width:0;padding:13px}
+  input,select,textarea{width:100%;max-width:100%;min-width:0;font-size:16px;line-height:1.35}
+  button,.btn,.diet-btn{min-height:40px;max-width:100%;font-size:14px}
+  .btnrow{flex-wrap:wrap}
+  .btnrow>*{max-width:100%}
+  .exercise-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:5px}
+  .exercise-row>*{min-width:0}
+  table{max-width:100%;font-size:12px}
+  #calendarList,#membershipTable,#paymentList,#trainerShell .panel{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #trainerShell{width:100%;max-width:100%;min-width:0;padding:12px 9px 28px!important;overflow-x:hidden}
+  #trainerShell>div{width:100%;max-width:100%!important;min-width:0}
+  #trainerShell header{width:100%;max-width:100%;padding:15px!important;overflow-wrap:anywhere}
+  #trainerShell .panel{padding:12px}
+  #trainerShell table{display:table;width:max-content;min-width:620px;max-width:none;white-space:nowrap}
+  .member-app{width:100%;max-width:100%;min-width:0;overflow-x:hidden;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+  .member-topbar{width:100%;height:58px;padding:0 12px}
+  .member-main{width:100%;max-width:100%;min-width:0;margin:0;padding:18px 11px 28px}
+  .member-greeting{gap:10px;align-items:center}
+  .member-greeting h1{font-size:22px}
+  .member-tabs{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;max-width:100%;margin:0;z-index:50;display:flex;gap:1px;padding:5px 3px calc(5px + env(safe-area-inset-bottom));border-radius:13px 13px 0 0;overflow-x:auto;overflow-y:hidden}
+  .member-tabs button{flex:1 1 0;min-width:0;max-width:none;padding:7px 1px;font-size:10px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+  .member-tabs button span{display:block;margin:0 0 3px;font-size:16px}
+  .member-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .member-shortcut{min-width:0;padding:12px;overflow-wrap:anywhere}
+  .member-panel{width:100%;max-width:100%;min-width:0;padding:12px}
+  .member-calendar-legend{gap:8px;font-size:10px}
+  .withai-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));width:100%;max-width:100%;min-width:0;gap:2px;overflow:hidden}
+  .withai-calendar-grid>*{min-width:0}
+  .home-calendar-day{min-width:0;width:100%;padding:2px;overflow:hidden}
+  .home-cell-event{min-width:0;max-width:100%;font-size:8px;overflow:hidden;text-overflow:ellipsis}
+  .home-calendar-takeat{min-width:0;max-width:100%;overflow:hidden}
+  .takeat-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .takeat-form-grid>*{min-width:0}
+  .diet-layout{grid-template-columns:minmax(0,1fr)}
+  .diet-hero{grid-template-columns:minmax(0,1fr)}
+  .diet-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .member-food-picker{grid-template-columns:repeat(2,minmax(0,1fr));max-width:100%}
+  .member-meal-row{grid-template-columns:minmax(0,1fr) 75px auto}
+  .auth-wrap{width:100%;min-height:calc(100dvh - 60px);padding:14px 10px}
+  .auth-card{width:100%;max-width:440px;padding:22px 16px}
+  .report{width:100%;max-width:100%;padding:14px;overflow-wrap:anywhere}
+}
+@media screen and (max-width:380px){
+  .shell>aside nav button{padding:8px 9px;font-size:11px}
+  .cards{gap:6px}
+  .cards>.card{padding:10px}
+  .member-tabs button{font-size:9px}
+  .member-shortcuts{gap:6px}
+  .member-achievement-summary{gap:4px}
+}
+
 </style></head>
 <body>
 <header><div class="brand">WithAi <small>FITNESS MANAGEMENT SYSTEM · 내 몸 공작소</small></div><div class="topright"><span class="badge">CENTER WORKSPACE</span><span id="userLabel" style="font-size:12px;color:#cbd5e1">로그인 필요</span><button class="btn" id="logoutBtn" type="button" style="display:none">로그아웃</button></div></header>
