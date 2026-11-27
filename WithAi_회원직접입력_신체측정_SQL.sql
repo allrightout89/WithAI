@@ -114,7 +114,7 @@ begin
     return jsonb_build_object('ok', false, 'message', '운동 날짜 형식을 확인해 주세요.');
   end;
   v_sets := p_entry->'setDetails';
-  if jsonb_typeof(v_sets) <> 'array' or jsonb_array_length(v_sets) < 1 or jsonb_array_length(v_sets) > 50 then
+  if coalesce(jsonb_typeof(v_sets),'') <> 'array' or jsonb_array_length(v_sets) < 1 or jsonb_array_length(v_sets) > 50 then
     return jsonb_build_object('ok', false, 'message', '세트별 기록을 1~50세트 사이로 입력해 주세요.');
   end if;
 
