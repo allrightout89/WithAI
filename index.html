@@ -1417,6 +1417,7 @@ async function loadMemberTrainingSessionsFromCloud(){
   const mapped=cloudRows.map(x=>({id:x.id,date:x.session_date,part:x.training_part,no:x.session_number,goal:x.goal,exercises:Array.isArray(x.exercises)?x.exercises:[],rpe:x.rpe,condition:x.condition,good:x.good,note:x.coaching_note,next:x.next_goal,video:x.video_url}));
   memberPortalPayload.sessions=[...mapped,...legacyRows];
   renderMemberSessionHistory(memberPortalPayload.sessions);
+  renderMemberExerciseProgress();renderMemberPreviousExerciseRecord();
   if(typeof renderMemberHomeCalendar==='function')renderMemberHomeCalendar();
   const lessonCount=$('memberSummary')?.querySelector('.member-statline span:nth-child(2) strong');if(lessonCount)lessonCount.textContent=memberPortalPayload.sessions.length+'회';
  }catch(e){console.warn('트레이너 레슨 기록 추가 조회:',e.message||e);}
@@ -1771,11 +1772,11 @@ async function loadTrainerPersonalWorkoutHistory(id){
 
 
 function renderMemberExerciseProgress(){
- const rows=memberPortalPayload?.memberExercises||[],select=$('memberExerciseProgressSelect'),host=$('memberExerciseProgressChart');if(!select||!host)return;
+ const personalRows=memberPortalPayload?.memberExercises||[],sessionRows=(memberPortalPayload?.sessions||[]).flatMap(session=>(session.exercises||[]).map(x=>({...x,date:session.date||session.session_date||'',source:'PT 레슨'}))),rows=[...personalRows,...sessionRows],select=$('memberExerciseProgressSelect'),host=$('memberExerciseProgressChart');if(!select||!host)return;
  const names=[...new Set(rows.map(x=>x.name).filter(Boolean))];
  if(!names.length){select.innerHTML='<option value="">운동 기록 없음</option>';host.innerHTML='<div class="empty">아직 개인운동 기록이 없습니다.</div>';return;}
  const previous=select.value;select.innerHTML=names.map(n=>'<option value="'+safeText(n)+'">'+safeText(n)+'</option>').join('');if(names.includes(previous))select.value=previous;
- const chosen=select.value,data=rows.filter(x=>x.name===chosen).map(x=>({date:x.date||'',weight:(getMemberExerciseSetDetails(x).map(s=>Number(s.weight)).filter(n=>Number.isFinite(n)&&n>0).length?Math.max(...getMemberExerciseSetDetails(x).map(s=>Number(s.weight)).filter(n=>Number.isFinite(n)&&n>0)):Number(x.weight))})).filter(x=>x.weight>0).sort((a,b)=>a.date.localeCompare(b.date));
+ const chosen=select.value,data=rows.filter(x=>x.name===chosen).map(x=>{const weights=getMemberExerciseSetDetails(x).map(s=>Number(s.weight)).filter(n=>Number.isFinite(n)&&n>0);return {date:x.date||'',weight:weights.length?Math.max(...weights):Number(x.weight)}}).filter(x=>x.weight>0).sort((a,b)=>a.date.localeCompare(b.date));
  if(!data.length){host.innerHTML='<div class="empty">이 운동의 중량 기록이 아직 없습니다. 세트별 중량을 입력하면 변화 그래프가 표시됩니다.</div>';return;}
  const vals=data.map(x=>Number(x.weight)),min=Math.min(...vals),max=Math.max(...vals),range=max-min||1,w=640,h=160,pad=28;
  const points=vals.map((v,i)=>{const x=pad+(data.length===1?0:i*(w-pad*2)/(data.length-1)),y=h-pad-((v-min)/range)*(h-pad*2);return x+','+y}).join(' ');
