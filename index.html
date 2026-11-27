@@ -89,6 +89,16 @@ textarea{min-height:76px;resize:vertical}.field label{display:block;font-size:12
 .member-food-option input{accent-color:#2563eb}.member-meal-selected{display:grid;gap:8px}.member-meal-row{display:grid;grid-template-columns:minmax(0,1fr) 95px auto;align-items:center;gap:8px;padding:9px;border:1px solid var(--line,#e5e7eb);border-radius:10px}.member-meal-row input{width:100%;min-width:0}.member-meal-remove{border:0;background:#fee2e2;color:#991b1b;border-radius:8px;padding:7px 9px;cursor:pointer}
 
 .exercise-guide-detail{white-space:pre-line;line-height:1.65}
+.member-exercise-categories{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:8px 0}
+.member-exercise-category{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:9px 4px;font-size:12px;font-weight:750;cursor:pointer}
+.member-exercise-category.active{background:#17212b;color:#fff;border-color:#17212b}
+.member-exercise-library{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:280px;overflow:auto;margin:9px 0;padding:2px}
+.member-exercise-option{display:flex;flex-direction:column;gap:4px;text-align:left;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;min-width:0}
+.member-exercise-option b{font-size:12px;color:var(--ink)}
+.member-exercise-option span{font-size:10px;line-height:1.45;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.member-exercise-option:hover{border-color:#b8a21b;background:#fffdf3}
+@media(max-width:600px){.member-exercise-categories{grid-template-columns:repeat(3,minmax(0,1fr))}.member-exercise-library{grid-template-columns:1fr;max-height:320px}}
+
 
 
 /* WithAi visual refinement: clearer hierarchy, calmer surfaces, accessible controls */
@@ -333,6 +343,84 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
 @media(max-width:900px){.shell{grid-template-columns:1fr}.shell>aside{padding:8px}.shell>main{padding:20px 16px}.member-main{padding:24px 16px 90px}}
 @media(max-width:600px){h1{font-size:24px}.card,.panel{padding:15px;border-radius:15px}.member-greeting h1{font-size:24px}.member-tabs{gap:3px}.member-tabs button{padding:10px 7px;font-size:10px}.auth-card{padding:25px 20px}}
 
+
+/* Mobile recovery patch: normalize viewport sizing and keep every workspace touchable */
+html{width:100%;max-width:100%;overflow-x:clip;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+*,*::before,*::after{box-sizing:border-box;min-width:0}
+img,video,canvas,svg{max-width:100%;height:auto}
+button,a,[role="button"],input,select,textarea{touch-action:manipulation}
+@media screen and (max-width:760px){
+  html,body{width:100%;min-width:0;overflow-x:hidden}
+  body{font-size:16px}
+  body>header{width:100%;height:60px;min-height:60px;padding:0 12px;gap:8px}
+  body>header .brand{font-size:16px;line-height:1.1}
+  body>header .brand small{font-size:8px;letter-spacing:.5px}
+  body>header #userLabel{max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  body>header #logoutBtn{padding:8px;font-size:12px}
+  .shell{display:block;width:100%;max-width:100%;min-height:calc(100dvh - 60px)}
+  .shell>aside{position:sticky;top:60px;z-index:15;width:100%;max-width:100%;padding:5px 7px;overflow:hidden}
+  .shell>aside nav{display:flex;flex-wrap:nowrap;gap:5px;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+  .shell>aside nav button{flex:0 0 auto;width:auto;max-width:none;min-height:42px;padding:9px 11px;margin:0;font-size:12px;white-space:nowrap}
+  .shell>main{display:block;width:100%;max-width:100%;min-width:0;margin:0;padding:14px 11px 32px;overflow-x:hidden}
+  main>section,.shell main>section{width:100%;max-width:100%;min-width:0}
+  h1{font-size:22px;line-height:1.25;overflow-wrap:anywhere}
+  h2{font-size:17px}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .grid2,.grid3,.membergrid{grid-template-columns:minmax(0,1fr)}
+  .formgrid,.diet-fields{grid-template-columns:minmax(0,1fr)}
+  .field.full,.diet-fields .field.full{grid-column:auto}
+  .panel,.card{width:100%;max-width:100%;min-width:0;padding:13px}
+  input,select,textarea{width:100%;max-width:100%;min-width:0;font-size:16px;line-height:1.35}
+  button,.btn,.diet-btn{min-height:40px;max-width:100%;font-size:14px}
+  .btnrow{flex-wrap:wrap}
+  .btnrow>*{max-width:100%}
+  .exercise-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:5px}
+  .exercise-row>*{min-width:0}
+  table{max-width:100%;font-size:12px}
+  #calendarList,#membershipTable,#paymentList,#trainerShell .panel{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #trainerShell{width:100%;max-width:100%;min-width:0;padding:12px 9px 28px!important;overflow-x:hidden}
+  #trainerShell>div{width:100%;max-width:100%!important;min-width:0}
+  #trainerShell header{width:100%;max-width:100%;padding:15px!important;overflow-wrap:anywhere}
+  #trainerShell .panel{padding:12px}
+  #trainerShell table{display:table;width:max-content;min-width:620px;max-width:none;white-space:nowrap}
+  .member-app{width:100%;max-width:100%;min-width:0;overflow-x:hidden;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+  .member-topbar{width:100%;height:58px;padding:0 12px}
+  .member-main{width:100%;max-width:100%;min-width:0;margin:0;padding:18px 11px 28px}
+  .member-greeting{gap:10px;align-items:center}
+  .member-greeting h1{font-size:22px}
+  .member-tabs{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;max-width:100%;margin:0;z-index:50;display:flex;gap:1px;padding:5px 3px calc(5px + env(safe-area-inset-bottom));border-radius:13px 13px 0 0;overflow-x:auto;overflow-y:hidden}
+  .member-tabs button{flex:1 1 0;min-width:0;max-width:none;padding:7px 1px;font-size:10px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+  .member-tabs button span{display:block;margin:0 0 3px;font-size:16px}
+  .member-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .member-shortcut{min-width:0;padding:12px;overflow-wrap:anywhere}
+  .member-panel{width:100%;max-width:100%;min-width:0;padding:12px}
+  .member-calendar-legend{gap:8px;font-size:10px}
+  .withai-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));width:100%;max-width:100%;min-width:0;gap:2px;overflow:hidden}
+  .withai-calendar-grid>*{min-width:0}
+  .home-calendar-day{min-width:0;width:100%;padding:2px;overflow:hidden}
+  .home-cell-event{min-width:0;max-width:100%;font-size:8px;overflow:hidden;text-overflow:ellipsis}
+  .home-calendar-takeat{min-width:0;max-width:100%;overflow:hidden}
+  .takeat-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .takeat-form-grid>*{min-width:0}
+  .diet-layout{grid-template-columns:minmax(0,1fr)}
+  .diet-hero{grid-template-columns:minmax(0,1fr)}
+  .diet-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .member-food-picker{grid-template-columns:repeat(2,minmax(0,1fr));max-width:100%}
+  .member-meal-row{grid-template-columns:minmax(0,1fr) 75px auto}
+  .auth-wrap{width:100%;min-height:calc(100dvh - 60px);padding:14px 10px}
+  .auth-card{width:100%;max-width:440px;padding:22px 16px}
+  .report{width:100%;max-width:100%;padding:14px;overflow-wrap:anywhere}
+}
+@media screen and (max-width:380px){
+  .shell>aside nav button{padding:8px 9px;font-size:11px}
+  .cards{gap:6px}
+  .cards>.card{padding:10px}
+  .member-tabs button{font-size:9px}
+  .member-shortcuts{gap:6px}
+  .member-achievement-summary{gap:4px}
+}
+
 </style></head>
 <body>
 <header><div class="brand">WithAi <small>FITNESS MANAGEMENT SYSTEM · 내 몸 공작소</small></div><div class="topright"><span class="badge">CENTER WORKSPACE</span><span id="userLabel" style="font-size:12px;color:#cbd5e1">로그인 필요</span><button class="btn" id="logoutBtn" type="button" style="display:none">로그아웃</button></div></header>
@@ -398,6 +486,13 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
    <div class="member-panel"><h2>체중 변화</h2><div id="memberWeightChart"></div></div>
    <div class="member-panel" style="margin-top:14px"><h2>체성분 변화</h2><div id="memberCompositionChart"></div></div>
    <div class="member-panel" style="margin-top:14px"><h2>운동 수행 변화</h2><p class="tiny">같은 운동의 중량 기록을 날짜별로 비교합니다.</p><div class="field" style="max-width:320px"><label>운동 종목</label><select id="memberExerciseProgressSelect" onchange="renderMemberExerciseProgress()"></select></div><div id="memberExerciseProgressChart"></div></div>
+   <div class="member-panel" style="margin-top:14px"><h2>내 신체 측정 입력</h2><p class="tiny">측정한 날짜와 수치를 직접 기록하면 변화 그래프에 반영됩니다.</p><div class="formgrid">
+    <div class="field"><label>측정일</label><input id="memberMeasurementDate" type="date"></div>
+    <div class="field"><label>체중 (kg)</label><input id="memberMeasurementWeight" type="number" min="0" step="0.1" placeholder="예: 68.5"></div>
+    <div class="field"><label>체지방률 (%)</label><input id="memberMeasurementBodyFat" type="number" min="0" max="100" step="0.1" placeholder="예: 22.5"></div>
+    <div class="field"><label>골격근량 (kg)</label><input id="memberMeasurementMuscle" type="number" min="0" step="0.1" placeholder="예: 28.4"></div>
+    <div class="field"><label>허리둘레 (cm)</label><input id="memberMeasurementWaist" type="number" min="0" step="0.1" placeholder="예: 78"></div>
+   </div><div class="btnrow"><button class="btn primary" type="button" onclick="saveMemberMeasurement()">측정 기록 저장</button></div></div>
    <div class="member-panel" style="margin-top:14px"><h2>측정 기록</h2><div id="memberMeasurementHistory"></div></div>
   </section>
   <section id="memberView-calendar" class="member-view hidden">
@@ -408,9 +503,9 @@ table{font-size:13px}th{background:#f7f9f7;color:#77847b;font-size:10px;letter-s
   <section id="memberView-exercise" class="member-view hidden">
    <div class="member-section-heading"><div><h2>운동 기록</h2><p>PT 레슨 외에 혼자 운동한 내용도 기록할 수 있습니다.</p></div></div>
    <div class="member-panel"><h2>오늘의 개인 운동 입력</h2><div class="formgrid">
-    <div class="field"><label>운동 날짜</label><input id="memberExerciseDate" type="date"></div><div class="field"><label>운동 부위</label><select id="memberExercisePart"><option>전신</option><option>하체</option><option>등</option><option>가슴</option><option>어깨</option><option>팔</option><option>코어</option><option>유산소</option><option>스트레칭</option></select></div>
-    <div class="field"><label>운동 종목</label><input id="memberExerciseName" list="memberExerciseOptions" placeholder="운동명을 검색하거나 선택하세요"><datalist id="memberExerciseOptions"></datalist><div id="memberExerciseGuide" class="exercise-guide" aria-live="polite"><b>운동 설명</b><p>운동 종목을 선택하면 주요 목적과 수행 방법을 안내합니다.</p></div></div><div class="field"><label>세트 수</label><input id="memberExerciseSets" type="number" min="0" placeholder="예: 3"></div>
-    <div class="field"><label>횟수 / 시간(분)</label><input id="memberExerciseReps" placeholder="예: 12회 또는 30분"></div><div class="field"><label>중량 (kg, 선택)</label><input id="memberExerciseWeight" type="number" min="0" step="0.5" placeholder="예: 20"></div>
+    <div class="field"><label>운동 날짜</label><input id="memberExerciseDate" type="date"></div><input id="memberExercisePart" type="hidden" value="하체">
+    <div class="field full"><label>웨이트 트레이닝 운동 선택</label><div class="member-exercise-categories" id="memberExerciseCategories"><button type="button" class="member-exercise-category active" data-part="하체" onclick="renderMemberExerciseLibrary('하체')">하체</button><button type="button" class="member-exercise-category" data-part="등" onclick="renderMemberExerciseLibrary('등')">등</button><button type="button" class="member-exercise-category" data-part="가슴" onclick="renderMemberExerciseLibrary('가슴')">가슴</button><button type="button" class="member-exercise-category" data-part="어깨" onclick="renderMemberExerciseLibrary('어깨')">어깨</button><button type="button" class="member-exercise-category" data-part="팔" onclick="renderMemberExerciseLibrary('팔')">팔</button><button type="button" class="member-exercise-category" data-part="복근" onclick="renderMemberExerciseLibrary('복근')">복근</button></div><input id="memberExerciseSearch" type="search" placeholder="운동명 검색 (예: 스쿼트, 레그 프레스)" oninput="renderMemberExerciseLibrary()"><div id="memberExerciseLibrary" class="member-exercise-library" aria-live="polite"></div><label style="margin-top:12px">선택한 운동</label><input id="memberExerciseName" list="memberExerciseOptions" placeholder="위 목록에서 운동을 선택하세요"><datalist id="memberExerciseOptions"></datalist><div id="memberExerciseGuide" class="exercise-guide" aria-live="polite"><b>운동 설명</b><p>부위를 선택하고 운동을 누르면 해부학적 목표 근육과 자세·힘의 사용법을 확인할 수 있습니다.</p></div></div>
+    <div class="field full"><label>세트별 수행 기록</label><p class="tiny">세트마다 중량과 횟수를 다르게 입력할 수 있습니다.</p><div id="memberExerciseSetRows"></div><div class="btnrow"><button class="btn" type="button" onclick="addMemberExerciseSetRow()">+ 세트 추가</button></div><div id="memberPreviousExerciseRecord" class="exercise-guide" aria-live="polite"><b>직전 운동 기록</b><p>운동 종목을 선택하면 이전 수행 기록이 표시됩니다.</p></div></div>
     <div class="field full"><label>운동 메모 / 컨디션</label><textarea id="memberExerciseNote" placeholder="오늘 운동 느낌, 불편했던 부위 등을 기록하세요."></textarea></div>
    </div><div class="btnrow"><button class="btn primary" type="button" onclick="saveMemberExercise()">운동 기록 저장</button></div></div>
    <div class="member-panel"><div class="member-panel-title"><div><h2>나의 운동 기록</h2><p>최근에 입력한 개인 운동 내역입니다.</p></div></div><div id="memberExerciseHistory"></div></div>
@@ -817,7 +912,7 @@ async function ensureSupabaseClient(){
 window.withAiCloudEnabled=false;
 let cloudTimer=null, currentUser=null, currentProfile=null, hasSnapshot=false, authMode='member';
 let cloudChannel=null, lastSnapshotUpdatedAt=null, cloudSyncBusy=false;
-let memberPortalToken=null, memberPortalPayload=null;
+let memberPortalToken=null, memberPortalPayload=null, memberExerciseCloudEntries=[];
 const $=id=>document.getElementById(id);
 function authMsg(t){$('authMessage').textContent=t}
 function cloudMsg(t){$('cloudStatus').textContent=t}
@@ -1292,18 +1387,77 @@ const MEMBER_EXERCISE_GUIDES = [
 ['실내 자전거','유산소','대퇴사두근·둔근·햄스트링·종아리를 반복 사용해 심폐 지구력과 하지 근지구력을 높입니다.','주요 관절: 고관절·무릎·발목의 반복 굽힘·폄. 안장 높이를 조절해 페달이 가장 아래일 때 무릎이 살짝 굽혀지도록 하고 골반을 안장에 안정적으로 둔 채 일정한 리듬으로 밟습니다. 주의: 무릎이 안팎으로 흔들리거나 발끝만으로 페달을 누르지 않게 합니다.'],
 ['스텝밀','유산소','대퇴사두근·대둔근·햄스트링·종아리 근육을 반복 사용해 심폐 및 하지 지구력을 훈련합니다.','주요 관절: 고관절·무릎·발목. 낮은 속도에서 발 전체를 계단에 올리고 몸통을 세운 채 한 계단씩 체중을 이동합니다; 손잡이는 균형 보조로만 가볍게 잡습니다. 주의: 발끝만 걸치거나 손잡이에 체중을 과하게 싣지 말고 피로 시 속도를 낮춥니다.'],
 ];
+
+const MEMBER_EXERCISE_GUIDES_EXTRA = [
+['레그 프레스(발 높이 조절)','하체','대퇴사두근과 대둔근을 중심으로 고관절·무릎 폄 근력을 기릅니다.','세팅·고정: 등과 천골을 등받이에 붙이고 발은 골반~어깨너비, 발바닥 3점을 발판에 둡니다. 힘의 사용: 발 전체로 발판을 밀며 무릎과 고관절을 동시에 폅니다. 근육 작용: 대퇴사두근은 무릎 폄, 대둔근은 고관절 폄에 기여합니다. 주의: 내려갈 때 골반이 말리거나 허리가 뜨기 전까지만 깊이를 확보하고 무릎을 잠그지 않습니다.'],
+['프론트 스쿼트','하체','대퇴사두근의 무릎 폄과 몸통 전면 안정성을 강조하는 스쿼트입니다.','세팅·고정: 바를 전면 어깨에 얹고 팔꿈치를 높여 상완을 지지대처럼 유지합니다. 발바닥 3점과 복압으로 몸통을 고정합니다. 힘의 사용: 무릎과 고관절을 함께 굽혀 수직으로 내려가고 바닥을 밀어 일어섭니다. 근육 작용: 대퇴사두근이 무릎 폄, 둔근이 고관절 폄을 담당합니다. 주의: 팔꿈치가 떨어지거나 몸통이 과하게 숙여지지 않게 합니다.'],
+['핵 스쿼트','하체','대퇴사두근과 대둔근의 무릎·고관절 폄 능력을 머신에서 안정적으로 훈련합니다.','세팅·고정: 등과 골반을 패드에 밀착하고 어깨 패드에 몸을 고정합니다. 발 위치로 무릎 이동 범위를 조절하되 발 전체를 플랫폼에 둡니다. 힘의 사용: 발판을 밀어 무릎과 고관절을 펴고 내려올 때 천천히 저항합니다. 근육 작용: 대퇴사두근이 무릎 폄의 주동근, 둔근이 고관절 폄을 보조합니다. 주의: 골반이 말리거나 무릎이 안쪽으로 무너지지 않게 합니다.'],
+['스미스 머신 스쿼트','하체','대퇴사두근·대둔근을 중심으로 스쿼트 패턴과 하체 근력을 훈련합니다.','세팅·고정: 바를 승모근 위에 안정적으로 놓고 발은 바 경로에 맞춰 배치합니다. 복압과 발바닥 3점으로 몸통·발을 고정합니다. 힘의 사용: 엉덩이와 무릎을 함께 굽혔다가 바닥을 밀며 폅니다. 근육 작용: 대퇴사두근은 무릎 폄, 둔근은 고관절 폄을 수행합니다. 주의: 바 경로에 맞추느라 발뒤꿈치가 뜨거나 허리가 과신전되지 않게 합니다.'],
+['레그 어브덕션 머신','하체','중둔근·소둔근과 대퇴근막장근을 사용해 고관절 벌림과 골반 안정성을 훈련합니다.','세팅·고정: 등과 골반을 등받이에 붙이고 무릎 바깥쪽을 패드에 댑니다. 힘의 사용: 골반이 흔들리지 않게 허벅지를 바깥으로 벌린 뒤 천천히 모읍니다. 근육 작용: 중둔근·소둔근이 고관절 벌림에 기여합니다. 주의: 상체를 젖히거나 반동으로 가동범위를 만들지 않습니다.'],
+['레그 어덕션 머신','하체','장내전근·단내전근·대내전근 등 고관절 내전근을 강화합니다.','세팅·고정: 등과 골반을 등받이에 고정하고 허벅지 안쪽을 패드에 댑니다. 힘의 사용: 양 허벅지를 중앙으로 모으고 원위치에서는 중량이 튀지 않게 버팁니다. 근육 작용: 고관절 내전근군이 허벅지를 몸의 정중선으로 모읍니다. 주의: 골반이 들리거나 허리를 말아 보상하지 않습니다.'],
+['스탠딩 카프 레이즈','하체','비복근을 중심으로 발목 발바닥굽힘 근력을 강화합니다.','세팅·고정: 어깨 패드에 몸을 안정적으로 두고 발 앞부분을 발판에 올립니다. 무릎은 거의 편 상태로 유지합니다. 힘의 사용: 엄지발가락 볼을 포함한 앞발로 바닥을 밀어 뒤꿈치를 올리고 천천히 내립니다. 근육 작용: 비복근과 가자미근이 발목을 발바닥 방향으로 폅니다. 주의: 발목이 안팎으로 기울거나 반동을 쓰지 않습니다.'],
+['시티드 카프 레이즈','하체','무릎 굽힘 자세에서 가자미근을 상대적으로 강조해 발목 저측굴곡을 훈련합니다.','세팅·고정: 무릎 위 패드를 허벅지에 고정하고 발 앞부분을 받침대에 둡니다. 힘의 사용: 앞발로 받침대를 누르며 뒤꿈치를 올리고 끝범위에서 잠시 멈춥니다. 근육 작용: 가자미근이 발목 발바닥굽힘을 담당합니다. 주의: 발목을 튕기지 말고 전체 가동범위를 통제합니다.'],
+['체스트 서포티드 로우','등','광배근·능형근·중부 승모근·후면 삼각근을 몸통 반동 없이 훈련합니다.','세팅·고정: 가슴을 패드에 밀착하고 발을 바닥에 고정합니다. 목은 척추와 중립을 유지합니다. 힘의 사용: 팔꿈치를 뒤·아래 방향으로 당기고 천천히 팔을 뻗습니다. 근육 작용: 광배근은 어깨 폄, 능형근·중부 승모근은 견갑골 후인에 기여합니다. 주의: 가슴을 패드에서 떼거나 어깨를 으쓱하지 않습니다.'],
+['T바 로우','등','광배근·능형근·중부 승모근과 후면 삼각근의 수평 당기기 근력을 강화합니다.','세팅·고정: 발을 플랫폼에 고정하고 고관절을 접어 몸통 각도를 유지합니다. 가슴 지지형이면 흉곽을 패드에 붙입니다. 힘의 사용: 팔꿈치를 몸통 옆으로 당겨 손잡이를 하복부 방향으로 이동시킵니다. 근육 작용: 광배근은 상완을 폄·모음하고 견갑골 주변 근육은 후인·안정화합니다. 주의: 허리 반동으로 중량을 튀기지 않습니다.'],
+['클로즈그립 랫풀다운','등','광배근과 대원근을 중심으로 어깨 폄·모음 및 팔꿈치 굽힘을 훈련합니다.','세팅·고정: 허벅지 패드를 조이고 발을 바닥에 둡니다. 흉곽을 과하게 들지 않고 척추 중립을 유지합니다. 힘의 사용: 팔꿈치를 옆구리·골반 방향으로 내리며 손잡이를 윗가슴 쪽으로 당깁니다. 근육 작용: 광배근이 상완을 몸통 쪽으로 당기고 이두근이 팔꿈치 굽힘을 돕습니다. 주의: 몸을 뒤로 젖혀 당기지 않습니다.'],
+['스트레이트 암 풀다운','등','광배근·대원근의 어깨 폄 기능을 팔꿈치 움직임을 최소화해 훈련합니다.','세팅·고정: 케이블 상단에 바를 연결하고 무릎을 약간 굽혀 고관절을 접습니다. 복압으로 몸통을 고정하고 팔꿈치는 살짝 굽힌 각도를 유지합니다. 힘의 사용: 겨드랑이를 조인다는 느낌으로 손잡이를 허벅지 앞까지 내립니다. 근육 작용: 광배근이 상완을 머리 위 위치에서 몸통 쪽으로 폅니다. 주의: 허리 신전이나 팔꿈치 굽힘으로 동작을 대신하지 않습니다.'],
+['원암 케이블 로우','등','좌우 광배근과 견갑골 주변 근육의 비대칭 조절 및 당기기 근력을 훈련합니다.','세팅·고정: 케이블을 배꼽 높이에 두고 발을 앞뒤로 벌려 골반과 흉곽을 정면에 고정합니다. 힘의 사용: 팔꿈치를 갈비뼈 옆으로 당기되 몸통 회전을 최소화합니다. 근육 작용: 광배근은 어깨 폄, 능형근·승모근은 견갑골 위치 조절에 기여합니다. 주의: 몸통을 비틀어 손잡이를 당기지 않습니다.'],
+['인클라인 덤벨 로우','등','광배근·능형근·중부 승모근을 가슴 지지 자세에서 집중적으로 훈련합니다.','세팅·고정: 벤치를 30~45도로 맞추고 가슴을 패드에 붙이며 발을 바닥에 고정합니다. 힘의 사용: 팔꿈치를 골반 또는 갈비뼈 방향으로 당긴 뒤 천천히 내립니다. 근육 작용: 광배근은 어깨 폄, 견갑골 후인근은 견갑골을 척추 쪽으로 이동시킵니다. 주의: 목을 들거나 어깨를 으쓱하지 않습니다.'],
+['덤벨 풀오버','등','광배근·대원근과 대흉근의 보조 작용을 활용해 어깨 굽힘·폄 가동 조절을 훈련합니다.','세팅·고정: 벤치에 등 상부를 지지하고 갈비뼈를 아래로 정렬하며 복부에 힘을 줍니다. 팔꿈치는 약간 굽힌 채 각도를 유지합니다. 힘의 사용: 덤벨을 머리 뒤로 통제해 내렸다가 겨드랑이를 조이며 가슴 위로 가져옵니다. 근육 작용: 광배근이 어깨 폄에 기여합니다. 주의: 허리가 과하게 꺾이거나 어깨 통증 범위까지 내리지 않습니다.'],
+['시티드 케이블 로우(와이드)','등','중부 승모근·능형근·후면 삼각근과 광배근의 당기기 기능을 훈련합니다.','세팅·고정: 발판에 발을 대고 골반을 중립으로 둡니다. 손잡이를 넓게 잡되 손목은 중립으로 유지합니다. 힘의 사용: 팔꿈치를 바깥쪽으로 벌려 명치 방향으로 당기고 천천히 돌아옵니다. 근육 작용: 견갑골 후인과 어깨 수평벌림이 주요 움직임입니다. 주의: 허리를 젖히거나 어깨를 귀 쪽으로 올리지 않습니다.'],
+['인클라인 벤치 프레스','가슴','대흉근 쇄골부를 중심으로 전면 삼각근과 삼두근을 함께 강화합니다.','세팅·고정: 벤치 각도를 약 20~35도로 설정하고 머리·등·골반을 지지합니다. 발을 바닥에 고정하고 견갑골을 안정화합니다. 힘의 사용: 바를 윗가슴 쪽으로 내리고 팔꿈치가 손목 아래에 오도록 밀어 올립니다. 근육 작용: 대흉근 쇄골부가 어깨 수평모음·굽힘에 기여합니다. 주의: 각도를 과도하게 세워 어깨 전면에 부하가 몰리지 않게 합니다.'],
+['디클라인 체스트 프레스','가슴','대흉근 흉골부·늑골부를 중심으로 수평 밀기 근력을 강화합니다.','세팅·고정: 좌석을 조절해 손잡이가 가슴 아래쪽 높이에 오도록 하고 등·골반을 패드에 고정합니다. 힘의 사용: 손잡이를 앞·약간 위쪽으로 밀고 천천히 팔꿈치를 굽혀 돌아옵니다. 근육 작용: 대흉근이 상완을 수평으로 모으고 삼두근이 팔꿈치를 폅니다. 주의: 어깨가 앞으로 말리거나 팔꿈치가 과도하게 뒤로 가지 않게 합니다.'],
+['덤벨 플라이','가슴','대흉근의 어깨 수평모음 기능을 긴 근육 길이 구간부터 수축 구간까지 훈련합니다.','세팅·고정: 벤치에 머리·등·골반을 지지하고 발을 바닥에 둡니다. 팔꿈치는 약간 굽혀 고정합니다. 힘의 사용: 팔을 큰 원호로 벌려 가슴이 늘어나는 범위까지만 내린 뒤 양팔을 가슴 위로 모읍니다. 근육 작용: 대흉근이 상완을 수평으로 모읍니다. 주의: 팔꿈치를 펴 잠그거나 어깨 앞쪽이 과하게 늘어나는 깊이를 피합니다.'],
+['스미스 머신 벤치 프레스','가슴','대흉근·삼두근·전면 삼각근을 고정된 바 경로에서 훈련합니다.','세팅·고정: 벤치 위치를 조절해 바가 중간 가슴으로 내려오도록 하고 발·머리·등·골반을 지지합니다. 힘의 사용: 바를 가슴 쪽으로 통제해 내린 뒤 발로 바닥을 밀어 몸통을 안정시키며 위로 밉니다. 근육 작용: 대흉근의 수평모음과 삼두근의 팔꿈치 폄이 함께 작용합니다. 주의: 어깨가 들리거나 손목이 뒤로 꺾이지 않게 합니다.'],
+['머신 인클라인 프레스','가슴','대흉근 쇄골부와 삼두근·전면 삼각근의 상향 밀기 기능을 강화합니다.','세팅·고정: 좌석을 조절해 손잡이가 윗가슴 높이에 오도록 하고 등·골반을 패드에 밀착합니다. 힘의 사용: 손잡이를 앞·위 방향으로 밀고 팔꿈치를 천천히 굽혀 돌아옵니다. 근육 작용: 대흉근 쇄골부가 상완을 굽히고 모으는 데 기여합니다. 주의: 허리를 과신전하거나 어깨가 귀 쪽으로 올라가지 않게 합니다.'],
+['케이블 플라이(하이 투 로우)','가슴','대흉근의 수평모음·모음 기능을 아래 방향의 케이블 저항으로 훈련합니다.','세팅·고정: 케이블을 어깨보다 높게 설정하고 한 발을 앞에 두어 골반과 몸통을 고정합니다. 팔꿈치를 부드럽게 굽혀 각도를 유지합니다. 힘의 사용: 손을 아래·앞쪽으로 모아 하복부 앞에서 만납니다. 근육 작용: 대흉근이 상완을 모으고 내리는 데 기여합니다. 주의: 허리를 숙여 당기거나 손목만 꺾지 않습니다.'],
+['아놀드 프레스','어깨','삼각근 전·중부와 삼두근을 사용해 어깨 굽힘·벌림 및 팔꿈치 폄을 훈련합니다.','세팅·고정: 등받이에 등을 지지하고 발을 고정하며 복압을 유지합니다. 덤벨을 가슴 앞, 손바닥이 몸을 향하게 시작합니다. 힘의 사용: 팔을 위로 밀면서 전완과 상완을 자연스럽게 회전시킵니다. 근육 작용: 삼각근이 상완을 들어 올리고 삼두근이 팔꿈치를 폅니다. 주의: 통증 없는 회전 범위에서 실시하고 허리를 젖히지 않습니다.'],
+['머신 레터럴 레이즈','어깨','삼각근 중부의 어깨 벌림 기능을 일정한 저항으로 집중 훈련합니다.','세팅·고정: 좌석을 조절해 패드가 팔꿈치 또는 상완 바깥쪽에 오게 하고 등·골반을 고정합니다. 힘의 사용: 팔꿈치를 옆으로 들어 올려 어깨 높이 전후까지 벌린 뒤 천천히 내립니다. 근육 작용: 삼각근 중부가 상완골 벌림에 기여합니다. 주의: 승모근으로 어깨를 으쓱하거나 몸통을 기울이지 않습니다.'],
+['케이블 레터럴 레이즈','어깨','삼각근 중부에 지속적인 장력을 제공해 어깨 벌림 근력을 강화합니다.','세팅·고정: 케이블을 몸 뒤쪽 낮은 위치에 두고 손잡이를 잡습니다. 반대 손으로 기둥을 잡아 몸통을 고정합니다. 힘의 사용: 팔꿈치를 부드럽게 굽혀 팔을 옆·약간 앞쪽으로 들어 올립니다. 근육 작용: 삼각근 중부가 상완을 벌립니다. 주의: 손목으로 당기거나 몸통 반동을 사용하지 않습니다.'],
+['덤벨 프론트 레이즈','어깨','삼각근 전부를 중심으로 어깨 굽힘 근력을 훈련합니다.','세팅·고정: 발을 골반너비로 두고 복부·둔근에 가볍게 힘을 줘 몸통을 고정합니다. 덤벨은 허벅지 앞에서 시작합니다. 힘의 사용: 팔을 앞쪽으로 들어 어깨 높이 전후까지 올리고 천천히 내립니다. 근육 작용: 삼각근 전부가 상완 굽힘에 기여합니다. 주의: 허리를 젖히거나 반동으로 덤벨을 올리지 않습니다.'],
+['케이블 리어 델트 플라이','어깨','후면 삼각근과 견갑골 주변 근육의 어깨 수평벌림 기능을 훈련합니다.','세팅·고정: 케이블을 어깨 높이에 두고 반대편 손잡이를 교차해 잡습니다. 흉곽·골반을 정면에 고정합니다. 힘의 사용: 팔을 옆·뒤로 벌리고 천천히 시작 위치로 돌아옵니다. 근육 작용: 후면 삼각근이 상완을 수평으로 벌립니다. 주의: 허리 회전이나 어깨 으쓱임으로 범위를 만들지 않습니다.'],
+['덤벨 슈러그','어깨','상부 승모근을 중심으로 견갑골 거상 근력을 강화합니다.','세팅·고정: 양손에 덤벨을 들고 팔을 몸 옆에 길게 둡니다. 목은 중립, 몸통은 수직으로 고정합니다. 힘의 사용: 어깨를 귀 방향으로 수직에 가깝게 들어 올리고 천천히 내립니다. 근육 작용: 상부 승모근과 견갑거근이 견갑골 거상에 기여합니다. 주의: 어깨를 크게 돌리거나 목을 앞으로 내밀지 않습니다.'],
+['인클라인 덤벨 컬','팔','상완이두근을 어깨가 뒤로 위치한 자세에서 훈련해 근육 길이 조절 능력을 높입니다.','세팅·고정: 벤치를 45~60도로 설정하고 등·골반을 지지합니다. 상완을 몸통 뒤쪽에 두되 어깨 앞쪽이 불편하지 않게 합니다. 힘의 사용: 팔꿈치를 굽혀 덤벨을 올리고 2~3초에 걸쳐 내립니다. 근육 작용: 상완이두근과 상완근이 팔꿈치 굽힘을 수행합니다. 주의: 팔꿈치가 앞쪽으로 이동하거나 어깨가 말리지 않게 합니다.'],
+['프리처 컬','팔','상완이두근·상완근의 팔꿈치 굽힘 기능을 지지된 자세에서 훈련합니다.','세팅·고정: 겨드랑이와 상완을 패드에 안정적으로 지지하고 손목을 중립으로 둡니다. 힘의 사용: 팔꿈치를 굽혀 바를 올린 뒤 완전히 잠그지 않는 범위에서 천천히 내립니다. 근육 작용: 이두근·상완근이 팔꿈치 굽힘에 기여합니다. 주의: 바닥 구간에서 팔꿈치를 강하게 잠그거나 반동을 사용하지 않습니다.'],
+['케이블 컬','팔','상완이두근·상완근을 일정한 케이블 장력 아래에서 훈련합니다.','세팅·고정: 케이블 하단 손잡이를 잡고 팔꿈치를 몸통 옆에 고정합니다. 발과 골반은 흔들리지 않게 둡니다. 힘의 사용: 팔꿈치만 굽혀 손잡이를 어깨 쪽으로 올리고 천천히 폅니다. 근육 작용: 이두근과 상완근이 팔꿈치 굽힘을 담당합니다. 주의: 어깨를 앞으로 내밀거나 몸통을 뒤로 젖히지 않습니다.'],
+['덤벨 킥백','팔','상완삼두근의 팔꿈치 폄 기능을 상완을 뒤로 둔 자세에서 훈련합니다.','세팅·고정: 한 손과 무릎을 벤치에 지지하거나 상체를 힌지하고 상완을 몸통 옆에 고정합니다. 힘의 사용: 상완 위치를 유지한 채 팔꿈치를 펴 덤벨을 뒤로 보내고 천천히 굽힙니다. 근육 작용: 삼두근이 팔꿈치 폄을 수행합니다. 주의: 어깨를 흔들거나 허리를 비틀어 중량을 이동하지 않습니다.'],
+['로프 트라이셉스 푸시다운','팔','상완삼두근의 팔꿈치 폄을 케이블 저항으로 훈련합니다.','세팅·고정: 케이블 상단 로프를 잡고 팔꿈치를 갈비뼈 옆에 고정합니다. 어깨는 편안히 내리고 몸통을 세웁니다. 힘의 사용: 팔꿈치를 펴며 로프 끝을 허벅지 바깥쪽으로 벌리고 천천히 돌아옵니다. 근육 작용: 삼두근의 세 갈래가 팔꿈치 폄에 기여합니다. 주의: 팔꿈치가 앞뒤로 움직이거나 상체 반동을 쓰지 않습니다.'],
+['클로즈그립 벤치 프레스','팔','상완삼두근을 중심으로 대흉근과 전면 삼각근을 함께 사용하는 복합 밀기 운동입니다.','세팅·고정: 벤치에 머리·등·골반을 지지하고 발을 바닥에 고정합니다. 손 간격은 어깨너비 안팎으로 하되 손목이 편한 범위를 선택합니다. 힘의 사용: 팔꿈치를 몸통 가까이 내려 바를 가슴 아래쪽으로 내리고 위로 밉니다. 근육 작용: 삼두근이 팔꿈치 폄을 주도합니다. 주의: 손을 지나치게 좁혀 손목을 꺾지 않습니다.'],
+['행잉 니 레이즈','복근','복직근·복사근과 고관절 굽힘근을 사용하며 골반 후방경사 조절을 훈련합니다.','세팅·고정: 철봉을 어깨너비로 잡고 견갑골을 안정화하며 몸통 흔들림을 멈춥니다. 힘의 사용: 무릎을 들어 올릴 때 단순히 허벅지만 들지 말고 골반을 갈비뼈 쪽으로 말아 올립니다. 근육 작용: 복직근이 골반 후방경사와 척추 굽힘을 보조합니다. 주의: 반동으로 다리를 흔들지 않습니다.'],
+['리버스 크런치','복근','복직근을 중심으로 골반 후방경사와 요추 굽힘 조절을 훈련합니다.','세팅·고정: 바로 누워 무릎을 굽히고 팔을 바닥에 둡니다. 갈비뼈를 아래로 정렬해 몸통을 안정화합니다. 힘의 사용: 무릎을 가슴 쪽으로 가져오며 꼬리뼈를 바닥에서 살짝 말아 올리고 천천히 내립니다. 근육 작용: 복직근이 골반을 흉곽 방향으로 당기는 데 기여합니다. 주의: 다리 반동으로 엉덩이를 던지지 않습니다.'],
+['머신 크런치','복근','복직근의 척추 굽힘 기능을 외부 저항으로 점진적으로 강화합니다.','세팅·고정: 좌석과 패드를 조절해 골반이 들리지 않도록 고정합니다. 손잡이는 가볍게 잡고 목을 당기지 않습니다. 힘의 사용: 갈비뼈를 골반 쪽으로 가까이 가져오며 몸통을 굽히고 천천히 펴줍니다. 근육 작용: 복직근이 척추 굽힘 토크를 만듭니다. 주의: 고관절만 접거나 팔로 손잡이를 당기지 않습니다.'],
+['팔로프 프레스','복근','복횡근·내외복사근을 중심으로 몸통 회전 저항과 항회전 안정성을 훈련합니다.','세팅·고정: 케이블을 가슴 높이에 두고 옆으로 서서 양손으로 손잡이를 잡습니다. 발은 골반너비, 무릎은 부드럽게 굽힙니다. 힘의 사용: 손을 앞으로 뻗어도 몸통과 골반이 케이블 쪽으로 돌아가지 않게 버팁니다. 근육 작용: 복사근·복횡근이 회전 모멘트에 저항합니다. 주의: 허리를 비틀거나 골반을 이동하지 않습니다.'],
+['케이블 우드찹','복근','내외복사근과 복횡근을 사용해 몸통 회전·대각선 안정성을 훈련합니다.','세팅·고정: 케이블을 어깨 높이 또는 위쪽에 두고 발을 고정합니다. 골반과 흉곽이 통제된 범위에서 함께 회전하도록 준비합니다. 힘의 사용: 팔만 당기지 말고 복부에 힘을 유지하며 몸통을 대각선 방향으로 회전합니다. 근육 작용: 복사근이 몸통 회전과 굽힘을 조절합니다. 주의: 허리만 비틀거나 무릎이 안쪽으로 무너지지 않게 합니다.'],
+['AB 휠 롤아웃','복근','복직근·복횡근·광배근·둔근이 협응해 척추 과신전을 방지하는 항신전 능력을 훈련합니다.','세팅·고정: 무릎을 패드에 대고 손으로 휠을 잡습니다. 둔근을 조이고 갈비뼈를 골반 위에 정렬합니다. 힘의 사용: 몸통 정렬을 유지하며 휠을 앞으로 보내고 복부로 당겨 돌아옵니다. 근육 작용: 복부 근육이 허리 과신전에 저항합니다. 주의: 허리가 꺾이기 전까지만 전진하고 호흡을 참지 않습니다.']
+];
+
 function getMemberExerciseGuides(){
- const local=MEMBER_EXERCISE_GUIDES.map(x=>({name:x[0],part:x[1],purpose:x[2],howto:x[3]}));
+ const source=[...MEMBER_EXERCISE_GUIDES,...MEMBER_EXERCISE_GUIDES_EXTRA];
+ const local=source.map(x=>({name:x[0],part:x[1],purpose:x[2],howto:x[3]}));
  const remote=memberPortalPayload&&Array.isArray(memberPortalPayload.exerciseGuides)?memberPortalPayload.exerciseGuides:[];
  const merged=new Map(local.map(x=>[String(x.name).toLocaleLowerCase(),x]));
  remote.forEach(x=>{if(x&&x.name){const key=String(x.name).toLocaleLowerCase();const base=merged.get(key)||{};merged.set(key,{...base,...x,name:x.name,part:x.part||base.part||'전신',purpose:x.purpose||base.purpose||'',howto:x.howto||base.howto||''});}});
- return [...merged.values()];
+ return [...merged.values()].filter(x=>['하체','등','가슴','어깨','팔','복근','코어'].includes(x.part)).map(x=>({...x,part:x.part==='코어'?'복근':x.part}));
+}
+let memberExerciseLibraryPart='하체';
+function renderMemberExerciseLibrary(part){
+ if(part)memberExerciseLibraryPart=part;
+ const host=$('memberExerciseLibrary'),search=($('memberExerciseSearch')?.value||'').trim().toLocaleLowerCase(),guides=getMemberExerciseGuides();
+ document.querySelectorAll('.member-exercise-category').forEach(b=>b.classList.toggle('active',b.dataset.part===memberExerciseLibraryPart));
+ const rows=guides.filter(x=>(x.part==='코어'?'복근':x.part)===memberExerciseLibraryPart&&(!search||x.name.toLocaleLowerCase().includes(search)||x.purpose.toLocaleLowerCase().includes(search)));
+ if(host)host.innerHTML=rows.length?rows.map(x=>'<button type="button" class="member-exercise-option" onclick="selectMemberExerciseGuide(\''+safeText(x.name).replace(/'/g,'&#39;')+'\')"><b>'+safeText(x.name)+'</b><span>'+safeText(x.purpose)+'</span></button>').join(''):'<div class="tiny">검색 결과가 없습니다. 다른 운동명으로 검색해 주세요.</div>';
+}
+function selectMemberExerciseGuide(name){
+ const item=getMemberExerciseGuides().find(x=>x.name===name);if(!item)return;
+ $('memberExerciseName').value=item.name;
+ $('memberExercisePart').value=item.part;
+ renderMemberExerciseGuide();renderMemberPreviousExerciseRecord();
 }
 function renderMemberExerciseGuide(){
  const input=document.getElementById('memberExerciseName'),list=document.getElementById('memberExerciseOptions'),box=document.getElementById('memberExerciseGuide');if(!input||!list||!box)return;
- const guides=getMemberExerciseGuides();list.innerHTML=guides.map(x=>`<option value="${safeText(x.name)}"></option>`).join('');
+ const guides=getMemberExerciseGuides();list.innerHTML=guides.map(x=>`<option value="${safeText(x.name)}"></option>`).join('');renderMemberExerciseLibrary();
  const name=input.value.trim().toLocaleLowerCase();const item=guides.find(x=>x.name.toLocaleLowerCase()===name);
- box.innerHTML=item?`<b>${safeText(item.name)} · ${safeText(item.part)}</b><p><strong>목적·주요 사용 근육</strong><br>${safeText(item.purpose)}</p><p class="exercise-guide-detail"><strong>주요 관절·수행 방법</strong><br>${safeText(item.howto)}</p>`:'<b>운동 설명</b><p>'+(name?'등록된 운동 설명이 없습니다. 운동명을 목록에서 선택하거나 관리자에게 설명 등록을 요청해 주세요.':'운동 종목을 선택하면 목적 부위, 주요 관절, 고정 위치, 수행 방법과 주의사항을 안내합니다.')+'</p>';
+ box.innerHTML=item?`<b>${safeText(item.name)} · ${safeText(item.part)}</b><p><strong>1. 운동 목적 · 주요 근육</strong><br>${safeText(item.purpose)}</p><p class="exercise-guide-detail"><strong>2. 세팅 · 신체 고정</strong><br>${safeText((item.howto.match(/세팅·고정: ([\s\S]*?)(?= 힘의 사용:|$)/)||[])[1]||'몸통과 관절을 안정적으로 고정하고 통증 없는 정렬을 유지합니다.')}</p><p class="exercise-guide-detail"><strong>3. 힘의 방향 · 근육과 관절의 움직임</strong><br>${safeText((item.howto.match(/힘의 사용: ([\s\S]*?)(?= 근육 작용:|$)/)||[])[1]||item.howto)}</p><p class="exercise-guide-detail"><strong>4. 목표 근육의 작용</strong><br>${safeText((item.howto.match(/근육 작용: ([\s\S]*?)(?= 주의:|$)/)||[])[1]||'주동근이 해당 관절 움직임을 만들고 보조근과 안정화 근육이 자세를 유지합니다.')}</p><p class="exercise-guide-detail guide-tip"><strong>5. 주의 · 보상 동작</strong><br>${safeText((item.howto.match(/주의: ([\s\S]*)$/)||[])[1]||'통증이 나타나면 중단하고 가동범위와 부하를 조절합니다.')}</p>`:'<b>운동 설명</b><p>'+(name?'등록된 운동 설명이 없습니다. 운동명을 목록에서 선택하거나 관리자에게 설명 등록을 요청해 주세요.':'부위를 선택하고 운동을 누르면 해부학적 목표 근육과 자세·힘의 사용법을 확인할 수 있습니다.')+'</p>';
 }
 function ensureMemberExerciseGuides(){if(!Array.isArray(db.memberExerciseGuides)){db.memberExerciseGuides=MEMBER_EXERCISE_GUIDES.map(x=>({name:x[0],part:x[1],purpose:x[2],howto:x[3]}));}}
 function clearMemberExerciseGuideForm(){['guideName','guidePurpose','guideHowto','guideEditingName'].forEach(id=>$(id).value='');$('guidePart').value='하체';}
@@ -1312,8 +1466,8 @@ function deleteMemberExerciseGuide(name){if(!confirm(`'${name}' 운동 설명을
 function saveMemberExerciseGuide(){const name=$('guideName').value.trim(),part=$('guidePart').value,purpose=$('guidePurpose').value.trim(),howto=$('guideHowto').value.trim(),old=$('guideEditingName').value;if(!name||!purpose||!howto){msg('운동명, 운동 목적, 수행 방법을 모두 입력해 주세요.');return;}ensureMemberExerciseGuides();if(old&&old!==name&&db.memberExerciseGuides.some(x=>x.name===name)){msg('같은 이름의 운동이 이미 있습니다.');return;}const item={name,part,purpose,howto};if(old){const i=db.memberExerciseGuides.findIndex(x=>x.name===old);if(i>=0)db.memberExerciseGuides[i]=item;else db.memberExerciseGuides.push(item);}else{const i=db.memberExerciseGuides.findIndex(x=>x.name===name);if(i>=0)db.memberExerciseGuides[i]=item;else db.memberExerciseGuides.push(item);}persist();clearMemberExerciseGuideForm();renderMemberExerciseGuideAdmin();msg('회원용 운동 설명을 저장했습니다.');}
 function renderMemberExerciseGuideAdmin(){const box=$('memberExerciseGuideAdminList');if(!box)return;ensureMemberExerciseGuides();const rows=db.memberExerciseGuides.slice().sort((a,b)=>a.part.localeCompare(b.part,'ko')||a.name.localeCompare(b.name,'ko'));box.innerHTML=rows.length?`<div class="tiny" style="margin-bottom:8px">등록된 설명 ${rows.length}개</div><div style="overflow-x:auto"><table><thead><tr><th>운동명</th><th>부위</th><th>운동 목적 / 수행 방법</th><th>관리</th></tr></thead><tbody>${rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.part)}</td><td>${esc(x.purpose)}<br><span class="tiny">${esc(x.howto)}</span></td><td><button class="btn" onclick="editMemberExerciseGuide('${esc(x.name).replace(/'/g,'&#39;')}')">수정</button> <button class="btn danger" onclick="deleteMemberExerciseGuide('${esc(x.name).replace(/'/g,'&#39;')}')">삭제</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">등록된 운동 설명이 없습니다.</div>';}
 ensureMemberExerciseGuides();
-document.getElementById('memberExerciseName')?.addEventListener('input',renderMemberExerciseGuide);
-document.getElementById('memberExerciseName')?.addEventListener('change',renderMemberExerciseGuide);
+document.getElementById('memberExerciseName')?.addEventListener('input',()=>{renderMemberExerciseGuide();renderMemberPreviousExerciseRecord();});
+document.getElementById('memberExerciseName')?.addEventListener('change',()=>{renderMemberExerciseGuide();renderMemberPreviousExerciseRecord();});
 
 function memberLocalDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function memberNutritionSummary(m){const t=nutritionTargets(m||{});return t.kcal?`예상 기초대사량 ${t.bmr.toLocaleString()} kcal · 하루 총소비열량 ${t.tdee.toLocaleString()} kcal · 하루 목표 섭취량 ${t.kcal.toLocaleString()} kcal · 단백질 목표 ${t.protein}g`:'성별·나이·키·체중을 입력하면 개인별 목표 열량을 계산합니다.'}
@@ -1332,9 +1486,24 @@ async function loadMemberTrainingSessionsFromCloud(){
   const mapped=cloudRows.map(x=>({id:x.id,date:x.session_date,part:x.training_part,no:x.session_number,goal:x.goal,exercises:Array.isArray(x.exercises)?x.exercises:[],rpe:x.rpe,condition:x.condition,good:x.good,note:x.coaching_note,next:x.next_goal,video:x.video_url}));
   memberPortalPayload.sessions=[...mapped,...legacyRows];
   renderMemberSessionHistory(memberPortalPayload.sessions);
+  renderMemberExerciseProgress();renderMemberPreviousExerciseRecord();
   if(typeof renderMemberHomeCalendar==='function')renderMemberHomeCalendar();
   const lessonCount=$('memberSummary')?.querySelector('.member-statline span:nth-child(2) strong');if(lessonCount)lessonCount.textContent=memberPortalPayload.sessions.length+'회';
  }catch(e){console.warn('트레이너 레슨 기록 추가 조회:',e.message||e);}
+}
+function renderMemberExerciseHistory(){
+ const host=$('memberExerciseHistory');if(!host)return;
+ const rows=(memberPortalPayload?.memberExercises||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ host.innerHTML=rows.length?'<h3>내 개인 운동 기록</h3>'+rows.map(x=>'<div class="panel" style="margin:8px 0"><b>'+safeText(x.date||'')+' · '+safeText(x.part||'')+' · '+safeText(x.name||'')+'</b>'+(getMemberExerciseSetDetails(x).length?getMemberExerciseSetDetails(x).map((v,i)=>'<p class="tiny">세트 '+(i+1)+' · '+(v.weight!==''&&v.weight!=null?safeText(v.weight)+'kg':'맨몸/중량 미입력')+' × '+safeText(v.reps||'-')+'</p>').join(''):'<p class="tiny">'+(x.sets?safeText(x.sets)+'세트 · ':'')+safeText(x.reps||'-')+(x.weight?' · '+safeText(x.weight)+'kg':'')+'</p>')+(x.note?'<p class="tiny">'+safeText(x.note)+'</p>':'')+'</div>').join(''):'<div class="empty">아직 개인 운동 기록이 없습니다.</div>';
+}
+async function loadMemberExerciseEntriesFromCloud(){
+ try{
+  const result=await memberPortalRpc('withai_member_get_exercise_entries',{});
+  memberExerciseCloudEntries=(Array.isArray(result.entries)?result.entries:[]).map(x=>({...x,...(x.entry||{}),_cloudEntry:true}));
+  const legacy=(memberPortalPayload?.memberExercises||[]).filter(x=>!x._cloudEntry);
+  memberPortalPayload.memberExercises=[...legacy,...memberExerciseCloudEntries];
+  renderMemberExerciseHistory();renderMemberExerciseProgress();renderMemberPreviousExerciseRecord();
+ }catch(e){console.warn('회원 세트별 운동기록 조회:',e.message||e);}
 }
 function renderMemberPortal(payload){
  memberPortalPayload=payload;memberPortalToken=payload.token||memberPortalToken;
@@ -1342,14 +1511,15 @@ function renderMemberPortal(payload){
  $('authGate').style.display='none';$('appShell').style.display='none';$('memberPortal').style.display='block';$('logoutBtn').style.display='none';$('userLabel').textContent=(m.name||'회원')+' · 회원';
  $('memberWelcome').textContent=(m.name||'회원')+'님의 운동·식단 관리';
  $('memberSelfSex').value=m.sex||'female';$('memberSelfAge').value=m.age||'';$('memberSelfHeight').value=m.height||'';$('memberSelfWeight').value=m.weight||'';$('memberSelfGoal').value=m.goal||'근력 향상';$('memberSelfActivity').value=String(m.activityFactor||1.375);
- $('memberExerciseDate').value=memberLocalDate();$('memberMealDate').value=memberLocalDate();renderMemberExerciseGuide();renderMemberFoodPicker();renderMemberMealSelected();
+ $('memberExerciseDate').value=memberLocalDate();$('memberMeasurementDate').value=memberLocalDate();$('memberMealDate').value=memberLocalDate();initMemberExerciseSetRows();renderMemberExerciseGuide();renderMemberPreviousExerciseRecord();renderMemberFoodPicker();renderMemberMealSelected();
  $('memberTodayLabel').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});$('memberSummary').innerHTML='<b>'+safeText(m.name||'회원')+'님, 오늘도 건강한 하루를 시작해요.</b><div class="tiny" style="margin-top:7px">운동 목표 '+safeText(m.goal||'미설정')+' · 담당 트레이너 '+safeText(m.coach||'미지정')+'</div><div class="member-statline"><span>등록 회차<strong>'+safeText(m.package??'-')+'회</strong></span><span>누적 레슨<strong>'+sessions.length+'회</strong></span><span>개인 운동 기록<strong>'+personal.length+'건</strong></span></div>';
  $('memberSelfTarget').textContent=memberNutritionSummary(m);
  const sortedSessions=sessions.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
  renderMemberSessionHistory(sessions);
- loadMemberTrainingSessionsFromCloud();loadMemberCalendar();
+ renderMemberExerciseHistory();
+ loadMemberTrainingSessionsFromCloud();loadMemberCalendar();loadMemberExerciseEntriesFromCloud();
  const sortedPersonal=personal.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
- $('memberExerciseHistory').innerHTML=sortedPersonal.length?'<h3>내 개인 운동 기록</h3>'+sortedPersonal.map(x=>'<div class="panel" style="margin:8px 0"><b>'+safeText(x.date)+' · '+safeText(x.part)+' · '+safeText(x.name)+'</b><p class="tiny">'+(x.sets?safeText(x.sets)+'세트 · ':'')+safeText(x.reps||'-')+(x.weight?' · '+safeText(x.weight)+'kg':'')+'</p>'+(x.note?'<p class="tiny">'+safeText(x.note)+'</p>':'')+'</div>').join(''):'<div class="empty">아직 개인 운동 기록이 없습니다.</div>';
+ renderMemberExerciseHistory();
  renderMemberMealHistory(memberLocalDate());
  const foodSelect=$('memberMealFood');if(foodSelect&&!foodSelect.options.length){foodSelect.innerHTML=DIET_FOODS.map((f,i)=>'<option value="'+i+'">'+safeText(f.name)+'</option>').join('');}
  const homeNutrition=$('memberHomeNutrition');if(homeNutrition){const hk=Math.round(sum('kcal')),goal=targets.kcal||0,pct=goal?Math.min(100,Math.round(hk/goal*100)):0;homeNutrition.innerHTML='<div class="diet-summary-grid"><div class="diet-stat"><div class="name">섭취 열량</div><strong>'+hk.toLocaleString()+' kcal</strong><small>목표 '+(goal?goal.toLocaleString()+' kcal':'신체정보 입력 필요')+'</small><div class="diet-progress"><span style="width:'+pct+'%"></span></div></div><div class="diet-stat"><div class="name">단백질</div><strong>'+Math.round(sum('protein'))+'g</strong><small>목표 '+(targets.protein||'-')+'g</small></div><div class="diet-stat"><div class="name">탄수화물 / 지방</div><strong>'+Math.round(sum('carbs'))+' / '+Math.round(sum('fat'))+'g</strong><small>오늘 기록 기준</small></div></div>';}
@@ -1373,7 +1543,51 @@ async function loadMemberConsultationFromCloud(){
 }
 async function reloadMemberPortal(){const data=await memberPortalRpc('withai_member_get_portal',{});memberPortalToken=data.token||null;renderMemberPortal(data);}
 async function saveMemberSelfProfile(){try{const age=$('memberSelfAge').value,height=$('memberSelfHeight').value,weight=$('memberSelfWeight').value;if(!age||!height||!weight){throw new Error('나이, 키, 체중을 모두 입력해 주세요.')}await memberPortalRpc('withai_member_update_profile',{p_profile:{sex:$('memberSelfSex').value,age:Number(age),height:Number(height),weight:Number(weight),goal:$('memberSelfGoal').value,activityFactor:Number($('memberSelfActivity').value)}});await reloadMemberPortal();alert('나의 신체 정보가 저장되었습니다.');}catch(e){alert('신체 정보 저장 실패: '+(e.message||e));}}
-async function saveMemberExercise(){try{const name=$('memberExerciseName').value.trim();if(!name)throw new Error('운동 종목을 입력해 주세요.');await memberPortalRpc('withai_member_save_exercise',{p_entry:{date:$('memberExerciseDate').value||memberLocalDate(),part:$('memberExercisePart').value,name,sets:$('memberExerciseSets').value?Number($('memberExerciseSets').value):null,reps:$('memberExerciseReps').value,weight:$('memberExerciseWeight').value?Number($('memberExerciseWeight').value):null,note:$('memberExerciseNote').value.trim()}});$('memberExerciseName').value='';$('memberExerciseSets').value='';$('memberExerciseReps').value='';$('memberExerciseWeight').value='';$('memberExerciseNote').value='';await reloadMemberPortal();alert('개인 운동 기록을 저장했습니다.');}catch(e){alert('운동 기록 저장 실패: '+(e.message||e));}}
+function getMemberExerciseSetDetails(row){
+ const raw=row?.setDetails||row?.set_details||row?.sets_detail;
+ if(Array.isArray(raw))return raw.map(x=>({weight:x.weight??'',reps:x.reps??''}));
+ const count=Math.max(0,Number(row?.sets)||0);
+ if(row?.weight!=null||row?.reps!=null)return Array.from({length:Math.max(1,count)},()=>({weight:row.weight??'',reps:row.reps??''}));
+ return [];
+}
+function addMemberExerciseSetRow(weight='',reps=''){
+ const host=$('memberExerciseSetRows');if(!host)return;
+ const index=host.querySelectorAll('.member-exercise-set-row').length+1;
+ const row=document.createElement('div');row.className='member-exercise-set-row';row.style.cssText='display:grid;grid-template-columns:52px minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end;margin:7px 0';
+ row.innerHTML='<div class="tiny" style="padding:10px 0">세트 '+index+'</div><div class="field"><label>중량 (kg)</label><input class="member-set-weight" type="number" min="0" step="0.5" value="'+safeText(weight)+'" placeholder="맨몸은 비워두기"></div><div class="field"><label>횟수 / 시간</label><input class="member-set-reps" type="text" value="'+safeText(reps)+'" placeholder="예: 12회"></div><button class="btn" type="button" aria-label="세트 삭제" onclick="this.closest(\'.member-exercise-set-row\').remove();renumberMemberExerciseSetRows()">삭제</button>';
+ host.appendChild(row);renumberMemberExerciseSetRows();
+}
+function renumberMemberExerciseSetRows(){const rows=$('memberExerciseSetRows')?.querySelectorAll('.member-exercise-set-row')||[];rows.forEach((r,i)=>{const label=r.firstElementChild;if(label)label.textContent='세트 '+(i+1);});}
+function initMemberExerciseSetRows(){const host=$('memberExerciseSetRows');if(host&&!host.children.length)addMemberExerciseSetRow();}
+function renderMemberPreviousExerciseRecord(){
+ const host=$('memberPreviousExerciseRecord'),name=$('memberExerciseName')?.value.trim();if(!host)return;
+ if(!name){host.innerHTML='<b>직전 운동 기록</b><p>운동 종목을 선택하면 이전 수행 기록이 표시됩니다.</p>';return;}
+ const records=[];
+ (memberPortalPayload?.memberExercises||[]).forEach(x=>{if((x.name||'').trim().toLowerCase()===name.toLowerCase())records.push({date:x.date||'',source:'내 개인 운동',sets:getMemberExerciseSetDetails(x)});});
+ (memberPortalPayload?.sessions||[]).forEach(session=>(session.exercises||[]).forEach(x=>{if((x.name||'').trim().toLowerCase()===name.toLowerCase())records.push({date:session.date||session.session_date||'',source:'PT 레슨',sets:getMemberExerciseSetDetails(x)});}));
+ records.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ const previous=records[0];
+ host.innerHTML='<b>직전 운동 기록 · '+safeText(name)+'</b>'+(previous?'<p class="tiny">'+safeText(previous.date||'날짜 미입력')+' · '+safeText(previous.source)+'</p>'+(previous.sets.length?previous.sets.map((x,i)=>'<p class="tiny">세트 '+(i+1)+' · '+(x.weight!==''&&x.weight!=null?safeText(x.weight)+'kg':'맨몸/중량 미입력')+' × '+safeText(x.reps||'-')+'</p>').join(''):'<p class="tiny">세트별 상세 기록이 없는 과거 기록입니다.</p>'):'<p>아직 같은 운동의 이전 기록이 없습니다.</p>');
+}
+async function saveMemberExercise(){
+ try{
+  const name=$('memberExerciseName').value.trim();if(!name)throw new Error('운동 종목을 입력해 주세요.');
+  const setDetails=[...($('memberExerciseSetRows')?.querySelectorAll('.member-exercise-set-row')||[])].map(r=>({weight:r.querySelector('.member-set-weight')?.value!==''?Number(r.querySelector('.member-set-weight').value):null,reps:r.querySelector('.member-set-reps')?.value.trim()||''})).filter(x=>x.weight!==null||x.reps!=='');
+  if(!setDetails.length)throw new Error('세트별 중량 또는 횟수를 한 세트 이상 입력해 주세요.');
+  const weights=setDetails.map(x=>x.weight).filter(x=>x!==null);
+  await memberPortalRpc('withai_member_save_exercise_entry',{p_entry:{date:$('memberExerciseDate').value||memberLocalDate(),part:$('memberExercisePart').value,name,sets:setDetails.length,reps:setDetails.map(x=>x.reps).join(' / '),weight:weights.length?Math.max(...weights):null,setDetails,note:$('memberExerciseNote').value.trim()}});
+  $('memberExerciseName').value='';$('memberExerciseNote').value='';$('memberExerciseSetRows').innerHTML='';initMemberExerciseSetRows();await loadMemberExerciseEntriesFromCloud();alert('개인 운동 기록을 저장했습니다.');
+ }catch(e){alert('운동 기록 저장 실패: '+(e.message||e));}
+}
+async function saveMemberMeasurement(){
+ try{
+  const entry={date:$('memberMeasurementDate').value||memberLocalDate(),weight:$('memberMeasurementWeight').value,bodyFat:$('memberMeasurementBodyFat').value,muscle:$('memberMeasurementMuscle').value,waist:$('memberMeasurementWaist').value};
+  if(!Object.values(entry).slice(1).some(v=>v!==''))throw new Error('체중, 체지방률, 골격근량, 허리둘레 중 한 가지 이상 입력해 주세요.');
+  await memberPortalRpc('withai_member_save_measurement',{p_entry:entry});
+  ['memberMeasurementWeight','memberMeasurementBodyFat','memberMeasurementMuscle','memberMeasurementWaist'].forEach(id=>$(id).value='');
+  await loadMemberCalendar();alert('신체 측정 기록을 저장했습니다.');
+ }catch(e){alert('신체 측정 기록 저장 실패: '+(e.message||e)+' · 신체 측정 저장 SQL 적용 여부를 확인해 주세요.');}
+}
 let selectedMemberFoods=new Map();
  let selectedMemberCustomFoods=new Map();
 function renderMemberMealHistory(date){
@@ -1442,8 +1656,8 @@ function renderMemberMealSelected(){const root=$('memberMealSelected');if(!root)
 function previewMemberMeal(){const items=[...selectedMemberFoods.entries()];let totals={kcal:0,c:0,p:0,f:0};items.forEach(([name,g])=>{const custom=selectedMemberCustomFoods.get(name);if(custom){totals.kcal+=custom.kcal;return;}const food=DIET_FOODS.find(x=>x.name===name);if(!food)return;const k=g/100;totals.kcal+=food.kcal*k;totals.c+=food.c*k;totals.p+=food.p*k;totals.f+=food.f*k;});if($('memberMealPreview'))$('memberMealPreview').textContent=items.length?`선택 ${items.length}종 · 약 ${Math.round(totals.kcal)} kcal · 탄수화물 ${totals.c.toFixed(1)}g · 단백질 ${totals.p.toFixed(1)}g · 지방 ${totals.f.toFixed(1)}g`:'음식을 여러 개 선택하면 전체 섭취 열량과 영양소가 합산됩니다.';}
 function addMemberCustomFood(){const name=$('memberCustomFoodName').value.trim(),rawKcal=$('memberCustomFoodKcal').value,kcal=Number(rawKcal),grams=Number($('memberCustomFoodGrams').value||100);if(!name)return alert('음식 이름을 입력해 주세요.');if(rawKcal===''||!Number.isFinite(kcal)||kcal<0||kcal>10000)return alert('섭취 열량을 0~10000 kcal 사이로 입력해 주세요.');if(!Number.isFinite(grams)||grams<1||grams>3000)return alert('섭취량은 1~3000g 사이로 입력해 주세요.');if(DIET_FOODS.some(x=>x.name.toLocaleLowerCase()===name.toLocaleLowerCase()))return alert('이미 음식 목록에 있는 이름입니다. 위 검색 목록에서 선택해 주세요.');if(selectedMemberFoods.has(name))return alert('이미 선택한 음식입니다.');selectedMemberFoods.set(name,grams);selectedMemberCustomFoods.set(name,{kcal});$('memberCustomFoodName').value='';$('memberCustomFoodKcal').value='';$('memberCustomFoodGrams').value='100';renderMemberMealSelected();previewMemberMeal();}
 async function saveMemberMeal(){try{const items=[...selectedMemberFoods.entries()];if(!items.length)throw new Error('섭취한 음식을 한 가지 이상 선택해 주세요.');const date=$('memberMealDate').value||memberLocalDate(),meal=$('memberMealType').value,note=$('memberMealNote').value.trim();for(const [name,grams] of items){if(!Number.isFinite(Number(grams))||Number(grams)<1||Number(grams)>3000)throw new Error(name+' 섭취량을 1~3000g 사이로 입력해 주세요.');}const saveBtn=document.querySelector('#memberView-nutrition .btn.primary');if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='저장 중...';}try{for(const [name,grams] of items){const custom=selectedMemberCustomFoods.get(name);if(custom){await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal,food:name,grams:Number(grams),kcal:custom.kcal,carbs:0,protein:0,fat:0,note}});}else{const f=DIET_FOODS.find(x=>x.name===name);if(!f)throw new Error(name+' 음식 정보를 찾을 수 없습니다.');const scale=Number(grams)/100;await memberPortalRpc('withai_member_save_meal',{p_entry:{date,meal,food:f.name,grams:Number(grams),kcal:f.kcal*scale,carbs:f.c*scale,protein:f.p*scale,fat:f.f*scale,note}});}}}finally{if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='식단 기록 저장';}}selectedMemberFoods.clear();selectedMemberCustomFoods.clear();$('memberMealNote').value='';renderMemberFoodPicker();renderMemberMealSelected();previewMemberMeal();await reloadMemberPortal();memberHomeCalendarSelected=date;renderMemberHomeCalendar();renderMemberMealHistory(date);$('memberMealDate').value=date;alert(items.length+'가지 음식 기록을 저장했습니다.');}catch(e){alert('식단 저장 실패: '+(e.message||e));}}
-$('memberExerciseName')?.addEventListener('input',renderMemberExerciseGuide);
-$('memberExerciseName')?.addEventListener('change',renderMemberExerciseGuide);
+$('memberExerciseName')?.addEventListener('input',()=>{renderMemberExerciseGuide();renderMemberPreviousExerciseRecord();});
+$('memberExerciseName')?.addEventListener('change',()=>{renderMemberExerciseGuide();renderMemberPreviousExerciseRecord();});
 $('loginBtn').onclick=async()=>{
  $('loginBtn').disabled=true;
  try{
@@ -1627,12 +1841,12 @@ async function loadTrainerPersonalWorkoutHistory(id){
 
 
 function renderMemberExerciseProgress(){
- const rows=memberPortalPayload?.memberExercises||[],select=$('memberExerciseProgressSelect'),host=$('memberExerciseProgressChart');if(!select||!host)return;
+ const personalRows=memberPortalPayload?.memberExercises||[],sessionRows=(memberPortalPayload?.sessions||[]).flatMap(session=>(session.exercises||[]).map(x=>({...x,date:session.date||session.session_date||'',source:'PT 레슨'}))),rows=[...personalRows,...sessionRows],select=$('memberExerciseProgressSelect'),host=$('memberExerciseProgressChart');if(!select||!host)return;
  const names=[...new Set(rows.map(x=>x.name).filter(Boolean))];
  if(!names.length){select.innerHTML='<option value="">운동 기록 없음</option>';host.innerHTML='<div class="empty">아직 개인운동 기록이 없습니다.</div>';return;}
  const previous=select.value;select.innerHTML=names.map(n=>'<option value="'+safeText(n)+'">'+safeText(n)+'</option>').join('');if(names.includes(previous))select.value=previous;
- const chosen=select.value,data=rows.filter(x=>x.name===chosen&&Number(x.weight)>0).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
- if(!data.length){host.innerHTML='<div class="empty">이 운동의 중량 기록이 아직 없습니다. 운동 기록에 중량을 입력하면 변화 그래프가 표시됩니다.</div>';return;}
+ const chosen=select.value,data=rows.filter(x=>x.name===chosen).map(x=>{const weights=getMemberExerciseSetDetails(x).map(s=>Number(s.weight)).filter(n=>Number.isFinite(n)&&n>0);return {date:x.date||'',weight:weights.length?Math.max(...weights):Number(x.weight)}}).filter(x=>x.weight>0).sort((a,b)=>a.date.localeCompare(b.date));
+ if(!data.length){host.innerHTML='<div class="empty">이 운동의 중량 기록이 아직 없습니다. 세트별 중량을 입력하면 변화 그래프가 표시됩니다.</div>';return;}
  const vals=data.map(x=>Number(x.weight)),min=Math.min(...vals),max=Math.max(...vals),range=max-min||1,w=640,h=160,pad=28;
  const points=vals.map((v,i)=>{const x=pad+(data.length===1?0:i*(w-pad*2)/(data.length-1)),y=h-pad-((v-min)/range)*(h-pad*2);return x+','+y}).join(' ');
  host.innerHTML='<div class="tiny" style="margin:8px 0">기록 '+data.length+'회 · 최근 '+vals[vals.length-1]+'kg</div><div style="overflow-x:auto"><svg viewBox="0 0 '+w+' '+h+'" style="width:100%;min-width:300px;height:auto"><line x1="'+pad+'" y1="'+(h-pad)+'" x2="'+(w-pad)+'" y2="'+(h-pad)+'" stroke="#dfe7df"/><polyline points="'+points+'" fill="none" stroke="#6f9861" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+data.map((r,i)=>{const x=pad+(data.length===1?0:i*(w-pad*2)/(data.length-1)),y=h-pad-((Number(r.weight)-min)/range)*(h-pad*2);return '<circle cx="'+x+'" cy="'+y+'" r="4" fill="#6f9861"/><text x="'+x+'" y="'+(y-10)+'" text-anchor="middle" font-size="10" fill="#334238">'+r.weight+'kg</text>'}).join('')+'</svg><div style="display:flex;justify-content:space-between" class="tiny"><span>'+safeText(data[0].date||'')+'</span><span>'+safeText(data[data.length-1].date||'')+'</span></div></div>';
@@ -1903,7 +2117,7 @@ window.withAiPersistAppointment=async(row)=>{
 .member-home-calendar-panel{padding:18px!important}.member-calendar-legend{display:flex;gap:16px;flex-wrap:wrap;margin:4px 0 12px;font-size:11px;color:#647268}.member-calendar-legend span{display:flex;align-items:center;gap:6px}.member-calendar-legend i{width:8px;height:8px;border-radius:50%;display:inline-block}.lesson-dot{background:#4d8060}.personal-dot{background:#7385c0}.consult-dot{background:#e1a34e}
 .member-home-calendar-panel .withai-calendar-day{min-height:82px}.member-home-calendar-panel .calendar-event-chip{padding:2px 4px}.member-home-calendar-panel .calendar-event-chip.lesson{background:#e7f1e8;color:#315d3e}.member-home-calendar-panel .calendar-event-chip.personal{background:#edf0fb;color:#485c9a}.member-home-calendar-panel .calendar-event-chip.meal{background:#fff2df;color:#95611e}
 .takeat-panel{overflow:hidden;display:none}.takeat-panel.is-open{display:block}
-.home-calendar-day{min-width:0;min-height:145px;border:1px solid #e4eae4;border-radius:10px;background:#fff;padding:5px;display:flex;flex-direction:column;overflow:hidden}.home-calendar-day.is-outside{opacity:.38;background:#f7f8f6}.home-calendar-day.is-selected{outline:2px solid #547b60;background:#f4f8f2}.home-calendar-day.is-today .calendar-day-number{background:#294b38;color:#fff;border-radius:20px;padding:2px 6px}.home-calendar-day-head{height:22px;flex:0 0 22px}.home-calendar-exercise{flex:1;min-height:50px;display:flex;flex-direction:column;gap:3px;overflow:hidden;padding-bottom:4px}.home-cell-event{display:block;width:100%;min-width:0;border:0;border-radius:5px;padding:4px 3px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;cursor:pointer}.home-cell-event.lesson{background:#e7f1e8;color:#315d3e}.home-cell-event.personal{background:#edf0fb;color:#485c9a}.home-cell-event b{font-weight:800}.home-cell-empty{font-size:9px;color:#a1aaa1;padding:5px 2px}.home-cell-more{font-size:9px;color:#69786c}.home-calendar-takeat{margin-top:auto;width:100%;min-height:34px;border:1px solid #e9e4d5;border-radius:6px;background:#fbf8ef;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:4px 5px;cursor:pointer;text-align:left}.home-calendar-takeat span{font-size:8px;letter-spacing:1px;font-weight:900;color:#927b45}.home-calendar-takeat b{font-size:10px;line-height:1.3;color:#526858}.home-calendar-takeat b.over{color:#bd624c}.home-calendar-takeat b.under{color:#4b8060}.home-calendar-takeat b.neutral{color:#7b806f}
+.home-calendar-day{min-width:0;min-height:145px;border:1px solid #e4eae4;border-radius:10px;background:#fff;padding:5px;display:flex;flex-direction:column;overflow:hidden}.home-calendar-day.is-outside{opacity:.38;background:#f7f8f6}.home-calendar-day.is-selected{outline:2px solid #547b60;background:#f4f8f2}.home-calendar-day.is-today .calendar-day-number{background:#294b38;color:#fff;border-radius:20px;padding:2px 6px}.home-calendar-day-head{height:22px;flex:0 0 22px}.home-calendar-exercise{flex:1;min-height:50px;display:flex;flex-direction:column;gap:3px;overflow:hidden;padding-bottom:4px}.home-calendar-exercise[role="button"]{cursor:pointer;border-radius:6px}.home-calendar-exercise[role="button"]:hover{background:#f3f7f1}.home-calendar-exercise[role="button"]:focus-visible{outline:2px solid #547b60;outline-offset:1px}.home-cell-event{display:block;width:100%;min-width:0;border:0;border-radius:5px;padding:4px 3px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;cursor:pointer}.home-cell-event.lesson{background:#e7f1e8;color:#315d3e}.home-cell-event.personal{background:#edf0fb;color:#485c9a}.home-cell-event b{font-weight:800}.home-cell-empty{font-size:9px;color:#a1aaa1;padding:5px 2px}.home-cell-more{font-size:9px;color:#69786c}.home-calendar-takeat{margin-top:auto;width:100%;min-height:34px;border:1px solid #e9e4d5;border-radius:6px;background:#fbf8ef;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:4px 5px;cursor:pointer;text-align:left}.home-calendar-takeat span{font-size:8px;letter-spacing:1px;font-weight:900;color:#927b45}.home-calendar-takeat b{font-size:10px;line-height:1.3;color:#526858}.home-calendar-takeat b.over{color:#bd624c}.home-calendar-takeat b.under{color:#4b8060}.home-calendar-takeat b.neutral{color:#7b806f}
 .takeat-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.takeat-kicker{font-size:10px;letter-spacing:2px;font-weight:800;color:#5f846b}.takeat-heading h2{margin:5px 0;font-size:21px}.takeat-heading p{margin:0;color:#77847a;font-size:12px}.takeat-mark{width:42px;height:42px;border-radius:14px;background:#e8f0e8;color:#3b6848;display:grid;place-items:center;font-size:21px;font-weight:800}
 .takeat-summary{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:16px;margin:16px 0;border-radius:14px;background:linear-gradient(120deg,#f1f6ef,#faf8f1)}.takeat-kcal-big{font-size:28px;font-weight:800;color:#263b2d;letter-spacing:-1px}.takeat-kcal-big small{font-size:12px;font-weight:600;color:#748077;letter-spacing:0}.takeat-delta{font-size:13px;font-weight:800;text-align:right}.takeat-delta.under{color:#4d8060}.takeat-delta.over{color:#c06d4b}.takeat-delta.neutral{color:#647268}.takeat-progress-track{height:9px;background:#e0e8df;border-radius:20px;overflow:hidden;margin-top:10px}.takeat-progress-fill{height:100%;border-radius:20px;background:#679477;transition:width .2s}.takeat-target-line{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#738076;margin-top:7px}
 .takeat-entry{border:1px solid #e7ece6;border-radius:13px;padding:14px}.takeat-entry-title{display:flex;justify-content:space-between;gap:8px;margin-bottom:12px}.takeat-entry-title span{font-size:11px;color:#738076}.takeat-form-grid{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:9px}.takeat-form-grid label,.takeat-note-label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#6d796f}.takeat-form-grid input,.takeat-form-grid select,.takeat-note-label input{min-width:0;width:100%;padding:10px;border:1px solid #e0e7df;border-radius:9px;background:#fff;color:#26372b;font:inherit;font-size:13px}.takeat-macros{margin-top:9px}.takeat-note-label{margin-top:9px}.takeat-save{width:100%;margin-top:12px}.takeat-meal-list{margin-top:12px}.takeat-meal-item{display:flex;justify-content:space-between;gap:10px;padding:9px 2px;border-bottom:1px solid #edf0eb;font-size:12px}.takeat-meal-item:last-child{border-bottom:0}.takeat-meal-item small{color:#77847a}.takeat-foot{display:flex;justify-content:flex-end;margin-top:10px}.member-home-shortcuts{margin-top:14px}.member-day-achievement-icons{font-size:10px;line-height:1.2;white-space:nowrap}.member-achievement-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:14px 0}.member-achievement-stat{border:1px solid #e8eee8;border-radius:12px;padding:12px;background:#fbfdfb}.member-achievement-stat b{display:block;font-size:19px;color:#253b2d}.member-achievement-stat span{font-size:11px;color:#718074}.member-achievement-streak{grid-column:1/-1;padding:11px 13px;border-radius:11px;background:#f3f8f2;font-size:12px;color:#405b45}.member-day-reward{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 12px}.member-day-reward span{display:inline-flex;align-items:center;gap:4px;padding:6px 9px;border-radius:20px;background:#f0f7ef;color:#426448;font-size:11px;font-weight:700}.member-day-reward .nutrition{background:#f4f5fb;color:#5b628d}.member-day-praise{padding:11px 13px;border-radius:11px;background:#fbfaf2;color:#655b36;font-size:12px;line-height:1.6;margin:8px 0 13px}@media(max-width:600px){.member-achievement-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.member-achievement-stat{padding:9px 7px}.member-achievement-stat b{font-size:16px}.member-achievement-stat span{font-size:10px}}
@@ -1976,13 +2190,42 @@ function renderMemberHomeCalendar(){
   const total=Math.round(meals.reduce((sum,x)=>sum+(Number(x.kcal)||0),0)),diff=total-target;
   const mealLabel=!target?'목표 미설정':!meals.length?'식단 입력':(diff>0?'+'+diff.toLocaleString():diff<0?diff.toLocaleString():'0')+' kcal';
   const marks=(achievement.exercise?'💪':'')+(achievement.nutrition?' 🥗':achievement.recorded?' 📝':'');
-  const eventHtml=events.length?events.slice(0,3).map(e=>{const hasLessonLog=e.type==='lesson'&&(memberPortalPayload?.sessions||[]).some(x=>(x.date||x.session_date||'')===key);const label=e.type==='lesson'?(hasLessonLog||e.data?.sessionLogOnly?'수업일지':'PT 레슨'):'훈련일지';return '<button type="button" class="home-cell-event '+(e.type==='personal'?'personal':'lesson')+'" onclick="openMemberHomeCalendarEntry(\''+key+'\',\''+e.type+'\',\''+String(e.id||'')+'\')"><b>'+(e.time?safeText(e.time):'시간 미정')+'</b> '+safeText(label)+'</button>';}).join(''):'<span class="home-cell-empty">운동 일정 없음</span>';
-  out+='<div class="home-calendar-day '+(d.getMonth()!==month.getMonth()?'is-outside ':'')+(key===memberHomeCalendarSelected?'is-selected ':'')+(key===today?'is-today':'')+'"><div class="home-calendar-day-head"><span class="calendar-day-number">'+d.getDate()+'</span><span class="member-day-achievement-icons">'+marks+'</span></div><div class="home-calendar-exercise">'+eventHtml+(events.length>3?'<span class="home-cell-more">+'+(events.length-3)+'건 더보기</span>':'')+'</div><button class="home-calendar-takeat" type="button" onclick="openMemberHomeTakeat(\''+key+'\')"><span>TAKEAT</span><b class="'+(!target?'neutral':diff>0?'over':diff<0?'under':'neutral')+'">'+safeText(mealLabel)+'</b></button></div>';
+  const hasWorkoutRecord=(memberPortalPayload?.memberExercises||[]).some(x=>(x.date||'')===key);const eventHtml=events.length?events.slice(0,3).map(e=>{const hasLessonLog=e.type==='lesson'&&(memberPortalPayload?.sessions||[]).some(x=>(x.date||x.session_date||'')===key);const label=e.type==='lesson'?(hasLessonLog||e.data?.sessionLogOnly?'수업일지':'PT 레슨'):'훈련일지';return '<button type="button" class="home-cell-event '+(e.type==='personal'?'personal':'lesson')+'" onclick="event.stopPropagation();openMemberHomeCalendarEntry(\''+key+'\',\''+e.type+'\',\''+String(e.id||'')+'\')"><b>'+(e.time?safeText(e.time):'시간 미정')+'</b> '+safeText(label)+'</button>';}).join(''):hasWorkoutRecord?'<span class="home-cell-empty">개인 운동 기록 보기</span>':'<span class="home-cell-empty">운동 일정 없음 · 눌러서 기록하기</span>';
+  out+='<div class="home-calendar-day '+(d.getMonth()!==month.getMonth()?'is-outside ':'')+(key===memberHomeCalendarSelected?'is-selected ':'')+(key===today?'is-today':'')+'"><div class="home-calendar-day-head"><span class="calendar-day-number">'+d.getDate()+'</span><span class="member-day-achievement-icons">'+marks+'</span></div><div class="home-calendar-exercise" role="button" tabindex="0" onclick="openMemberHomeExerciseSlot(\''+key+'\','+events.length+')">'+eventHtml+(events.length>3?'<span class="home-cell-more">+'+(events.length-3)+'건 더보기</span>':'')+'</div><button class="home-calendar-takeat" type="button" onclick="openMemberHomeTakeat(\''+key+'\')"><span>TAKEAT</span><b class="'+(!target?'neutral':diff>0?'over':diff<0?'under':'neutral')+'">'+safeText(mealLabel)+'</b></button></div>';
  }
  host.innerHTML=out;
  selectMemberHomeCalendarDate(memberHomeCalendarSelected,false);
 }
 function shiftMemberHomeCalendar(n){memberHomeCalendarMonth=new Date(memberHomeCalendarMonth.getFullYear(),memberHomeCalendarMonth.getMonth()+n,1);renderMemberHomeCalendar();}
+function openMemberHomeExerciseSlot(date,eventCount){
+ memberHomeCalendarSelected=date;
+ const input=$('memberExerciseDate');if(input)input.value=date;
+ const d=new Date(date+'T12:00:00');
+ if(d.getMonth()!==memberHomeCalendarMonth.getMonth()||d.getFullYear()!==memberHomeCalendarMonth.getFullYear())memberHomeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);
+ if(eventCount>0){renderMemberHomeCalendar();selectMemberHomeCalendarDate(date,true);const details=$('memberHomeCalendarDetails');if(details)details.scrollIntoView({behavior:'smooth',block:'center'});return;}
+ const rows=(memberPortalPayload?.memberExercises||[]).filter(x=>(x.date||'')===date);
+ if(rows.length){
+  renderMemberHomeCalendar();
+  const host=$('memberHomeCalendarDetails');
+  if(host){
+   let out='<div class="calendar-detail-heading"><b>'+safeText(date)+' · 개인 운동 기록</b></div>';
+   rows.forEach(x=>{const sets=getMemberExerciseSetDetails(x);out+='<div class="calendar-detail-event"><b>'+safeText(x.part||'')+' · '+safeText(x.name||'운동')+'</b>';
+    out+=sets.length?sets.map((v,i)=>'<p class="tiny">세트 '+(i+1)+' · '+(v.weight!==''&&v.weight!=null?safeText(v.weight)+'kg':'맨몸/중량 미입력')+' × '+safeText(v.reps||'-')+'</p>').join(''):'<p class="tiny">'+safeText(x.sets||'-')+'세트 · '+safeText(x.reps||'-')+'</p>';
+    if(x.note)out+='<p class="tiny">메모: '+safeText(x.note)+'</p>';out+='</div>';});
+   out+='<button class="btn primary" type="button" onclick="openMemberExerciseEntryForDate(\''+date+'\')">이 날짜 운동 추가 기록하기</button>';
+   host.innerHTML=out;host.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  return;
+ }
+ openMemberExerciseEntryForDate(date);
+}
+function openMemberExerciseEntryForDate(date){
+ memberHomeCalendarSelected=date;
+ const input=$('memberExerciseDate');if(input)input.value=date;
+ switchMemberTab('exercise');
+ const heading=$('memberView-exercise');if(heading)heading.scrollIntoView({behavior:'smooth',block:'start'});
+ const name=$('memberExerciseName');if(name)name.focus({preventScroll:true});
+}
 function openMemberHomeCalendarEntry(date,type,id){
  if(new Date(date+'T12:00:00').getMonth()!==memberHomeCalendarMonth.getMonth()||new Date(date+'T12:00:00').getFullYear()!==memberHomeCalendarMonth.getFullYear()){
   memberHomeCalendarMonth=new Date(new Date(date+'T12:00:00').getFullYear(),new Date(date+'T12:00:00').getMonth(),1);
